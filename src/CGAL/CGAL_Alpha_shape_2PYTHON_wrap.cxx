@@ -19018,7 +19018,7 @@ SWIGINTERN PyObject *_wrap_new_Alpha_shape_2(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -19054,7 +19054,7 @@ SWIGINTERN PyObject *_wrap_new_Alpha_shape_2(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -35565,7 +35565,7 @@ SWIGINTERN PyObject *_wrap_new_Weighted_alpha_shape_2(PyObject *self, PyObject *
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -35601,7 +35601,7 @@ SWIGINTERN PyObject *_wrap_new_Weighted_alpha_shape_2(PyObject *self, PyObject *
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }

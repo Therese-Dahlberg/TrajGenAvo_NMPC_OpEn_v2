@@ -755,6 +755,21 @@ def face_border_length(hedge, P):
 def bbox(P):
     return _CGAL_Polygon_mesh_processing.bbox(P)
 
+def corefine(A, B):
+    return _CGAL_Polygon_mesh_processing.corefine(A, B)
+
+def corefine_and_compute_union(A, B, out):
+    return _CGAL_Polygon_mesh_processing.corefine_and_compute_union(A, B, out)
+
+def corefine_and_compute_intersection(A, B, out):
+    return _CGAL_Polygon_mesh_processing.corefine_and_compute_intersection(A, B, out)
+
+def corefine_and_compute_difference(A, B, out):
+    return _CGAL_Polygon_mesh_processing.corefine_and_compute_difference(A, B, out)
+
+def clip(*args):
+    return _CGAL_Polygon_mesh_processing.clip(*args)
+
 def border_halfedges(facet_range, P, out):
     return _CGAL_Polygon_mesh_processing.border_halfedges(facet_range, P, out)
 

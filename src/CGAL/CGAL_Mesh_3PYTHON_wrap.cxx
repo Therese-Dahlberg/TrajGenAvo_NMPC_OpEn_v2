@@ -9750,6 +9750,37 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_new_Internal_Triangulation_3_Mesh_3_regular_triangulation_3__SWIG_2(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Triangulation_3_wrapper< MT_PMD,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< MT_PMD,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< MT_PMD,Weighted_point_3 >,CGAL::Tag_true,boost::shared_ptr< C3T3_PMD > > *arg1 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  Triangulation_3_wrapper< MT_PMD,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< MT_PMD,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< MT_PMD,Weighted_point_3 >,CGAL::Tag_true,boost::shared_ptr< C3T3_PMD > > *result = 0 ;
+  
+  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_Triangulation_3_wrapperT_MT_PMD_Weighted_point_3_SWIG_Triangulation_3__CGAL_Vertex_handleT_MT_PMD_Weighted_point_3_t_SWIG_Triangulation_3__CGAL_Cell_handleT_MT_PMD_Weighted_point_3_t_CGAL__Tag_true_boost__shared_ptrT_C3T3_PMD_t_t,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Internal_Triangulation_3_Mesh_3_regular_triangulation_3" "', argument " "1"" of type '" "Triangulation_3_wrapper< MT_PMD,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< MT_PMD,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< MT_PMD,Weighted_point_3 >,CGAL::Tag_true,boost::shared_ptr< C3T3_PMD > > const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Internal_Triangulation_3_Mesh_3_regular_triangulation_3" "', argument " "1"" of type '" "Triangulation_3_wrapper< MT_PMD,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< MT_PMD,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< MT_PMD,Weighted_point_3 >,CGAL::Tag_true,boost::shared_ptr< C3T3_PMD > > const &""'"); 
+  }
+  arg1 = reinterpret_cast< Triangulation_3_wrapper< MT_PMD,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< MT_PMD,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< MT_PMD,Weighted_point_3 >,CGAL::Tag_true,boost::shared_ptr< C3T3_PMD > > * >(argp1);
+  {
+    try{
+      result = (Triangulation_3_wrapper< MT_PMD,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< MT_PMD,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< MT_PMD,Weighted_point_3 >,CGAL::Tag_true,boost::shared_ptr< C3T3_PMD > > *)new Triangulation_3_wrapper< MT_PMD,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< MT_PMD,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< MT_PMD,Weighted_point_3 >,CGAL::Tag_true,boost::shared_ptr< C3T3_PMD > >((Triangulation_3_wrapper< MT_PMD,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< MT_PMD,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< MT_PMD,Weighted_point_3 >,CGAL::Tag_true,boost::shared_ptr< C3T3_PMD > > const &)*arg1);
+    }
+    catch(Bad_element_type){
+      SWIG_fail;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Triangulation_3_wrapperT_MT_PMD_Weighted_point_3_SWIG_Triangulation_3__CGAL_Vertex_handleT_MT_PMD_Weighted_point_3_t_SWIG_Triangulation_3__CGAL_Cell_handleT_MT_PMD_Weighted_point_3_t_CGAL__Tag_true_boost__shared_ptrT_C3T3_PMD_t_t, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_new_Internal_Triangulation_3_Mesh_3_regular_triangulation_3(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
   PyObject *argv[2] = {
@@ -9765,7 +9796,7 @@ SWIGINTERN PyObject *_wrap_new_Internal_Triangulation_3_Mesh_3_regular_triangula
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -9775,12 +9806,21 @@ SWIGINTERN PyObject *_wrap_new_Internal_Triangulation_3_Mesh_3_regular_triangula
       return _wrap_new_Internal_Triangulation_3_Mesh_3_regular_triangulation_3__SWIG_1(self, argc, argv);
     }
   }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Triangulation_3_wrapperT_MT_PMD_Weighted_point_3_SWIG_Triangulation_3__CGAL_Vertex_handleT_MT_PMD_Weighted_point_3_t_SWIG_Triangulation_3__CGAL_Cell_handleT_MT_PMD_Weighted_point_3_t_CGAL__Tag_true_boost__shared_ptrT_C3T3_PMD_t_t, SWIG_POINTER_NO_NULL | 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_Internal_Triangulation_3_Mesh_3_regular_triangulation_3__SWIG_2(self, argc, argv);
+    }
+  }
   
 fail:
   SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'new_Internal_Triangulation_3_Mesh_3_regular_triangulation_3'.\n"
     "  Possible C/C++ prototypes are:\n"
     "    Triangulation_3_wrapper< MT_PMD,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< MT_PMD,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< MT_PMD,Weighted_point_3 >,CGAL::Tag_true,boost::shared_ptr< C3T3_PMD > >::Triangulation_3_wrapper()\n"
-    "    Triangulation_3_wrapper< MT_PMD,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< MT_PMD,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< MT_PMD,Weighted_point_3 >,CGAL::Tag_true,boost::shared_ptr< C3T3_PMD > >::Triangulation_3_wrapper(Triangulation_3_wrapper< MT_PMD,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< MT_PMD,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< MT_PMD,Weighted_point_3 >,CGAL::Tag_true,boost::shared_ptr< C3T3_PMD > >::Point_range)\n");
+    "    Triangulation_3_wrapper< MT_PMD,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< MT_PMD,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< MT_PMD,Weighted_point_3 >,CGAL::Tag_true,boost::shared_ptr< C3T3_PMD > >::Triangulation_3_wrapper(Triangulation_3_wrapper< MT_PMD,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< MT_PMD,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< MT_PMD,Weighted_point_3 >,CGAL::Tag_true,boost::shared_ptr< C3T3_PMD > >::Point_range)\n"
+    "    Triangulation_3_wrapper< MT_PMD,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< MT_PMD,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< MT_PMD,Weighted_point_3 >,CGAL::Tag_true,boost::shared_ptr< C3T3_PMD > >::Triangulation_3_wrapper(Triangulation_3_wrapper< MT_PMD,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< MT_PMD,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< MT_PMD,Weighted_point_3 >,CGAL::Tag_true,boost::shared_ptr< C3T3_PMD > > const &)\n");
   return 0;
 }
 
@@ -13267,7 +13307,7 @@ SWIGINTERN PyObject *_wrap_Internal_Triangulation_3_Mesh_3_regular_triangulation
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -24384,7 +24424,7 @@ SWIGINTERN PyObject *_wrap_new_Mesh_3_regular_triangulation_3(PyObject *self, Py
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }

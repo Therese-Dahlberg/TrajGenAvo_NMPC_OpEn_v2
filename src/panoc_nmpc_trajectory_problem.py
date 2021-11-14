@@ -5,6 +5,7 @@ from time import perf_counter_ns
 from enum import Enum
 
 import scipy
+import scipy.spatial
 import numpy as np
 
 import shapely

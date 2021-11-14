@@ -8259,6 +8259,37 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_new_Triangulation_3__SWIG_2(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Triangulation_3_wrapper< CGAL_T3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_T3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_T3,Point_3 >,CGAL::Tag_false,void * > *arg1 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  Triangulation_3_wrapper< CGAL_T3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_T3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_T3,Point_3 >,CGAL::Tag_false,void * > *result = 0 ;
+  
+  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_Triangulation_3_wrapperT_CGAL_T3_Point_3_SWIG_Triangulation_3__CGAL_Vertex_handleT_CGAL_T3_Point_3_t_SWIG_Triangulation_3__CGAL_Cell_handleT_CGAL_T3_Point_3_t_CGAL__Tag_false_void_p_t,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Triangulation_3" "', argument " "1"" of type '" "Triangulation_3_wrapper< CGAL_T3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_T3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_T3,Point_3 >,CGAL::Tag_false,void * > const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Triangulation_3" "', argument " "1"" of type '" "Triangulation_3_wrapper< CGAL_T3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_T3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_T3,Point_3 >,CGAL::Tag_false,void * > const &""'"); 
+  }
+  arg1 = reinterpret_cast< Triangulation_3_wrapper< CGAL_T3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_T3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_T3,Point_3 >,CGAL::Tag_false,void * > * >(argp1);
+  {
+    try{
+      result = (Triangulation_3_wrapper< CGAL_T3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_T3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_T3,Point_3 >,CGAL::Tag_false,void * > *)new Triangulation_3_wrapper< CGAL_T3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_T3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_T3,Point_3 >,CGAL::Tag_false,void * >((Triangulation_3_wrapper< CGAL_T3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_T3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_T3,Point_3 >,CGAL::Tag_false,void * > const &)*arg1);
+    }
+    catch(Bad_element_type){
+      SWIG_fail;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Triangulation_3_wrapperT_CGAL_T3_Point_3_SWIG_Triangulation_3__CGAL_Vertex_handleT_CGAL_T3_Point_3_t_SWIG_Triangulation_3__CGAL_Cell_handleT_CGAL_T3_Point_3_t_CGAL__Tag_false_void_p_t, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_new_Triangulation_3(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
   PyObject *argv[2] = {
@@ -8274,7 +8305,7 @@ SWIGINTERN PyObject *_wrap_new_Triangulation_3(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -8284,12 +8315,21 @@ SWIGINTERN PyObject *_wrap_new_Triangulation_3(PyObject *self, PyObject *args) {
       return _wrap_new_Triangulation_3__SWIG_1(self, argc, argv);
     }
   }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Triangulation_3_wrapperT_CGAL_T3_Point_3_SWIG_Triangulation_3__CGAL_Vertex_handleT_CGAL_T3_Point_3_t_SWIG_Triangulation_3__CGAL_Cell_handleT_CGAL_T3_Point_3_t_CGAL__Tag_false_void_p_t, SWIG_POINTER_NO_NULL | 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_Triangulation_3__SWIG_2(self, argc, argv);
+    }
+  }
   
 fail:
   SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'new_Triangulation_3'.\n"
     "  Possible C/C++ prototypes are:\n"
     "    Triangulation_3_wrapper< CGAL_T3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_T3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_T3,Point_3 >,CGAL::Tag_false,void * >::Triangulation_3_wrapper()\n"
-    "    Triangulation_3_wrapper< CGAL_T3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_T3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_T3,Point_3 >,CGAL::Tag_false,void * >::Triangulation_3_wrapper(Triangulation_3_wrapper< CGAL_T3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_T3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_T3,Point_3 >,CGAL::Tag_false,void * >::Point_range)\n");
+    "    Triangulation_3_wrapper< CGAL_T3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_T3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_T3,Point_3 >,CGAL::Tag_false,void * >::Triangulation_3_wrapper(Triangulation_3_wrapper< CGAL_T3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_T3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_T3,Point_3 >,CGAL::Tag_false,void * >::Point_range)\n"
+    "    Triangulation_3_wrapper< CGAL_T3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_T3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_T3,Point_3 >,CGAL::Tag_false,void * >::Triangulation_3_wrapper(Triangulation_3_wrapper< CGAL_T3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_T3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_T3,Point_3 >,CGAL::Tag_false,void * > const &)\n");
   return 0;
 }
 
@@ -11776,7 +11816,7 @@ SWIGINTERN PyObject *_wrap_Triangulation_3_insert(PyObject *self, PyObject *args
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -26325,6 +26365,37 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_new_Internal_Triangulation_3_Delaunay_triangulation_3__SWIG_2(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Triangulation_3_wrapper< CGAL_DT3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_DT3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_DT3,Point_3 >,CGAL::Tag_false,void * > *arg1 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  Triangulation_3_wrapper< CGAL_DT3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_DT3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_DT3,Point_3 >,CGAL::Tag_false,void * > *result = 0 ;
+  
+  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_Triangulation_3_wrapperT_CGAL_DT3_Point_3_SWIG_Triangulation_3__CGAL_Vertex_handleT_CGAL_DT3_Point_3_t_SWIG_Triangulation_3__CGAL_Cell_handleT_CGAL_DT3_Point_3_t_CGAL__Tag_false_void_p_t,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Internal_Triangulation_3_Delaunay_triangulation_3" "', argument " "1"" of type '" "Triangulation_3_wrapper< CGAL_DT3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_DT3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_DT3,Point_3 >,CGAL::Tag_false,void * > const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Internal_Triangulation_3_Delaunay_triangulation_3" "', argument " "1"" of type '" "Triangulation_3_wrapper< CGAL_DT3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_DT3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_DT3,Point_3 >,CGAL::Tag_false,void * > const &""'"); 
+  }
+  arg1 = reinterpret_cast< Triangulation_3_wrapper< CGAL_DT3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_DT3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_DT3,Point_3 >,CGAL::Tag_false,void * > * >(argp1);
+  {
+    try{
+      result = (Triangulation_3_wrapper< CGAL_DT3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_DT3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_DT3,Point_3 >,CGAL::Tag_false,void * > *)new Triangulation_3_wrapper< CGAL_DT3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_DT3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_DT3,Point_3 >,CGAL::Tag_false,void * >((Triangulation_3_wrapper< CGAL_DT3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_DT3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_DT3,Point_3 >,CGAL::Tag_false,void * > const &)*arg1);
+    }
+    catch(Bad_element_type){
+      SWIG_fail;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Triangulation_3_wrapperT_CGAL_DT3_Point_3_SWIG_Triangulation_3__CGAL_Vertex_handleT_CGAL_DT3_Point_3_t_SWIG_Triangulation_3__CGAL_Cell_handleT_CGAL_DT3_Point_3_t_CGAL__Tag_false_void_p_t, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_new_Internal_Triangulation_3_Delaunay_triangulation_3(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
   PyObject *argv[2] = {
@@ -26340,7 +26411,7 @@ SWIGINTERN PyObject *_wrap_new_Internal_Triangulation_3_Delaunay_triangulation_3
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -26350,12 +26421,21 @@ SWIGINTERN PyObject *_wrap_new_Internal_Triangulation_3_Delaunay_triangulation_3
       return _wrap_new_Internal_Triangulation_3_Delaunay_triangulation_3__SWIG_1(self, argc, argv);
     }
   }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Triangulation_3_wrapperT_CGAL_DT3_Point_3_SWIG_Triangulation_3__CGAL_Vertex_handleT_CGAL_DT3_Point_3_t_SWIG_Triangulation_3__CGAL_Cell_handleT_CGAL_DT3_Point_3_t_CGAL__Tag_false_void_p_t, SWIG_POINTER_NO_NULL | 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_Internal_Triangulation_3_Delaunay_triangulation_3__SWIG_2(self, argc, argv);
+    }
+  }
   
 fail:
   SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'new_Internal_Triangulation_3_Delaunay_triangulation_3'.\n"
     "  Possible C/C++ prototypes are:\n"
     "    Triangulation_3_wrapper< CGAL_DT3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_DT3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_DT3,Point_3 >,CGAL::Tag_false,void * >::Triangulation_3_wrapper()\n"
-    "    Triangulation_3_wrapper< CGAL_DT3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_DT3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_DT3,Point_3 >,CGAL::Tag_false,void * >::Triangulation_3_wrapper(Triangulation_3_wrapper< CGAL_DT3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_DT3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_DT3,Point_3 >,CGAL::Tag_false,void * >::Point_range)\n");
+    "    Triangulation_3_wrapper< CGAL_DT3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_DT3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_DT3,Point_3 >,CGAL::Tag_false,void * >::Triangulation_3_wrapper(Triangulation_3_wrapper< CGAL_DT3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_DT3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_DT3,Point_3 >,CGAL::Tag_false,void * >::Point_range)\n"
+    "    Triangulation_3_wrapper< CGAL_DT3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_DT3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_DT3,Point_3 >,CGAL::Tag_false,void * >::Triangulation_3_wrapper(Triangulation_3_wrapper< CGAL_DT3,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_DT3,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_DT3,Point_3 >,CGAL::Tag_false,void * > const &)\n");
   return 0;
 }
 
@@ -29842,7 +29922,7 @@ SWIGINTERN PyObject *_wrap_Internal_Triangulation_3_Delaunay_triangulation_3_ins
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -41209,7 +41289,7 @@ SWIGINTERN PyObject *_wrap_new_Delaunay_triangulation_3(PyObject *self, PyObject
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -46472,6 +46552,37 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_new_Internal_Triangulation_3_Regular_triangulation_3__SWIG_2(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Triangulation_3_wrapper< CGAL_RT3,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_RT3,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_RT3,Weighted_point_3 >,CGAL::Tag_true,void * > *arg1 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  Triangulation_3_wrapper< CGAL_RT3,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_RT3,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_RT3,Weighted_point_3 >,CGAL::Tag_true,void * > *result = 0 ;
+  
+  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_Triangulation_3_wrapperT_CGAL_RT3_Weighted_point_3_SWIG_Triangulation_3__CGAL_Vertex_handleT_CGAL_RT3_Weighted_point_3_t_SWIG_Triangulation_3__CGAL_Cell_handleT_CGAL_RT3_Weighted_point_3_t_CGAL__Tag_true_void_p_t,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Internal_Triangulation_3_Regular_triangulation_3" "', argument " "1"" of type '" "Triangulation_3_wrapper< CGAL_RT3,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_RT3,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_RT3,Weighted_point_3 >,CGAL::Tag_true,void * > const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Internal_Triangulation_3_Regular_triangulation_3" "', argument " "1"" of type '" "Triangulation_3_wrapper< CGAL_RT3,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_RT3,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_RT3,Weighted_point_3 >,CGAL::Tag_true,void * > const &""'"); 
+  }
+  arg1 = reinterpret_cast< Triangulation_3_wrapper< CGAL_RT3,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_RT3,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_RT3,Weighted_point_3 >,CGAL::Tag_true,void * > * >(argp1);
+  {
+    try{
+      result = (Triangulation_3_wrapper< CGAL_RT3,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_RT3,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_RT3,Weighted_point_3 >,CGAL::Tag_true,void * > *)new Triangulation_3_wrapper< CGAL_RT3,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_RT3,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_RT3,Weighted_point_3 >,CGAL::Tag_true,void * >((Triangulation_3_wrapper< CGAL_RT3,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_RT3,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_RT3,Weighted_point_3 >,CGAL::Tag_true,void * > const &)*arg1);
+    }
+    catch(Bad_element_type){
+      SWIG_fail;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Triangulation_3_wrapperT_CGAL_RT3_Weighted_point_3_SWIG_Triangulation_3__CGAL_Vertex_handleT_CGAL_RT3_Weighted_point_3_t_SWIG_Triangulation_3__CGAL_Cell_handleT_CGAL_RT3_Weighted_point_3_t_CGAL__Tag_true_void_p_t, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_new_Internal_Triangulation_3_Regular_triangulation_3(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
   PyObject *argv[2] = {
@@ -46487,7 +46598,7 @@ SWIGINTERN PyObject *_wrap_new_Internal_Triangulation_3_Regular_triangulation_3(
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -46497,12 +46608,21 @@ SWIGINTERN PyObject *_wrap_new_Internal_Triangulation_3_Regular_triangulation_3(
       return _wrap_new_Internal_Triangulation_3_Regular_triangulation_3__SWIG_1(self, argc, argv);
     }
   }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Triangulation_3_wrapperT_CGAL_RT3_Weighted_point_3_SWIG_Triangulation_3__CGAL_Vertex_handleT_CGAL_RT3_Weighted_point_3_t_SWIG_Triangulation_3__CGAL_Cell_handleT_CGAL_RT3_Weighted_point_3_t_CGAL__Tag_true_void_p_t, SWIG_POINTER_NO_NULL | 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_Internal_Triangulation_3_Regular_triangulation_3__SWIG_2(self, argc, argv);
+    }
+  }
   
 fail:
   SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'new_Internal_Triangulation_3_Regular_triangulation_3'.\n"
     "  Possible C/C++ prototypes are:\n"
     "    Triangulation_3_wrapper< CGAL_RT3,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_RT3,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_RT3,Weighted_point_3 >,CGAL::Tag_true,void * >::Triangulation_3_wrapper()\n"
-    "    Triangulation_3_wrapper< CGAL_RT3,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_RT3,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_RT3,Weighted_point_3 >,CGAL::Tag_true,void * >::Triangulation_3_wrapper(Triangulation_3_wrapper< CGAL_RT3,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_RT3,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_RT3,Weighted_point_3 >,CGAL::Tag_true,void * >::Point_range)\n");
+    "    Triangulation_3_wrapper< CGAL_RT3,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_RT3,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_RT3,Weighted_point_3 >,CGAL::Tag_true,void * >::Triangulation_3_wrapper(Triangulation_3_wrapper< CGAL_RT3,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_RT3,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_RT3,Weighted_point_3 >,CGAL::Tag_true,void * >::Point_range)\n"
+    "    Triangulation_3_wrapper< CGAL_RT3,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_RT3,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_RT3,Weighted_point_3 >,CGAL::Tag_true,void * >::Triangulation_3_wrapper(Triangulation_3_wrapper< CGAL_RT3,Weighted_point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< CGAL_RT3,Weighted_point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< CGAL_RT3,Weighted_point_3 >,CGAL::Tag_true,void * > const &)\n");
   return 0;
 }
 
@@ -49989,7 +50109,7 @@ SWIGINTERN PyObject *_wrap_Internal_Triangulation_3_Regular_triangulation_3_inse
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -61317,7 +61437,7 @@ SWIGINTERN PyObject *_wrap_new_Regular_triangulation_3(PyObject *self, PyObject 
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }

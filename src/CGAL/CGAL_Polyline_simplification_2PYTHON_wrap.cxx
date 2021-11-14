@@ -9999,7 +9999,7 @@ SWIGINTERN PyObject *_wrap_Internal_Triangulation_2_Internal_Contrained_triangul
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -18458,7 +18458,7 @@ SWIGINTERN PyObject *_wrap_new_Internal_Contrained_triangulation_2_Internal_Cons
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -19135,7 +19135,7 @@ SWIGINTERN PyObject *_wrap_new_Internal_Constrained_Delaunay_triangulation_2_PS2
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -21539,7 +21539,7 @@ SWIGINTERN PyObject *_wrap_new_PS2_Constrained_Delaunay_triangulation_plus_2(PyO
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -22139,7 +22139,7 @@ SWIGINTERN PyObject *_wrap_PS2_Constrained_Delaunay_triangulation_plus_2_insert_
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -22158,7 +22158,7 @@ SWIGINTERN PyObject *_wrap_PS2_Constrained_Delaunay_triangulation_plus_2_insert_
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -28327,7 +28327,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -28354,7 +28354,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -28381,7 +28381,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -28408,7 +28408,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -28435,7 +28435,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -28462,7 +28462,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -28489,7 +28489,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -28516,7 +28516,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -28543,7 +28543,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -28570,7 +28570,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -28631,7 +28631,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -28692,7 +28692,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -28753,7 +28753,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -28814,7 +28814,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -28875,7 +28875,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -28936,7 +28936,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -28997,7 +28997,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -29058,7 +29058,7 @@ SWIGINTERN PyObject *_wrap_simplify(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }

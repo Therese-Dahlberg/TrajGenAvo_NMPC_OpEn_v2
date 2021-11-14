@@ -5549,7 +5549,7 @@ SWIGINTERN PyObject *_wrap_new_Orthogonal_incremental_neighbor_search_tree_2(PyO
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -5681,7 +5681,7 @@ SWIGINTERN PyObject *_wrap_Orthogonal_incremental_neighbor_search_tree_2_insert(
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -7409,7 +7409,7 @@ SWIGINTERN PyObject *_wrap_new_Incremental_neighbor_search_tree_2(PyObject *self
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -7541,7 +7541,7 @@ SWIGINTERN PyObject *_wrap_Incremental_neighbor_search_tree_2_insert(PyObject *s
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -9269,7 +9269,7 @@ SWIGINTERN PyObject *_wrap_new_K_neighbor_search_tree_2(PyObject *self, PyObject
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -9401,7 +9401,7 @@ SWIGINTERN PyObject *_wrap_K_neighbor_search_tree_2_insert(PyObject *self, PyObj
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -11197,7 +11197,7 @@ SWIGINTERN PyObject *_wrap_new_Orthogonal_k_neighbor_search_tree_2(PyObject *sel
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -11329,7 +11329,7 @@ SWIGINTERN PyObject *_wrap_Orthogonal_k_neighbor_search_tree_2_insert(PyObject *
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -13125,7 +13125,7 @@ SWIGINTERN PyObject *_wrap_new_Orthogonal_incremental_neighbor_search_tree_3(PyO
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -13257,7 +13257,7 @@ SWIGINTERN PyObject *_wrap_Orthogonal_incremental_neighbor_search_tree_3_insert(
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -14985,7 +14985,7 @@ SWIGINTERN PyObject *_wrap_new_Incremental_neighbor_search_tree_3(PyObject *self
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -15117,7 +15117,7 @@ SWIGINTERN PyObject *_wrap_Incremental_neighbor_search_tree_3_insert(PyObject *s
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -16845,7 +16845,7 @@ SWIGINTERN PyObject *_wrap_new_K_neighbor_search_tree_3(PyObject *self, PyObject
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -16977,7 +16977,7 @@ SWIGINTERN PyObject *_wrap_K_neighbor_search_tree_3_insert(PyObject *self, PyObj
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -18773,7 +18773,7 @@ SWIGINTERN PyObject *_wrap_new_Orthogonal_k_neighbor_search_tree_3(PyObject *sel
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -18905,7 +18905,7 @@ SWIGINTERN PyObject *_wrap_Orthogonal_k_neighbor_search_tree_3_insert(PyObject *
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }

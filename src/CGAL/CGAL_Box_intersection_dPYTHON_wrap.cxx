@@ -5736,7 +5736,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_d(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -5745,7 +5745,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_d(PyObject *self, PyObject *args) {
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -5765,7 +5765,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_d(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -5774,7 +5774,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_d(PyObject *self, PyObject *args) {
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -5794,7 +5794,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_d(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -5803,7 +5803,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_d(PyObject *self, PyObject *args) {
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -5829,7 +5829,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_d(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -5838,7 +5838,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_d(PyObject *self, PyObject *args) {
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -5864,7 +5864,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_d(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -5873,7 +5873,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_d(PyObject *self, PyObject *args) {
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -5905,7 +5905,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_d(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -5914,7 +5914,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_d(PyObject *self, PyObject *args) {
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -5946,7 +5946,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_d(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -5955,7 +5955,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_d(PyObject *self, PyObject *args) {
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -5993,7 +5993,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_d(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -6002,7 +6002,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_d(PyObject *self, PyObject *args) {
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -6188,7 +6188,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_all_pairs_d(PyObject *self, PyObject
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -6197,7 +6197,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_all_pairs_d(PyObject *self, PyObject
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -6217,7 +6217,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_all_pairs_d(PyObject *self, PyObject
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -6226,7 +6226,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_all_pairs_d(PyObject *self, PyObject
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -6246,7 +6246,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_all_pairs_d(PyObject *self, PyObject
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -6255,7 +6255,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_all_pairs_d(PyObject *self, PyObject
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -6281,7 +6281,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_all_pairs_d(PyObject *self, PyObject
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -6290,7 +6290,7 @@ SWIGINTERN PyObject *_wrap_box_intersection_all_pairs_d(PyObject *self, PyObject
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -6492,7 +6492,7 @@ SWIGINTERN PyObject *_wrap_box_self_intersection_d(PyObject *self, PyObject *arg
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -6511,7 +6511,7 @@ SWIGINTERN PyObject *_wrap_box_self_intersection_d(PyObject *self, PyObject *arg
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -6530,7 +6530,7 @@ SWIGINTERN PyObject *_wrap_box_self_intersection_d(PyObject *self, PyObject *arg
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -6555,7 +6555,7 @@ SWIGINTERN PyObject *_wrap_box_self_intersection_d(PyObject *self, PyObject *arg
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -6580,7 +6580,7 @@ SWIGINTERN PyObject *_wrap_box_self_intersection_d(PyObject *self, PyObject *arg
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -6611,7 +6611,7 @@ SWIGINTERN PyObject *_wrap_box_self_intersection_d(PyObject *self, PyObject *arg
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -6760,7 +6760,7 @@ SWIGINTERN PyObject *_wrap_box_self_intersection_all_pairs_d(PyObject *self, PyO
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -6779,7 +6779,7 @@ SWIGINTERN PyObject *_wrap_box_self_intersection_all_pairs_d(PyObject *self, PyO
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -6798,7 +6798,7 @@ SWIGINTERN PyObject *_wrap_box_self_intersection_all_pairs_d(PyObject *self, PyO
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -6823,7 +6823,7 @@ SWIGINTERN PyObject *_wrap_box_self_intersection_all_pairs_d(PyObject *self, PyO
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }

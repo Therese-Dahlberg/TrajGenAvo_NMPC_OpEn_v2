@@ -7743,7 +7743,7 @@ SWIGINTERN PyObject *_wrap_new_AABB_tree_Polyhedron_3_Facet_handle(PyObject *sel
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -10203,7 +10203,7 @@ SWIGINTERN PyObject *_wrap_AABB_tree_Polyhedron_3_Facet_handle_accelerate_distan
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -10335,7 +10335,7 @@ SWIGINTERN PyObject *_wrap_new_AABB_tree_Polyhedron_3_Halfedge_handle(PyObject *
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -12795,7 +12795,7 @@ SWIGINTERN PyObject *_wrap_AABB_tree_Polyhedron_3_Halfedge_handle_accelerate_dis
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -12927,7 +12927,7 @@ SWIGINTERN PyObject *_wrap_new_AABB_tree_Segment_3_soup(PyObject *self, PyObject
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -12965,7 +12965,7 @@ SWIGINTERN PyObject *_wrap_AABB_tree_Segment_3_soup_insert_from_array(PyObject *
     boost::shared_ptr<std::vector< Segment_3::cpp_base> > res(new std::vector< Segment_3::cpp_base>());
     if (!PySequence_Check(swig_obj[1])) {
       PyErr_SetString(PyExc_ValueError,"Expected a sequence");
-      return NULL;
+      return nullptr;
     }
     int length=PySequence_Length(swig_obj[1]);
     for (int l=0; l<length; l++) {
@@ -12973,7 +12973,7 @@ SWIGINTERN PyObject *_wrap_AABB_tree_Segment_3_soup_insert_from_array(PyObject *
       
       if (PySequence_Length(point) != 6) {
         PyErr_SetString(PyExc_ValueError,"Expect 6 floats per segment");
-        return NULL;
+        return nullptr;
       }
       
       const EPIC_Kernel::Point_3 p( 
@@ -15449,7 +15449,7 @@ SWIGINTERN PyObject *_wrap_AABB_tree_Segment_3_soup_accelerate_distance_queries(
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -15581,7 +15581,7 @@ SWIGINTERN PyObject *_wrap_new_AABB_tree_Triangle_3_soup(PyObject *self, PyObjec
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -15619,7 +15619,7 @@ SWIGINTERN PyObject *_wrap_AABB_tree_Triangle_3_soup_insert_from_array(PyObject 
     boost::shared_ptr<std::vector< Triangle_3::cpp_base> > res(new std::vector< Triangle_3::cpp_base>());
     if (!PySequence_Check(swig_obj[1])) {
       PyErr_SetString(PyExc_ValueError,"Expected a sequence");
-      return NULL;
+      return nullptr;
     }
     int length=PySequence_Length(swig_obj[1]);
     for (int l=0; l<length; l++) {
@@ -15627,7 +15627,7 @@ SWIGINTERN PyObject *_wrap_AABB_tree_Triangle_3_soup_insert_from_array(PyObject 
       
       if (PySequence_Length(point) != 9) {
         PyErr_SetString(PyExc_ValueError,"Expect 9 floats per triangle");
-        return NULL;
+        return nullptr;
       }
       
       const EPIC_Kernel::Point_3 p( 
@@ -18108,7 +18108,7 @@ SWIGINTERN PyObject *_wrap_AABB_tree_Triangle_3_soup_accelerate_distance_queries
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }

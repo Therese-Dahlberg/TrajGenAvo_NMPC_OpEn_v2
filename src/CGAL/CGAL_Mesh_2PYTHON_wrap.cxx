@@ -10024,7 +10024,7 @@ SWIGINTERN PyObject *_wrap_Internal_Triangulation_2_Internal_Contrained_triangul
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -18483,7 +18483,7 @@ SWIGINTERN PyObject *_wrap_new_Internal_Contrained_triangulation_2_Mesh_2_Constr
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -19160,7 +19160,7 @@ SWIGINTERN PyObject *_wrap_new_Mesh_2_Constrained_Delaunay_triangulation_2(PyObj
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -25219,7 +25219,7 @@ SWIGINTERN PyObject *_wrap_Internal_Triangulation_2_Internal_Contrained_triangul
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -33678,7 +33678,7 @@ SWIGINTERN PyObject *_wrap_new_Internal_Contrained_triangulation_2_Internal_Cons
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -34355,7 +34355,7 @@ SWIGINTERN PyObject *_wrap_new_Internal_Constrained_Delaunay_triangulation_2_Mes
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -36759,7 +36759,7 @@ SWIGINTERN PyObject *_wrap_new_Mesh_2_Constrained_Delaunay_triangulation_plus_2(
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=NULL){
+      if (iter!=nullptr){
         Py_DECREF(iter);
         _v=1;
       }
@@ -37359,7 +37359,7 @@ SWIGINTERN PyObject *_wrap_Mesh_2_Constrained_Delaunay_triangulation_plus_2_inse
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -37378,7 +37378,7 @@ SWIGINTERN PyObject *_wrap_Mesh_2_Constrained_Delaunay_triangulation_plus_2_inse
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -39441,7 +39441,7 @@ SWIGINTERN PyObject *_wrap_Default_Delaunay_mesher_2_set_seeds(PyObject *self, P
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -39460,7 +39460,7 @@ SWIGINTERN PyObject *_wrap_Default_Delaunay_mesher_2_set_seeds(PyObject *self, P
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -41360,7 +41360,7 @@ SWIGINTERN PyObject *_wrap_Default_Delaunay_mesher_plus_2_set_seeds(PyObject *se
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -41379,7 +41379,7 @@ SWIGINTERN PyObject *_wrap_Default_Delaunay_mesher_plus_2_set_seeds(PyObject *se
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -43032,7 +43032,7 @@ SWIGINTERN PyObject *_wrap_refine_Delaunay_mesh_2(PyObject *self, PyObject *args
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -43055,7 +43055,7 @@ SWIGINTERN PyObject *_wrap_refine_Delaunay_mesh_2(PyObject *self, PyObject *args
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -43078,7 +43078,7 @@ SWIGINTERN PyObject *_wrap_refine_Delaunay_mesh_2(PyObject *self, PyObject *args
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
@@ -43107,7 +43107,7 @@ SWIGINTERN PyObject *_wrap_refine_Delaunay_mesh_2(PyObject *self, PyObject *args
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=NULL){
+        if (iter!=nullptr){
           Py_DECREF(iter);
           _v=1;
         }
