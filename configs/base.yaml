@@ -21,8 +21,10 @@ constraint:         # Distance constraint
     d: 1                        # The distance the atrs should keep in m
     distance_error_lb: -0.05    # lower bound error margin in m, actual ok distance: d + distance_error_lb <d_ok < d + distance_error_ub
     distance_error_ub: 0.05     # upper bound error margin
-    distance_lb: 0.95           # Lower bound distance between ATRs
-    distance_ub: 1.05           # Upper bound distance between ATRs
+#    distance_lb: 0.95           # Lower bound distance between ATRs
+#    distance_ub: 1.05           # Upper bound distance between ATRs
+    distance_lb: 1.0           # Lower bound distance between ATRs
+    distance_ub: 1.0           # Upper bound distance between ATRs
     formation_angle: 0
     formation_angle_error_margin: 0
     slave_offset: [1, 0, 0]  # Where the slave should start in relation to the master # Shouldn't be used anymore
