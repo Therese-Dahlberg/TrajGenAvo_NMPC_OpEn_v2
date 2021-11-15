@@ -36,7 +36,7 @@ def init(build=False, self_destruct=False):
         return traj_gen
 
 
-def main(build=False, destroy_plots=True):
+def main(build=False, destroy_plots=False):
     traj_gen = init(build=build, self_destruct=destroy_plots)
     try:
         traj_gen.run(plot=1)
