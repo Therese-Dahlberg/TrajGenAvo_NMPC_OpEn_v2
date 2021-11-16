@@ -1,0 +1,41 @@
+{
+    "nodes": [
+        {
+            "coord": [8,6], 
+            "neighbour": [[]]
+        }, 
+        {
+            "coord": [7,6], 
+            "neighbour": [[8,6]]
+        },
+        {
+            "coord": [6,6], 
+            "neighbour": [[7,6]]
+        },
+        {
+            "coord": [5,6], 
+            "neighbour": [[6,6]]
+        }, 
+        {
+            "coord": [5,5], 
+            "neighbour": [[5,6]]
+        }, 
+        {
+            "coord": [5,4], 
+            "neighbour": [[5,5]]
+        }, 
+        {
+            "coord": [5,3], 
+            "neighbour": [[5,4]]
+        }, 
+        {
+            "coord": [5,2], 
+            "neighbour": [[5,3]]
+        }, 
+        {
+            "coord": [5,1], 
+            "neighbour": [[5,2]]
+        }
+    ], 
+    "boundary": [[3.0, -2.0], [12.0, -2.0], [12.0, 11.0], [3.0, 11.0]]
+}

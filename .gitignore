@@ -6,6 +6,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 mpc_build/
+src/CGAL/
 
 # Jupyter Notebook
 .ipynb_checkpoints

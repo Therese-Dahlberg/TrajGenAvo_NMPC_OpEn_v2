@@ -86,6 +86,8 @@ class TrajectoryGenerator:
         # Flag for genereating 2s horizon
         self.two_seconds = False
 
+        self.gen_traj = [[],[]]
+
     def load_params(self): 
         file_path = Path(__file__)
 
@@ -281,6 +283,11 @@ class TrajectoryGenerator:
                 print("Finished the trajectory planning")
                 if self.self_destruct:
                     self.kill()
+                self.gen_traj = generated_trajectory
+                
+    # Returns the generated trajectory for the master and slave
+    def getGeneratedTrajectory(self):
+        return self.gen_traj
         
     
     def plot(self, trajectory, u_master_prev, u_slave_prev, past_trajectory, u):
