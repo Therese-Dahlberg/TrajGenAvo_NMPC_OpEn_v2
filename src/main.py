@@ -1,9 +1,14 @@
 import os, sys, json
 from pathlib import Path
+from typing import Counter
 
 from trajectory_generator import TrajectoryGenerator
 from path_planner.global_path_planner import GlobalPathPlanner
 
+from shapely.geometry import LineString
+from shapely.geometry import Point
+from shapely.geometry import Polygon
+import matplotlib.pyplot as plt
 
 def init(build=False, self_destruct=False):
 
@@ -49,32 +54,55 @@ def init(build=False, self_destruct=False):
 
 # Checks if there is a collision with the obstacles (only for static obstacles for now)
 # TODO: Implement a function to check wether or not a trajectory has collided with any obstacle.
-def collisionDetection(trajList, obstacle_corners):
+def collisionDetection(trajList):
     # trajList should be a list of generated trajectores: [[(x0_m,y0_m,theta0_m),...,(xN_m,yN_m,thetaN_m)],[(x0_s,y0_s,theta0_s),...,(xN_s,yN_s,thetaN_s)]], for N number of points.
     # obstacle_corners could for example be a list containing the coordinates of all PADDED obstacles: [[o1_x,o1_y],...,[oM_x,oM_y]], for M obstacles.
     # TODO: Fix the padded obstacles coordinates!
 
-    #For every pair of nodes compute the line between them
+    padded_obstacle = Polygon([(4.5,3.5),(4.5,5.5),(6.5,5.5),(6.5,3.5)])
     nr_of_points = len(trajList[0])
     master_trajectory = trajList[0]
     slave_trajectory = trajList[1]
-    for i in enumerate(nr_of_points):
-        x_m = master_trajectory[i][0]
-        y_m = master_trajectory[i][1]
-        x_s = slave_trajectory[i][0]
-        y_s = slave_trajectory[i][1]
+    counter = 0
+    collided_list = []  # A list to save all trajectory points that collided
+    a = 0.01
+    for i in range(nr_of_points):
+        # Load defined as a line
+        # load = LineString([master_trajectory[i][:2],slave_trajectory[i][:2]])
 
-        #Line equation to find the line between the two ATRs, defined on the closed interval [x_s,x_m], [y_s,y_m]
-        k = (y_m - y_s)/(x_m - x_s)
-        m = y_m - k*x_m
+        master_corner_1 = (master_trajectory[i][0] + a, master_trajectory[i][1])
+        master_corner_2 = (master_trajectory[i][0] - a, master_trajectory[i][1])
+        slave_corner_1 = (slave_trajectory[i][0] + a, slave_trajectory[i][1])
+        slave_corner_2 = (slave_trajectory[i][0] - a, slave_trajectory[i][1])
 
-        # Loop through all the segments that encapules the obstacle and see if they intersect with any point on the line that represents the load.
+        # Load defined as a polygon
+        load = Polygon([master_corner_1,master_corner_2,slave_corner_2,slave_corner_1])
+
+        if load.intersects(padded_obstacle):
+            counter = counter + 1
+            collision_intersection = load.intersection(padded_obstacle)
+
+            # Plots all senarios of detected collisions.
+            plot_polygons([padded_obstacle,load])
+            
+            intersection_area = collision_intersection.area
+            
+            #Contains the coordinates where the trajectory collided
+            collided_list.append([master_trajectory[i][:2],slave_trajectory[i][:2]])
+            print("Oh no collision detected!")
 
 
+    
+    print("Collided: ", counter)
+    return collided_list
 
-
-
-
+# A function to plot several polygons.
+def plot_polygons(polygons):
+    # polygons is a list of Polygon objects
+    for p in polygons:
+        x,y = p.exterior.xy
+        plt.plot(x,y)
+    plt.show()
 
 
 def main(build=False, destroy_plots=True):
@@ -84,7 +112,7 @@ def main(build=False, destroy_plots=True):
     finally:
         print("Should kill all running processes")
     generated_trajectory = traj_gen.getGeneratedTrajectory()
-    # print("Generated trajectory ", generated_trajectory)
+    out = collisionDetection(generated_trajectory)
         
 
 if __name__ == '__main__':
