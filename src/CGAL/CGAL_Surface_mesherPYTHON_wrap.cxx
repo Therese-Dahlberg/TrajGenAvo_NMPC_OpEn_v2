@@ -3765,15 +3765,9 @@ typedef Polyhedron_3_wrapper< Polyhedron_3_,SWIG_Polyhedron_3::CGAL_Vertex_handl
     else  CGAL::output_surface_facets_to_off(outfile,c2t3.get_data());
   }
   
-  // deprecated
   void output_surface_facets_to_polyhedron(const Complex_2_in_triangulation_3_SWIG_wrapper& c2t3,Polyhedron_3_SWIG_wrapper& poly)
   {
-    CGAL:: facets_in_complex_2_to_triangle_mesh(c2t3.get_data(),poly.get_data() );
-  }
-
-  void facets_in_complex_2_to_triangle_mesh(const Complex_2_in_triangulation_3_SWIG_wrapper& c2t3,Polyhedron_3_SWIG_wrapper& poly)
-  {
-    CGAL:: facets_in_complex_2_to_triangle_mesh(c2t3.get_data(),poly.get_data() );
+    CGAL::output_surface_facets_to_polyhedron( c2t3.get_data(),poly.get_data() );
   }
 
   void  make_surface_mesh(Complex_2_in_triangulation_3_SWIG_wrapper& c2t3,const Implicit_surface_3_wrapper<IS_GLI_3,Gray_level_image_3_wrapper<GLI_3> >& surface,const Surface_mesh_criteria_3_wrapper<SMDC_3>& criteria, Surface_mesher_tag tag,int nb)
@@ -8260,37 +8254,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_Internal_Triangulation_3_Surface_mesh_default_triangulation_3__SWIG_2(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  Triangulation_3_wrapper< C2T3_DT,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< C2T3_DT,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< C2T3_DT,Point_3 >,CGAL::Tag_false,boost::shared_ptr< C2T3_DT > > *arg1 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  Triangulation_3_wrapper< C2T3_DT,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< C2T3_DT,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< C2T3_DT,Point_3 >,CGAL::Tag_false,boost::shared_ptr< C2T3_DT > > *result = 0 ;
-  
-  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_Triangulation_3_wrapperT_C2T3_DT_Point_3_SWIG_Triangulation_3__CGAL_Vertex_handleT_C2T3_DT_Point_3_t_SWIG_Triangulation_3__CGAL_Cell_handleT_C2T3_DT_Point_3_t_CGAL__Tag_false_boost__shared_ptrT_C2T3_DT_t_t,  0  | 0);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Internal_Triangulation_3_Surface_mesh_default_triangulation_3" "', argument " "1"" of type '" "Triangulation_3_wrapper< C2T3_DT,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< C2T3_DT,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< C2T3_DT,Point_3 >,CGAL::Tag_false,boost::shared_ptr< C2T3_DT > > const &""'"); 
-  }
-  if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Internal_Triangulation_3_Surface_mesh_default_triangulation_3" "', argument " "1"" of type '" "Triangulation_3_wrapper< C2T3_DT,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< C2T3_DT,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< C2T3_DT,Point_3 >,CGAL::Tag_false,boost::shared_ptr< C2T3_DT > > const &""'"); 
-  }
-  arg1 = reinterpret_cast< Triangulation_3_wrapper< C2T3_DT,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< C2T3_DT,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< C2T3_DT,Point_3 >,CGAL::Tag_false,boost::shared_ptr< C2T3_DT > > * >(argp1);
-  {
-    try{
-      result = (Triangulation_3_wrapper< C2T3_DT,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< C2T3_DT,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< C2T3_DT,Point_3 >,CGAL::Tag_false,boost::shared_ptr< C2T3_DT > > *)new Triangulation_3_wrapper< C2T3_DT,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< C2T3_DT,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< C2T3_DT,Point_3 >,CGAL::Tag_false,boost::shared_ptr< C2T3_DT > >((Triangulation_3_wrapper< C2T3_DT,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< C2T3_DT,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< C2T3_DT,Point_3 >,CGAL::Tag_false,boost::shared_ptr< C2T3_DT > > const &)*arg1);
-    }
-    catch(Bad_element_type){
-      SWIG_fail;
-    }
-  }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Triangulation_3_wrapperT_C2T3_DT_Point_3_SWIG_Triangulation_3__CGAL_Vertex_handleT_C2T3_DT_Point_3_t_SWIG_Triangulation_3__CGAL_Cell_handleT_C2T3_DT_Point_3_t_CGAL__Tag_false_boost__shared_ptrT_C2T3_DT_t_t, SWIG_POINTER_NEW |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_new_Internal_Triangulation_3_Surface_mesh_default_triangulation_3(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
   PyObject *argv[2] = {
@@ -8306,7 +8269,7 @@ SWIGINTERN PyObject *_wrap_new_Internal_Triangulation_3_Surface_mesh_default_tri
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }
@@ -8316,21 +8279,12 @@ SWIGINTERN PyObject *_wrap_new_Internal_Triangulation_3_Surface_mesh_default_tri
       return _wrap_new_Internal_Triangulation_3_Surface_mesh_default_triangulation_3__SWIG_1(self, argc, argv);
     }
   }
-  if (argc == 1) {
-    int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Triangulation_3_wrapperT_C2T3_DT_Point_3_SWIG_Triangulation_3__CGAL_Vertex_handleT_C2T3_DT_Point_3_t_SWIG_Triangulation_3__CGAL_Cell_handleT_C2T3_DT_Point_3_t_CGAL__Tag_false_boost__shared_ptrT_C2T3_DT_t_t, SWIG_POINTER_NO_NULL | 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      return _wrap_new_Internal_Triangulation_3_Surface_mesh_default_triangulation_3__SWIG_2(self, argc, argv);
-    }
-  }
   
 fail:
   SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'new_Internal_Triangulation_3_Surface_mesh_default_triangulation_3'.\n"
     "  Possible C/C++ prototypes are:\n"
     "    Triangulation_3_wrapper< C2T3_DT,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< C2T3_DT,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< C2T3_DT,Point_3 >,CGAL::Tag_false,boost::shared_ptr< C2T3_DT > >::Triangulation_3_wrapper()\n"
-    "    Triangulation_3_wrapper< C2T3_DT,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< C2T3_DT,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< C2T3_DT,Point_3 >,CGAL::Tag_false,boost::shared_ptr< C2T3_DT > >::Triangulation_3_wrapper(Triangulation_3_wrapper< C2T3_DT,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< C2T3_DT,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< C2T3_DT,Point_3 >,CGAL::Tag_false,boost::shared_ptr< C2T3_DT > >::Point_range)\n"
-    "    Triangulation_3_wrapper< C2T3_DT,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< C2T3_DT,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< C2T3_DT,Point_3 >,CGAL::Tag_false,boost::shared_ptr< C2T3_DT > >::Triangulation_3_wrapper(Triangulation_3_wrapper< C2T3_DT,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< C2T3_DT,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< C2T3_DT,Point_3 >,CGAL::Tag_false,boost::shared_ptr< C2T3_DT > > const &)\n");
+    "    Triangulation_3_wrapper< C2T3_DT,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< C2T3_DT,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< C2T3_DT,Point_3 >,CGAL::Tag_false,boost::shared_ptr< C2T3_DT > >::Triangulation_3_wrapper(Triangulation_3_wrapper< C2T3_DT,Point_3,SWIG_Triangulation_3::CGAL_Vertex_handle< C2T3_DT,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< C2T3_DT,Point_3 >,CGAL::Tag_false,boost::shared_ptr< C2T3_DT > >::Point_range)\n");
   return 0;
 }
 
@@ -11817,7 +11771,7 @@ SWIGINTERN PyObject *_wrap_Internal_Triangulation_3_Surface_mesh_default_triangu
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=nullptr){
+        if (iter!=NULL){
           Py_DECREF(iter);
           _v=1;
         }
@@ -23184,7 +23138,7 @@ SWIGINTERN PyObject *_wrap_new_Surface_mesh_default_triangulation_3(PyObject *se
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }
@@ -29198,50 +29152,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_facets_in_complex_2_to_triangle_mesh(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Complex_2_in_triangulation_3_SWIG_wrapper *arg1 = 0 ;
-  Polyhedron_3_SWIG_wrapper *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "facets_in_complex_2_to_triangle_mesh", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_C2T3_wrapperT_C2T3_Delaunay_triangulation_3_wrapperT_C2T3_DT_SWIG_Triangulation_3__CGAL_Vertex_handleT_C2T3_DT_Point_3_t_SWIG_Triangulation_3__CGAL_Cell_handleT_C2T3_DT_Point_3_t_boost__shared_ptrT_C2T3_DT_t_t_t,  0  | 0);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "facets_in_complex_2_to_triangle_mesh" "', argument " "1"" of type '" "Complex_2_in_triangulation_3_SWIG_wrapper const &""'"); 
-  }
-  if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "facets_in_complex_2_to_triangle_mesh" "', argument " "1"" of type '" "Complex_2_in_triangulation_3_SWIG_wrapper const &""'"); 
-  }
-  arg1 = reinterpret_cast< Complex_2_in_triangulation_3_SWIG_wrapper * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t,  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "facets_in_complex_2_to_triangle_mesh" "', argument " "2"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "facets_in_complex_2_to_triangle_mesh" "', argument " "2"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  arg2 = reinterpret_cast< Polyhedron_3_SWIG_wrapper * >(argp2);
-  {
-    try {
-      facets_in_complex_2_to_triangle_mesh((C2T3_wrapper< C2T3,Delaunay_triangulation_3_wrapper< C2T3_DT,SWIG_Triangulation_3::CGAL_Vertex_handle< C2T3_DT,Point_3 >,SWIG_Triangulation_3::CGAL_Cell_handle< C2T3_DT,Point_3 >,boost::shared_ptr< C2T3_DT > > > const &)*arg1,*arg2);
-    } catch (std::exception &e) {
-      std::string error_msg("Error in SWIG_CGAL code. Here is the text of the C++ exception:\n");
-      error_msg += e.what();
-      PyErr_SetString(PyExc_Exception, error_msg.c_str());
-      SWIG_fail;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_make_surface_mesh__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   Complex_2_in_triangulation_3_SWIG_wrapper *arg1 = 0 ;
@@ -29816,7 +29726,6 @@ static PyMethodDef SwigMethods[] = {
 	 { "Implicit_surface_Gray_level_image_3_swiginit", Implicit_surface_Gray_level_image_3_swiginit, METH_VARARGS, NULL},
 	 { "output_surface_facets_to_off", _wrap_output_surface_facets_to_off, METH_VARARGS, NULL},
 	 { "output_surface_facets_to_polyhedron", _wrap_output_surface_facets_to_polyhedron, METH_VARARGS, NULL},
-	 { "facets_in_complex_2_to_triangle_mesh", _wrap_facets_in_complex_2_to_triangle_mesh, METH_VARARGS, NULL},
 	 { "make_surface_mesh", _wrap_make_surface_mesh, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };

@@ -3898,7 +3898,7 @@ SWIGINTERN PyObject *_wrap_Point_set_3_insert_range(PyObject *SWIGUNUSEDPARM(sel
     boost::shared_ptr<std::vector< EPIC_Kernel::Point_3 > > res(new std::vector<EPIC_Kernel::Point_3>());
     if (!PySequence_Check(swig_obj[1])) {
       PyErr_SetString(PyExc_ValueError,"Expecting a sequence");
-      return nullptr;
+      return NULL;
     }
     int length=PySequence_Length(swig_obj[1]);
     res->reserve(length);
@@ -5117,7 +5117,7 @@ SWIGINTERN PyObject *_wrap_Point_set_3_properties(PyObject *SWIGUNUSEDPARM(self)
     PyObject* list = PyList_New(result->size());
     for (std::size_t i=0;i<result->size();++i){
       PyObject* py_object=PyUnicode_FromString((*result)[i].c_str());
-      assert(py_object!=nullptr);
+      assert(py_object!=NULL);
       PyList_SetItem(list, i, py_object);
     }
     resultobj=list;

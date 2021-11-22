@@ -6109,7 +6109,7 @@ SWIGINTERN PyObject *_wrap_natural_neighbor_coordinates_2(PyObject *self, PyObje
         if (_v) {
           {
             PyObject* iter=PyObject_GetIter(argv[3]);
-            if (iter!=nullptr){
+            if (iter!=NULL){
               Py_DECREF(iter);
               _v=1;
             }
@@ -6483,7 +6483,7 @@ SWIGINTERN PyObject *_wrap_regular_neighbor_coordinates_2(PyObject *self, PyObje
         if (_v) {
           {
             PyObject* iter=PyObject_GetIter(argv[3]);
-            if (iter!=nullptr){
+            if (iter!=NULL){
               Py_DECREF(iter);
               _v=1;
             }
@@ -6492,7 +6492,7 @@ SWIGINTERN PyObject *_wrap_regular_neighbor_coordinates_2(PyObject *self, PyObje
           if (_v) {
             {
               PyObject* iter=PyObject_GetIter(argv[4]);
-              if (iter!=nullptr){
+              if (iter!=NULL){
                 Py_DECREF(iter);
                 _v=1;
               }
@@ -6734,7 +6734,7 @@ SWIGINTERN PyObject *_wrap_surface_neighbors_certified_3(PyObject *self, PyObjec
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }
@@ -6761,7 +6761,7 @@ SWIGINTERN PyObject *_wrap_surface_neighbors_certified_3(PyObject *self, PyObjec
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }
@@ -6949,7 +6949,7 @@ SWIGINTERN PyObject *_wrap_surface_neighbors_3(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }
@@ -7244,7 +7244,7 @@ SWIGINTERN PyObject *_wrap_surface_neighbor_coordinates_certified_3(PyObject *se
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }
@@ -7271,7 +7271,7 @@ SWIGINTERN PyObject *_wrap_surface_neighbor_coordinates_certified_3(PyObject *se
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }
@@ -7457,7 +7457,7 @@ SWIGINTERN PyObject *_wrap_surface_neighbor_coordinates_3(PyObject *self, PyObje
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }

@@ -32586,7 +32586,7 @@ SWIGINTERN PyObject *_wrap_Polygon_2_insert(PyObject *self, PyObject *args) {
       if (_v) {
         {
           PyObject* iter=PyObject_GetIter(argv[2]);
-          if (iter!=nullptr){
+          if (iter!=NULL){
             Py_DECREF(iter);
             _v=1;
           }
@@ -32657,7 +32657,7 @@ SWIGINTERN PyObject *_wrap_new_Polygon_2(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }

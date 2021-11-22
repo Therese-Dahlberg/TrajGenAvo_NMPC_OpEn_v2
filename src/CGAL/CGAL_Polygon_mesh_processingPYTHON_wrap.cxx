@@ -2839,8 +2839,8 @@ namespace swig {
 
 
   #include <SWIG_CGAL/Common/Iterator.h>
-  #include <SWIG_CGAL/Polyhedron_3/all_includes.h>
-  #include <SWIG_CGAL/Polygon_mesh_processing/all_includes.h>
+  #include  <SWIG_CGAL/Polyhedron_3/all_includes.h>
+  #include  <SWIG_CGAL/Polygon_mesh_processing/all_includes.h>
 
 typedef Polyhedron_3_wrapper< Polyhedron_3_,SWIG_Polyhedron_3::CGAL_Vertex_handle<Polyhedron_3_>,SWIG_Polyhedron_3::CGAL_Halfedge_handle<Polyhedron_3_>,SWIG_Polyhedron_3::CGAL_Facet_handle<Polyhedron_3_> >  Polyhedron_3_SWIG_wrapper; 
 typedef SWIG_Polyhedron_3::CGAL_Halfedge_handle<Polyhedron_3_>  Polyhedron_3_Halfedge_handle_SWIG_wrapper; 
@@ -5257,7 +5257,6 @@ SWIGINTERN std::vector< std::vector< Point_3 > >::iterator std_vector_Sl_std_vec
 SWIGINTERN void std_vector_Sl_std_vector_Sl_Point_3_Sg__Sg__insert__SWIG_1(std::vector< std::vector< Point_3 > > *self,std::vector< std::vector< Point_3 > >::iterator pos,std::vector< std::vector< Point_3 > >::size_type n,std::vector< std::vector< Point_3 > >::value_type const &x){ self->insert(pos, n, x); }
 
   #include <CGAL/polygon_mesh_processing.h>
-  #include <CGAL/Polygon_mesh_processing/clip.h>
   #include <SWIG_CGAL/Common/Wrapper_iterator_helper.h>
   #include <SWIG_CGAL/Common/triple.h>
   #include <SWIG_CGAL/Polygon_mesh_processing/utils.h>
@@ -5276,18 +5275,18 @@ SWIGINTERN void std_vector_Sl_std_vector_Sl_Point_3_Sg__Sg__insert__SWIG_1(std::
     typedef bool value_type;
     typedef bool reference;
 
-    Is_constrained_map() : m_set(nullptr) {}
+    Is_constrained_map() : m_set(NULL) {}
     Is_constrained_map(std::set<key_type>& set_) : m_set(&set_) {}
 
     friend bool get(const Is_constrained_map& map, const key_type& k)
     {
-      CGAL_assertion(map.m_set != nullptr);
+      CGAL_assertion(map.m_set != NULL);
       return map.m_set->count(k);
     }
 
     friend void put(const Is_constrained_map& map, const key_type& k, value_type b)
     {
-      CGAL_assertion(map.m_set != nullptr);
+      CGAL_assertion(map.m_set != NULL);
       if (b)
         map.m_set->insert(k);
       else
@@ -5743,50 +5742,6 @@ SWIGINTERN void std_vector_Sl_std_vector_Sl_Point_3_Sg__Sg__insert__SWIG_1(std::
     return Bbox_3( PMP::bbox(P.get_data()));
   }
 
-//
-// Corefinement based
-  void corefine(Polyhedron_3_SWIG_wrapper& A, Polyhedron_3_SWIG_wrapper& B)
-  {
-    PMP::corefine(A.get_data(), B.get_data());
-  }
-
-  bool corefine_and_compute_union(Polyhedron_3_SWIG_wrapper& A, Polyhedron_3_SWIG_wrapper& B, Polyhedron_3_SWIG_wrapper& out)
-  {
-    return PMP::corefine_and_compute_union(A.get_data(), B.get_data(), out.get_data());
-  }
-
-  bool corefine_and_compute_intersection(Polyhedron_3_SWIG_wrapper& A, Polyhedron_3_SWIG_wrapper& B, Polyhedron_3_SWIG_wrapper& out)
-  {
-    return PMP::corefine_and_compute_intersection(A.get_data(), B.get_data(), out.get_data());
-  }
-
-  bool corefine_and_compute_difference(Polyhedron_3_SWIG_wrapper& A, Polyhedron_3_SWIG_wrapper& B, Polyhedron_3_SWIG_wrapper& out)
-  {
-    return PMP::corefine_and_compute_difference(A.get_data(), B.get_data(), out.get_data());
-  }
-
-  bool clip(Polyhedron_3_SWIG_wrapper& A, Polyhedron_3_SWIG_wrapper& B)
-  {
-    return PMP::clip(A.get_data(), B.get_data());
-  }
-
-  bool clip(Polyhedron_3_SWIG_wrapper& A, Plane_3& plane)
-  {
-    return PMP::clip(A.get_data(), plane.get_data());
-  }
-
-#if CGAL_VERSION_MAJOR ==5 && CGAL_VERSION_MINOR >= 1
-  void split(Polyhedron_3_SWIG_wrapper& A, Polyhedron_3_SWIG_wrapper& B)
-  {
-    PMP::split(A.get_data(), B.get_data());
-  }
-
-  void split(Polyhedron_3_SWIG_wrapper& A, Plane_3& plane)
-  {
-    PMP::split(A.get_data(), plane.get_data());
-  }
-#endif
-
 //   CGAL::Polygon_mesh_processing::border_halfedges() (4.8)
   void border_halfedges(Facet_range facet_range,
                         Polyhedron_3_SWIG_wrapper& P,
@@ -5795,7 +5750,7 @@ SWIGINTERN void std_vector_Sl_std_vector_Sl_Point_3_Sg__Sg__insert__SWIG_1(std::
     CGAL::set_halfedgeds_items_id(P.get_data());
     PMP::border_halfedges(make_range(facet_range), P.get_data(), out);
   }
-  
+
 
 
 SWIGINTERN int
@@ -17132,7 +17087,7 @@ SWIGINTERN PyObject *_wrap_fair(PyObject *self, PyObject *args) {
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=nullptr){
+        if (iter!=NULL){
           Py_DECREF(iter);
           _v=1;
         }
@@ -17151,7 +17106,7 @@ SWIGINTERN PyObject *_wrap_fair(PyObject *self, PyObject *args) {
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=nullptr){
+        if (iter!=NULL){
           Py_DECREF(iter);
           _v=1;
         }
@@ -17330,7 +17285,7 @@ SWIGINTERN PyObject *_wrap_refine(PyObject *self, PyObject *args) {
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=nullptr){
+        if (iter!=NULL){
           Py_DECREF(iter);
           _v=1;
         }
@@ -17359,7 +17314,7 @@ SWIGINTERN PyObject *_wrap_refine(PyObject *self, PyObject *args) {
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=nullptr){
+        if (iter!=NULL){
           Py_DECREF(iter);
           _v=1;
         }
@@ -17539,7 +17494,7 @@ SWIGINTERN PyObject *_wrap_triangulate_faces(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }
@@ -17852,7 +17807,7 @@ SWIGINTERN PyObject *_wrap_isotropic_remeshing(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }
@@ -17877,7 +17832,7 @@ SWIGINTERN PyObject *_wrap_isotropic_remeshing(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }
@@ -17908,7 +17863,7 @@ SWIGINTERN PyObject *_wrap_isotropic_remeshing(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }
@@ -17931,7 +17886,7 @@ SWIGINTERN PyObject *_wrap_isotropic_remeshing(PyObject *self, PyObject *args) {
           if (_v) {
             {
               PyObject* iter=PyObject_GetIter(argv[4]);
-              if (iter!=nullptr){
+              if (iter!=NULL){
                 Py_DECREF(iter);
                 _v=1;
               }
@@ -17949,7 +17904,7 @@ SWIGINTERN PyObject *_wrap_isotropic_remeshing(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }
@@ -17972,7 +17927,7 @@ SWIGINTERN PyObject *_wrap_isotropic_remeshing(PyObject *self, PyObject *args) {
           if (_v) {
             {
               PyObject* iter=PyObject_GetIter(argv[4]);
-              if (iter!=nullptr){
+              if (iter!=NULL){
                 Py_DECREF(iter);
                 _v=1;
               }
@@ -18744,7 +18699,7 @@ SWIGINTERN PyObject *_wrap_triangulate_hole_polyline(PyObject *self, PyObject *a
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }
@@ -18763,7 +18718,7 @@ SWIGINTERN PyObject *_wrap_triangulate_hole_polyline(PyObject *self, PyObject *a
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }
@@ -18772,7 +18727,7 @@ SWIGINTERN PyObject *_wrap_triangulate_hole_polyline(PyObject *self, PyObject *a
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=nullptr){
+        if (iter!=NULL){
           Py_DECREF(iter);
           _v=1;
         }
@@ -19005,7 +18960,7 @@ SWIGINTERN PyObject *_wrap_reverse_face_orientations(PyObject *self, PyObject *a
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }
@@ -19178,7 +19133,7 @@ SWIGINTERN PyObject *_wrap_stitch_borders(PyObject *self, PyObject *args) {
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=nullptr){
+        if (iter!=NULL){
           Py_DECREF(iter);
           _v=1;
         }
@@ -19755,7 +19710,7 @@ SWIGINTERN PyObject *_wrap_connected_components(PyObject *SWIGUNUSEDPARM(self), 
     PyObject* list = PyList_New(result->size());
     for (std::size_t i=0;i<result->size();++i){
       PyObject* py_object=PyInt_FromLong((*result)[i]);
-      assert(py_object!=nullptr);
+      assert(py_object!=NULL);
       PyList_SetItem(list, i, py_object);
       Py_DECREF(py_object);
     }
@@ -19916,7 +19871,7 @@ SWIGINTERN PyObject *_wrap_keep_connected_components__SWIG_1(PyObject *SWIGUNUSE
     boost::shared_ptr<std::vector< int > > res(new std::vector<int>());
     if (!PySequence_Check(swig_obj[1])) {
       PyErr_SetString(PyExc_ValueError,"Expecting a sequence");
-      return nullptr;
+      return NULL;
     }
     int length=PySequence_Length(swig_obj[1]);
     res->reserve(length);
@@ -19926,7 +19881,7 @@ SWIGINTERN PyObject *_wrap_keep_connected_components__SWIG_1(PyObject *SWIGUNUSE
       {
         Py_XDECREF(o);
         PyErr_SetString(PyExc_ValueError,"Expecting a sequence of int");
-        return nullptr;
+        return NULL;
       }
       res->push_back( PyLong_AsLong(o));
       Py_DECREF(o);
@@ -19937,7 +19892,7 @@ SWIGINTERN PyObject *_wrap_keep_connected_components__SWIG_1(PyObject *SWIGUNUSE
     boost::shared_ptr<std::vector< int > > res(new std::vector<int>());
     if (!PySequence_Check(swig_obj[2])) {
       PyErr_SetString(PyExc_ValueError,"Expecting a sequence");
-      return nullptr;
+      return NULL;
     }
     int length=PySequence_Length(swig_obj[2]);
     res->reserve(length);
@@ -19947,7 +19902,7 @@ SWIGINTERN PyObject *_wrap_keep_connected_components__SWIG_1(PyObject *SWIGUNUSE
       {
         Py_XDECREF(o);
         PyErr_SetString(PyExc_ValueError,"Expecting a sequence of int");
-        return nullptr;
+        return NULL;
       }
       res->push_back( PyLong_AsLong(o));
       Py_DECREF(o);
@@ -19985,7 +19940,7 @@ SWIGINTERN PyObject *_wrap_keep_connected_components(PyObject *self, PyObject *a
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=nullptr){
+        if (iter!=NULL){
           Py_DECREF(iter);
           _v=1;
         }
@@ -20116,7 +20071,7 @@ SWIGINTERN PyObject *_wrap_remove_connected_components__SWIG_1(PyObject *SWIGUNU
     boost::shared_ptr<std::vector< int > > res(new std::vector<int>());
     if (!PySequence_Check(swig_obj[1])) {
       PyErr_SetString(PyExc_ValueError,"Expecting a sequence");
-      return nullptr;
+      return NULL;
     }
     int length=PySequence_Length(swig_obj[1]);
     res->reserve(length);
@@ -20126,7 +20081,7 @@ SWIGINTERN PyObject *_wrap_remove_connected_components__SWIG_1(PyObject *SWIGUNU
       {
         Py_XDECREF(o);
         PyErr_SetString(PyExc_ValueError,"Expecting a sequence of int");
-        return nullptr;
+        return NULL;
       }
       res->push_back( PyLong_AsLong(o));
       Py_DECREF(o);
@@ -20137,7 +20092,7 @@ SWIGINTERN PyObject *_wrap_remove_connected_components__SWIG_1(PyObject *SWIGUNU
     boost::shared_ptr<std::vector< int > > res(new std::vector<int>());
     if (!PySequence_Check(swig_obj[2])) {
       PyErr_SetString(PyExc_ValueError,"Expecting a sequence");
-      return nullptr;
+      return NULL;
     }
     int length=PySequence_Length(swig_obj[2]);
     res->reserve(length);
@@ -20147,7 +20102,7 @@ SWIGINTERN PyObject *_wrap_remove_connected_components__SWIG_1(PyObject *SWIGUNU
       {
         Py_XDECREF(o);
         PyErr_SetString(PyExc_ValueError,"Expecting a sequence of int");
-        return nullptr;
+        return NULL;
       }
       res->push_back( PyLong_AsLong(o));
       Py_DECREF(o);
@@ -20185,7 +20140,7 @@ SWIGINTERN PyObject *_wrap_remove_connected_components(PyObject *self, PyObject 
     if (_v) {
       {
         PyObject* iter=PyObject_GetIter(argv[1]);
-        if (iter!=nullptr){
+        if (iter!=NULL){
           Py_DECREF(iter);
           _v=1;
         }
@@ -20393,7 +20348,7 @@ SWIGINTERN PyObject *_wrap_area(PyObject *self, PyObject *args) {
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }
@@ -20576,352 +20531,6 @@ SWIGINTERN PyObject *_wrap_bbox(PyObject *SWIGUNUSEDPARM(self), PyObject *args) 
   return resultobj;
 fail:
   return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_corefine(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Polyhedron_3_SWIG_wrapper *arg1 = 0 ;
-  Polyhedron_3_SWIG_wrapper *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "corefine", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t,  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "corefine" "', argument " "1"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "corefine" "', argument " "1"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  arg1 = reinterpret_cast< Polyhedron_3_SWIG_wrapper * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t,  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "corefine" "', argument " "2"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "corefine" "', argument " "2"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  arg2 = reinterpret_cast< Polyhedron_3_SWIG_wrapper * >(argp2);
-  {
-    try {
-      corefine(*arg1,*arg2);
-    } catch (std::exception &e) {
-      std::string error_msg("Error in SWIG_CGAL code. Here is the text of the C++ exception:\n");
-      error_msg += e.what();
-      PyErr_SetString(PyExc_Exception, error_msg.c_str());
-      SWIG_fail;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_corefine_and_compute_union(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Polyhedron_3_SWIG_wrapper *arg1 = 0 ;
-  Polyhedron_3_SWIG_wrapper *arg2 = 0 ;
-  Polyhedron_3_SWIG_wrapper *arg3 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject *swig_obj[3] ;
-  bool result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "corefine_and_compute_union", 3, 3, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t,  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "corefine_and_compute_union" "', argument " "1"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "corefine_and_compute_union" "', argument " "1"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  arg1 = reinterpret_cast< Polyhedron_3_SWIG_wrapper * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t,  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "corefine_and_compute_union" "', argument " "2"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "corefine_and_compute_union" "', argument " "2"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  arg2 = reinterpret_cast< Polyhedron_3_SWIG_wrapper * >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t,  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "corefine_and_compute_union" "', argument " "3"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "corefine_and_compute_union" "', argument " "3"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  arg3 = reinterpret_cast< Polyhedron_3_SWIG_wrapper * >(argp3);
-  {
-    try {
-      result = (bool)corefine_and_compute_union(*arg1,*arg2,*arg3);
-    } catch (std::exception &e) {
-      std::string error_msg("Error in SWIG_CGAL code. Here is the text of the C++ exception:\n");
-      error_msg += e.what();
-      PyErr_SetString(PyExc_Exception, error_msg.c_str());
-      SWIG_fail;
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_corefine_and_compute_intersection(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Polyhedron_3_SWIG_wrapper *arg1 = 0 ;
-  Polyhedron_3_SWIG_wrapper *arg2 = 0 ;
-  Polyhedron_3_SWIG_wrapper *arg3 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject *swig_obj[3] ;
-  bool result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "corefine_and_compute_intersection", 3, 3, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t,  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "corefine_and_compute_intersection" "', argument " "1"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "corefine_and_compute_intersection" "', argument " "1"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  arg1 = reinterpret_cast< Polyhedron_3_SWIG_wrapper * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t,  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "corefine_and_compute_intersection" "', argument " "2"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "corefine_and_compute_intersection" "', argument " "2"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  arg2 = reinterpret_cast< Polyhedron_3_SWIG_wrapper * >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t,  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "corefine_and_compute_intersection" "', argument " "3"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "corefine_and_compute_intersection" "', argument " "3"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  arg3 = reinterpret_cast< Polyhedron_3_SWIG_wrapper * >(argp3);
-  {
-    try {
-      result = (bool)corefine_and_compute_intersection(*arg1,*arg2,*arg3);
-    } catch (std::exception &e) {
-      std::string error_msg("Error in SWIG_CGAL code. Here is the text of the C++ exception:\n");
-      error_msg += e.what();
-      PyErr_SetString(PyExc_Exception, error_msg.c_str());
-      SWIG_fail;
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_corefine_and_compute_difference(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Polyhedron_3_SWIG_wrapper *arg1 = 0 ;
-  Polyhedron_3_SWIG_wrapper *arg2 = 0 ;
-  Polyhedron_3_SWIG_wrapper *arg3 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject *swig_obj[3] ;
-  bool result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "corefine_and_compute_difference", 3, 3, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t,  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "corefine_and_compute_difference" "', argument " "1"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "corefine_and_compute_difference" "', argument " "1"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  arg1 = reinterpret_cast< Polyhedron_3_SWIG_wrapper * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t,  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "corefine_and_compute_difference" "', argument " "2"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "corefine_and_compute_difference" "', argument " "2"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  arg2 = reinterpret_cast< Polyhedron_3_SWIG_wrapper * >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t,  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "corefine_and_compute_difference" "', argument " "3"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "corefine_and_compute_difference" "', argument " "3"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  arg3 = reinterpret_cast< Polyhedron_3_SWIG_wrapper * >(argp3);
-  {
-    try {
-      result = (bool)corefine_and_compute_difference(*arg1,*arg2,*arg3);
-    } catch (std::exception &e) {
-      std::string error_msg("Error in SWIG_CGAL code. Here is the text of the C++ exception:\n");
-      error_msg += e.what();
-      PyErr_SetString(PyExc_Exception, error_msg.c_str());
-      SWIG_fail;
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_clip__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  Polyhedron_3_SWIG_wrapper *arg1 = 0 ;
-  Polyhedron_3_SWIG_wrapper *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  bool result;
-  
-  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t,  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "clip" "', argument " "1"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "clip" "', argument " "1"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  arg1 = reinterpret_cast< Polyhedron_3_SWIG_wrapper * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t,  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "clip" "', argument " "2"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "clip" "', argument " "2"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  arg2 = reinterpret_cast< Polyhedron_3_SWIG_wrapper * >(argp2);
-  {
-    try {
-      result = (bool)clip(*arg1,*arg2);
-    } catch (std::exception &e) {
-      std::string error_msg("Error in SWIG_CGAL code. Here is the text of the C++ exception:\n");
-      error_msg += e.what();
-      PyErr_SetString(PyExc_Exception, error_msg.c_str());
-      SWIG_fail;
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_clip__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  Polyhedron_3_SWIG_wrapper *arg1 = 0 ;
-  Plane_3 *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  bool result;
-  
-  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t,  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "clip" "', argument " "1"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "clip" "', argument " "1"" of type '" "Polyhedron_3_SWIG_wrapper &""'"); 
-  }
-  arg1 = reinterpret_cast< Polyhedron_3_SWIG_wrapper * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_Plane_3,  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "clip" "', argument " "2"" of type '" "Plane_3 &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "clip" "', argument " "2"" of type '" "Plane_3 &""'"); 
-  }
-  arg2 = reinterpret_cast< Plane_3 * >(argp2);
-  {
-    try {
-      result = (bool)clip(*arg1,*arg2);
-    } catch (std::exception &e) {
-      std::string error_msg("Error in SWIG_CGAL code. Here is the text of the C++ exception:\n");
-      error_msg += e.what();
-      PyErr_SetString(PyExc_Exception, error_msg.c_str());
-      SWIG_fail;
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_clip(PyObject *self, PyObject *args) {
-  Py_ssize_t argc;
-  PyObject *argv[3] = {
-    0
-  };
-  
-  if (!(argc = SWIG_Python_UnpackTuple(args, "clip", 0, 2, argv))) SWIG_fail;
-  --argc;
-  if (argc == 2) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t, SWIG_POINTER_NO_NULL);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      void *vptr = 0;
-      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t, SWIG_POINTER_NO_NULL);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        return _wrap_clip__SWIG_0(self, argc, argv);
-      }
-    }
-  }
-  if (argc == 2) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Polyhedron_3_wrapperT_Polyhedron_3__SWIG_Polyhedron_3__CGAL_Vertex_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Halfedge_handleT_Polyhedron_3__t_SWIG_Polyhedron_3__CGAL_Facet_handleT_Polyhedron_3__t_t, SWIG_POINTER_NO_NULL);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      void *vptr = 0;
-      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_Plane_3, SWIG_POINTER_NO_NULL);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        return _wrap_clip__SWIG_1(self, argc, argv);
-      }
-    }
-  }
-  
-fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'clip'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    clip(Polyhedron_3_SWIG_wrapper &,Polyhedron_3_SWIG_wrapper &)\n"
-    "    clip(Polyhedron_3_SWIG_wrapper &,Plane_3 &)\n");
-  return 0;
 }
 
 
@@ -21210,11 +20819,6 @@ static PyMethodDef SwigMethods[] = {
 	 { "edge_length", _wrap_edge_length, METH_VARARGS, NULL},
 	 { "face_border_length", _wrap_face_border_length, METH_VARARGS, NULL},
 	 { "bbox", _wrap_bbox, METH_O, NULL},
-	 { "corefine", _wrap_corefine, METH_VARARGS, NULL},
-	 { "corefine_and_compute_union", _wrap_corefine_and_compute_union, METH_VARARGS, NULL},
-	 { "corefine_and_compute_intersection", _wrap_corefine_and_compute_intersection, METH_VARARGS, NULL},
-	 { "corefine_and_compute_difference", _wrap_corefine_and_compute_difference, METH_VARARGS, NULL},
-	 { "clip", _wrap_clip, METH_VARARGS, NULL},
 	 { "border_halfedges", _wrap_border_halfedges, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };

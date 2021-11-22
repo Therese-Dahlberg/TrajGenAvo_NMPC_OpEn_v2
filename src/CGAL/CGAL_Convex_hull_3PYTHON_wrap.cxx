@@ -3007,7 +3007,7 @@ SWIGINTERN PyObject *_wrap_halfspace_intersection_3(PyObject *self, PyObject *ar
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }
@@ -3026,7 +3026,7 @@ SWIGINTERN PyObject *_wrap_halfspace_intersection_3(PyObject *self, PyObject *ar
     int _v;
     {
       PyObject* iter=PyObject_GetIter(argv[0]);
-      if (iter!=nullptr){
+      if (iter!=NULL){
         Py_DECREF(iter);
         _v=1;
       }

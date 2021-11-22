@@ -7033,7 +7033,7 @@ fail:
 
 SWIGINTERN PyObject *_wrap_new_HalfedgeDS__SWIG_2(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
-  HalfedgeDS_wrapper< HDS_d >::Self *arg1 = 0 ;
+  HalfedgeDS_wrapper< HDS_d > *arg1 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   HalfedgeDS_wrapper< HDS_d > *result = 0 ;
@@ -7041,15 +7041,15 @@ SWIGINTERN PyObject *_wrap_new_HalfedgeDS__SWIG_2(PyObject *SWIGUNUSEDPARM(self)
   if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_HalfedgeDS_wrapperT_HDS_d_t,  0  | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_HalfedgeDS" "', argument " "1"" of type '" "HalfedgeDS_wrapper< HDS_d >::Self const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_HalfedgeDS" "', argument " "1"" of type '" "HalfedgeDS_wrapper< HDS_d > const &""'"); 
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_HalfedgeDS" "', argument " "1"" of type '" "HalfedgeDS_wrapper< HDS_d >::Self const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_HalfedgeDS" "', argument " "1"" of type '" "HalfedgeDS_wrapper< HDS_d > const &""'"); 
   }
-  arg1 = reinterpret_cast< HalfedgeDS_wrapper< HDS_d >::Self * >(argp1);
+  arg1 = reinterpret_cast< HalfedgeDS_wrapper< HDS_d > * >(argp1);
   {
     try {
-      result = (HalfedgeDS_wrapper< HDS_d > *)new HalfedgeDS_wrapper< HDS_d >((HalfedgeDS_wrapper< HDS_d >::Self const &)*arg1);
+      result = (HalfedgeDS_wrapper< HDS_d > *)new HalfedgeDS_wrapper< HDS_d >((HalfedgeDS_wrapper< HDS_d > const &)*arg1);
     } catch (std::exception &e) {
       std::string error_msg("Error in SWIG_CGAL code. Here is the text of the C++ exception:\n");
       error_msg += e.what();
@@ -7111,7 +7111,7 @@ fail:
     "  Possible C/C++ prototypes are:\n"
     "    HalfedgeDS_wrapper< HDS_d >::HalfedgeDS_wrapper()\n"
     "    HalfedgeDS_wrapper< HDS_d >::HalfedgeDS_wrapper(int,int,int)\n"
-    "    HalfedgeDS_wrapper< HDS_d >::HalfedgeDS_wrapper(HalfedgeDS_wrapper< HDS_d >::Self const &)\n");
+    "    HalfedgeDS_wrapper< HDS_d >::HalfedgeDS_wrapper(HalfedgeDS_wrapper< HDS_d > const &)\n");
   return 0;
 }
 

@@ -1152,9 +1152,6 @@ def output_surface_facets_to_off(s, c2t3):
 def output_surface_facets_to_polyhedron(c2t3, poly):
     return _CGAL_Surface_mesher.output_surface_facets_to_polyhedron(c2t3, poly)
 
-def facets_in_complex_2_to_triangle_mesh(c2t3, poly):
-    return _CGAL_Surface_mesher.facets_in_complex_2_to_triangle_mesh(c2t3, poly)
-
 def make_surface_mesh(*args):
     return _CGAL_Surface_mesher.make_surface_mesh(*args)
 
