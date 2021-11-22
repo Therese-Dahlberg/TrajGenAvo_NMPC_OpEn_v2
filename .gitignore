@@ -19,3 +19,5 @@ ipython_config.py
 # pyenv
 .python-version
 
+# General
+.idea
