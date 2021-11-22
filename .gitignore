@@ -101,7 +101,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
-env/
+# env/        cause of commenting out: needed for environment.yaml and requirements.txt
 venv/
 ENV/
 env.bak/
