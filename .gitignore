@@ -7,6 +7,7 @@ __pycache__/
 .Python
 mpc_build/
 src/CGAL/
+CGAL/
 
 # Jupyter Notebook
 .ipynb_checkpoints

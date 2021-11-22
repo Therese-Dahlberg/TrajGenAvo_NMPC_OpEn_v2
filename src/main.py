@@ -46,7 +46,6 @@ def init(build=False, self_destruct=False):
         return traj_gen
 
 
-
 # Checks if there is a collision with the obstacles (only for static obstacles for now)
 # TODO: Implement a function to check wether or not a trajectory has collided with any obstacle.
 def collisionDetection(trajList, obstacle_corners):
@@ -70,14 +69,7 @@ def collisionDetection(trajList, obstacle_corners):
 
         # Loop through all the segments that encapules the obstacle and see if they intersect with any point on the line that represents the load.
 
-
-
-
-
-
-
-
-def main(build=False, destroy_plots=True):
+def main(build=False, destroy_plots=False):
     traj_gen = init(build=build, self_destruct=destroy_plots)
     try:
         traj_gen.run(plot=1)
