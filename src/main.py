@@ -105,7 +105,7 @@ def plot_polygons(polygons):
     plt.show()
 
 
-def main(build=False, destroy_plots=True):
+def main(build=True, destroy_plots=True):
     traj_gen = init(build=build, self_destruct=destroy_plots)
     try:
         traj_gen.run(plot=1)
