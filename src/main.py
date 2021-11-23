@@ -51,7 +51,6 @@ def init(build=False, self_destruct=False):
         return traj_gen
 
 
-
 # Checks if there is a collision with the obstacles (only for static obstacles for now)
 # TODO: Implement a function to check wether or not a trajectory has collided with any obstacle.
 def collisionDetection(trajList):

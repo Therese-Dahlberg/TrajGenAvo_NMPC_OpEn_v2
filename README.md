@@ -28,6 +28,7 @@ sudo cmake --version
 ```
 
 To use CGAL with python the [python bindings](https://github.com/CGAL/cgal-swig-bindings) are used. Install these and move them to the correct location via the following commands. Note that these assume that this assumes that Formation-control-of-autonomous-transportation-robots is placed under ```Documents```.
+Make sure to have your path variables of python set and have the python-dev distribution installed as well.
 ```
 cd Documents
 git clone https://github.com/cgal/cgal-swig-bindings &&\
