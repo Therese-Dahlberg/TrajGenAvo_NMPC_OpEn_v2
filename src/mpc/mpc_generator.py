@@ -9,6 +9,9 @@ from collections import Iterable
 
 from utils.config import SolverParams
 
+from shapely.geometry import Polygon
+from shapely.geometry import box
+
 
 MAX_SOLVER_TIME_MICROS = 8_000_000 #500_000
 MAX_OUTER_ITERATIONS = 15
@@ -282,36 +285,121 @@ class MpcModule:
             
         return cost
 
+    # Cost to punish ATR being inside of objects -> collision avoidance of ATR
     @cost_positive
-    def cost_inside_static_object(self, x_all, y_all, q, individual_costs=False):         
-        if not individual_costs:
+    def cost_inside_static_object(self, x_all, y_all, q, individual_costs=False):
+        # If cost is just computed or also logged 
+        if not individual_costs:    #
             crash_in_trajectory = 0 
         else:
             crash_in_trajectory = [] 
         
+        # Loop over time steps along horizon
         for t in range(0, self.solver_param.base.n_hor):
+            # Reset/init for each time step
             crash = 0
             x = x_all[t]
             y = y_all[t]
-            base_vert_obj = 0 
-            for vert in range(self.solver_param.base.min_vertices, self.solver_param.base.max_vertices + 1):                
+            base_vert_obj = 0
+
+            # Loop over polygon types (triangles, rectangles, etc.) -> ellipses not handled 
+            for vert in range(self.solver_param.base.min_vertices, self.solver_param.base.max_vertices + 1):
+                # Loop over object index in polygon group        
                 for obs in range(0, self.solver_param.base.n_obs_of_each_vertices):
+                    # init for each object
                     inside = 1
+                    # Loop over lines in specified object (has "vert" nr of lines)
                     for line in range(vert):
-                        b  = self.bs_static[base_vert_obj + line + obs * vert] 
-                        a0 = self.a0s_static[base_vert_obj + line + obs * vert]
-                        a1 = self.a1s_static[base_vert_obj + line + obs * vert]
+                        # access in reference to base vertice index of current shape (all vertices of all objects of this shape is accessable here)
+                        # access then in reference to object index and number of vertices of its shape (all vertices of this object is accessable here)
+                        # access then in reference to lines of shape (this vertice is accessable here)
+                        b  = self.bs_static[base_vert_obj + obs * vert + line]  # All base vertices stored
+                        a0 = self.a0s_static[base_vert_obj + obs * vert + line] # All ??? stored
+                        a1 = self.a1s_static[base_vert_obj + obs * vert + line] # All ??? stored
                         obs_eq = b - a0*x - a1*y
                         #h = (cs.fmax(0.0, obs_eq )/obs_eq)**2.0
-                        h = cs.fmax(0.0, obs_eq )**2.0
-                        inside = inside *h
-                    # If all equations for each object is > 0, then inside is > 0 
-                    crash += inside
-                #Set new index for next object shape
+                        # Set equation of hard constraints
+                        h = cs.fmax(0.0, obs_eq)**2.0   # zero if obs_eq is smaller than zero, i.e. if ATR position fulfills constraint (CasADi: Maximum function is "differentiable")
+                        if h == 0:
+                            # When h is zero for one line no crash is detected (interpretation: ATR is outside of at least one halfspace so not in object) 
+                            inside = 0
+                            break
+                        else:
+                            inside *= h
+                    # If all inequalities for current object is > 0, then inside is > 0, i.e. ATR is inside object
+                    crash += inside     # h also represents how much the constraint is violated
+                # Set new index of base vertice for next object shape (every vertice has an index and the base vertice is the reference for every object)
                 base_vert_obj += vert * self.solver_param.base.n_obs_of_each_vertices
 
+            # Update cost with number of collisions for all obstacles for current time step
             if not individual_costs:
-                crash_in_trajectory +=crash*q
+                crash_in_trajectory += crash*q
+            else:
+                crash_in_trajectory.append(crash*q)
+
+        return crash_in_trajectory
+
+    # Cost for collision of cargo with obstacles
+    @cost_positive
+    def cost_cargo_inside_static_object(self, x_all_master, y_all_master, x_all_slave, y_all_slave, q, individual_costs=False):
+        # If cost is just computed or also logged 
+        if not individual_costs:    
+            crash_in_trajectory = 0 
+        else:
+            crash_in_trajectory = [] 
+        
+        # Loop over time steps along horizon
+        for t in range(0, self.solver_param.base.n_hor):
+            # Reset/init for each time step
+            area = 0
+            x_master = x_all_master[t]
+            y_master = y_all_master[t]
+            x_slave = x_all_slave[t]
+            y_slave = y_all_slave[t]
+            
+            # Get shape of cargo (TODO: orientate it depending on position of ATRs only)
+            # TODO: With padded obstacles or unpadded? Since we include complete cargo
+            # Create Polygon for cargo online
+            # TODO: flexible definition of the cargo
+            # deviate from line (cargo) in normal direction (if line=[x,y] then normal=[y,x]or[-y,x])
+            a = 0.1    # in unit of x,y
+            master_corner_1 = (x_master, y_master) + a*(y_master-y_slave, x_master-x_slave)/np.linalg.norm((y_master-y_slave, x_master-x_slave))
+            master_corner_2 = (x_master, y_master) + a*(y_slave-y_master, x_master-x_slave)/np.linalg.norm((y_master-y_slave, x_master-x_slave))
+            slave_corner_1 = (x_slave, y_slave)    + a*(y_master-y_slave, x_master-x_slave)/np.linalg.norm((y_master-y_slave, x_master-x_slave))
+            slave_corner_2 = (x_slave, y_slave)    + a*(y_slave-y_master, x_master-x_slave)/np.linalg.norm((y_master-y_slave, x_master-x_slave))
+
+            # Cargo defined as a polygon
+            cargo = Polygon([master_corner_1,master_corner_2,slave_corner_2,slave_corner_1])
+
+            # Create axis aligned bounding boxes for current cargo
+            bounding_box_cargo = box(cargo.bounds[0],cargo.bounds[1],cargo.bounds[2],cargo.bounds[3])
+
+            # TODO: Get precomputed bounding boxes of static obstacles
+            bb_list = [] # list of shapely.geometry.box objects and its index
+
+            # Loop over all static obstacles
+            for bounding_box_obj in bb_list:
+                # Simple check for x,y values that bounding boxes overlap
+                obj_xmin = min(bounding_box_obj.exterior.coords.xy[0])
+                obj_xmax = max(bounding_box_obj.exterior.coords.xy[0])
+                obj_ymin = min(bounding_box_obj.exterior.coords.xy[1])
+                obj_ymax = max(bounding_box_obj.exterior.coords.xy[1])
+                cargo_xmin = min(bounding_box_cargo.exterior.coords.xy[0])
+                cargo_xmax = max(bounding_box_cargo.exterior.coords.xy[0])
+                cargo_ymin = min(bounding_box_cargo.exterior.coords.xy[1])
+                cargo_ymax = max(bounding_box_cargo.exterior.coords.xy[1])
+                if (obj_xmin < cargo_xmax and obj_xmax > cargo_xmin and
+                    obj_ymin < cargo_ymax and obj_ymax > cargo_ymin):
+                    # Bounding boxes overlap
+                    # Compute collision area with shapely
+                    # TODO: get shapely object of static obstacle with its index in bounding box list
+                    obj = obj_list[index]
+                    area += cargo.intersection(obj).area/min(cargo.area,obj.area)   # intersecting area compared to the size of the cargo or obstacle for good estimation if intrusion is bad or negatable
+            crash = cs.fmax(0.0, area)**2.0   # zero if cargo fulfills constraint (CasADi: Maximum function is "differentiable")
+                
+            # Update cost with number of collisions for all obstacles for current time step
+            if not individual_costs:
+                crash_in_trajectory += crash*q
             else:
                 crash_in_trajectory.append(crash*q)
 

@@ -37,7 +37,7 @@ def init(build=False, self_destruct=False):
         # master_goal = [(5, 2, 1.57), (8, 6, 1.57), (10, 8, 1.57)] # for different modes
         # slave_goal = [(5, 1, 1.57), (7, 6, 1.57), (9, 8, 1.57)]
     
-        # Gloabal path
+        # Global path
         map_fp = os.path.join(str(file_path.parent.parent), 'data', 'map.json')
         print("map fp", map_fp)
         gpp = GlobalPathPlanner(map_fp)
@@ -76,7 +76,7 @@ def collisionDetection(trajList):
 
         # Load defined as a polygon
         load = Polygon([master_corner_1,master_corner_2,slave_corner_2,slave_corner_1])
-
+        
         if load.intersects(padded_obstacle):
             counter = counter + 1
             collision_intersection = load.intersection(padded_obstacle)
@@ -104,7 +104,7 @@ def plot_polygons(polygons):
     plt.show()
 
 
-def main(build=True, destroy_plots=True):
+def main(build=False, destroy_plots=True):
     traj_gen = init(build=build, self_destruct=destroy_plots)
     try:
         traj_gen.run(plot=1)
