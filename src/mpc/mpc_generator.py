@@ -1,4 +1,6 @@
 import os, sys
+# import pickle
+# from pathlib import Path
 
 import traceback
 import numpy as np
@@ -10,11 +12,22 @@ from collections import Iterable
 from utils.config import SolverParams
 
 from shapely.geometry import Polygon
-from shapely.geometry import box
+from shapely.geometry import box as Box
 
+# DEBUG to be deleted
+from main import plot_polygons_w_atr
 
 MAX_SOLVER_TIME_MICROS = 8_000_000 #500_000
 MAX_OUTER_ITERATIONS = 15
+
+# # Get path to this file
+# file_path = Path(__file__)
+# # Load static obstacle polgyon and bounding boxes objects in shapely.geometry format
+# shapely_pickle = os.path.join(str(file_path.parent.parent.parent), 'data', 'shapely_obstacles_w_bounding_boxes.p')
+# with open(shapely_pickle, mode='rb') as f:
+#     static_dict = pickle.load(f)
+from main import init_obs
+static_dict = init_obs()
 
 def get_length(iterable):
     """Casadi can't handle len.
@@ -318,14 +331,15 @@ class MpcModule:
                         a1 = self.a1s_static[base_vert_obj + obs * vert + line] # All ??? stored
                         obs_eq = b - a0*x - a1*y
                         #h = (cs.fmax(0.0, obs_eq )/obs_eq)**2.0
-                        # Set equation of hard constraints
                         h = cs.fmax(0.0, obs_eq)**2.0   # zero if obs_eq is smaller than zero, i.e. if ATR position fulfills constraint (CasADi: Maximum function is "differentiable")
-                        if h == 0:
-                            # When h is zero for one line no crash is detected (interpretation: ATR is outside of at least one halfspace so not in object) 
-                            inside = 0
-                            break
-                        else:
-                            inside *= h
+                        inside *= h
+                        # Set equation of hard constraints
+                        # if obs_eq == 0:
+                        #     # When h or obs_eq is zero for one line no crash is detected (interpretation: ATR is outside of at least one halfspace so not in object) 
+                        #     inside = 0
+                        #     break
+                        # else:
+                        #     inside *= h    
                     # If all inequalities for current object is > 0, then inside is > 0, i.e. ATR is inside object
                     crash += inside     # h also represents how much the constraint is violated
                 # Set new index of base vertice for next object shape (every vertice has an index and the base vertice is the reference for every object)
@@ -346,7 +360,7 @@ class MpcModule:
         if not individual_costs:    
             crash_in_trajectory = 0 
         else:
-            crash_in_trajectory = [] 
+            crash_in_trajectory = []
         
         # Loop over time steps along horizon
         for t in range(0, self.solver_param.base.n_hor):
@@ -356,29 +370,31 @@ class MpcModule:
             y_master = y_all_master[t]
             x_slave = x_all_slave[t]
             y_slave = y_all_slave[t]
-            
-            # Get shape of cargo (TODO: orientate it depending on position of ATRs only)
-            # TODO: With padded obstacles or unpadded? Since we include complete cargo
+            gg = np.array([1,2])
+            plot_polygons_w_atr(gg,x_master,x_master)
+            # Get shape of cargo
+            # TODO: flexible definition of the cargo (orientate it depending on position of ATRs only)
             # Create Polygon for cargo online
-            # TODO: flexible definition of the cargo
-            # deviate from line (cargo) in normal direction (if line=[x,y] then normal=[y,x]or[-y,x])
-            a = 0.1    # in unit of x,y
-            master_corner_1 = (x_master, y_master) + a*(y_master-y_slave, x_master-x_slave)/np.linalg.norm((y_master-y_slave, x_master-x_slave))
-            master_corner_2 = (x_master, y_master) + a*(y_slave-y_master, x_master-x_slave)/np.linalg.norm((y_master-y_slave, x_master-x_slave))
-            slave_corner_1 = (x_slave, y_slave)    + a*(y_master-y_slave, x_master-x_slave)/np.linalg.norm((y_master-y_slave, x_master-x_slave))
-            slave_corner_2 = (x_slave, y_slave)    + a*(y_slave-y_master, x_master-x_slave)/np.linalg.norm((y_master-y_slave, x_master-x_slave))
+            # deviate from line (cargo) in normal direction (if line=[x,y] then normal=[y,-x]or[-y,x])
+            a = 1    # in unit of x,y
+            y_delta = y_master-y_slave
+            x_delta = x_master-x_slave
+            n = cs.sqrt(y_delta*y_delta + x_delta*x_delta)
+            master_corner_1 = (x_master - a*y_delta/n , y_master + a*x_delta/n)
+            master_corner_2 = (x_master + a*y_delta/n , y_master - a*x_delta/n)
+            slave_corner_1 =  (x_slave  - a*y_delta/n , y_slave  + a*x_delta/n)
+            slave_corner_2 =  (x_slave  + a*y_delta/n , y_slave  - a*x_delta/n)
 
             # Cargo defined as a polygon
             cargo = Polygon([master_corner_1,master_corner_2,slave_corner_2,slave_corner_1])
 
             # Create axis aligned bounding boxes for current cargo
-            bounding_box_cargo = box(cargo.bounds[0],cargo.bounds[1],cargo.bounds[2],cargo.bounds[3])
-
-            # TODO: Get precomputed bounding boxes of static obstacles
-            bb_list = [] # list of shapely.geometry.box objects and its index
+            bounds = cargo.bounds
+            bounding_box_cargo = Box(bounds[0], bounds[1], bounds[2], bounds[3])
 
             # Loop over all static obstacles
-            for bounding_box_obj in bb_list:
+            for obj_list in static_dict.values:
+                bounding_box_obj = obj_list[0]
                 # Simple check for x,y values that bounding boxes overlap
                 obj_xmin = min(bounding_box_obj.exterior.coords.xy[0])
                 obj_xmax = max(bounding_box_obj.exterior.coords.xy[0])
@@ -393,7 +409,7 @@ class MpcModule:
                     # Bounding boxes overlap
                     # Compute collision area with shapely
                     # TODO: get shapely object of static obstacle with its index in bounding box list
-                    obj = obj_list[index]
+                    obj = obj_list[1]
                     area += cargo.intersection(obj).area/min(cargo.area,obj.area)   # intersecting area compared to the size of the cargo or obstacle for good estimation if intrusion is bad or negatable
             crash = cs.fmax(0.0, area)**2.0   # zero if cargo fulfills constraint (CasADi: Maximum function is "differentiable")
                 
@@ -683,6 +699,7 @@ class MpcModule:
         self.enable_distance_constraint = self.parameters[50]
         self.q_formation_ang = self.parameters[51]
         self.q_line_theta = self.parameters[52]
+        # self.q_cargo = self.parameters[53]
 
         # u_ref  
         self.v_ref_master        = self.parameters[self.base_ref_u    : self.base_ref_points : self.solver_param.base.nu]
@@ -763,6 +780,8 @@ class MpcModule:
         # CHANGED LINES
         # cost += self.cost_inside_static_object((all_x_slave[1:]+all_x_master[1:])/2, (all_y_slave[1:]+all_y_master[1:])/2, self.q_obs_c)
         # cost += self.cost_inside_dyn_ellipse2((all_x_slave[1:]+all_x_master[1:])/2, (all_y_slave[1:]+all_y_master[1:])/2, self.q_dyn_obs_c)
+        # TODO: separate weighting
+        cost += self.cost_cargo_inside_static_object(all_x_master[1:], all_y_master[1:], all_x_slave[1:], all_y_slave[1:], self.q_obs_c)
 
         # Cost for outside bounds
         cost += self.cost_outside_bounds(all_x_master[1:], all_y_master[1:], self.q_obs_c)
