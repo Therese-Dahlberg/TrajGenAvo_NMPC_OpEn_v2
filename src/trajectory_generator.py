@@ -331,9 +331,12 @@ class TrajectoryGenerator:
                 self.plot_queues['slave_end'].put_nowait([[goal_positions[1][0]], [goal_positions[1][1]]])
         except Full:
             pass
-
-
-        # Plot planned trajectory 
+        try:
+            self.plot_queues['object'].put_nowait(((past_traj_master[-1][0], past_traj_slave[-1][0]),
+                                                   (past_traj_master[-1][1], past_traj_slave[-1][1])))
+        except:
+            pass
+        # Plot planned trajectory
         traj_master = trajectory[:,0:3]
         if self.solver_param.base.enable_slave and self.plot_config['plot_slave']:
             traj_slave = trajectory[:,3:6]

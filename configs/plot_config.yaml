@@ -132,6 +132,8 @@ planned_trajectory_slave_color: !!python/tuple [99, 49, 2, 155]
 planned_trajectory_master_legend: Leader-line-traj
 planned_trajectory_slave_legend: Follower-line-traj
 
+object_no_collision_color: &object_color g
+object_collision_color: &object_collide_color r
 
 
 

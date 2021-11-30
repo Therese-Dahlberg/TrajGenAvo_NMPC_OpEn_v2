@@ -10,6 +10,7 @@ from shapely.geometry import Point
 from shapely.geometry import Polygon
 import matplotlib.pyplot as plt
 
+
 def init(build=False, self_destruct=False):
 
         # Get path to this file
@@ -27,7 +28,7 @@ def init(build=False, self_destruct=False):
 
         # Given start and goal poses of the robots
         start_master = (4.5, 1, 1.57)
-        start_slave = (4.5,0,1.57)
+        start_slave = (4.5, 0, 1.57)
 
         #ORIGINAL NODES
         master_goal = [(5, 2, 1.57), (5, 9, 1.57), (4, 10, 1.57)] # for different modes
@@ -58,16 +59,16 @@ def collisionDetection(trajList):
     # obstacle_corners could for example be a list containing the coordinates of all PADDED obstacles: [[o1_x,o1_y],...,[oM_x,oM_y]], for M obstacles.
     # TODO: Fix the padded obstacles coordinates!
 
-    padded_obstacle = Polygon([(4.5,3.5),(4.5,5.5),(6.5,5.5),(6.5,3.5)])
+    padded_obstacle = Polygon([(4.5, 3.5), (4.5, 5.5), (6.5, 5.5), (6.5, 3.5)])
     nr_of_points = len(trajList[0])
     master_trajectory = trajList[0]
     slave_trajectory = trajList[1]
     counter = 0
     collided_list = []  # A list to save all trajectory points that collided
-    a = 0.01
+    a = 0.01 # so the object's width is 0.02
     for i in range(nr_of_points):
         # Load defined as a line
-        # load = LineString([master_trajectory[i][:2],slave_trajectory[i][:2]])
+        # load = LineString([master_trajectory[i][:2], slave_trajectory[i][:2]])
 
         master_corner_1 = (master_trajectory[i][0] + a, master_trajectory[i][1])
         master_corner_2 = (master_trajectory[i][0] - a, master_trajectory[i][1])
@@ -75,19 +76,19 @@ def collisionDetection(trajList):
         slave_corner_2 = (slave_trajectory[i][0] - a, slave_trajectory[i][1])
 
         # Load defined as a polygon
-        load = Polygon([master_corner_1,master_corner_2,slave_corner_2,slave_corner_1])
+        load = Polygon([master_corner_1, master_corner_2, slave_corner_2, slave_corner_1])
 
         if load.intersects(padded_obstacle):
             counter = counter + 1
             collision_intersection = load.intersection(padded_obstacle)
 
-            # Plots all senarios of detected collisions.
-            plot_polygons([padded_obstacle,load])
+            # Plots all scenarios of detected collisions.
+            plot_polygons([padded_obstacle, load])
             
             intersection_area = collision_intersection.area
             
             #Contains the coordinates where the trajectory collided
-            collided_list.append([master_trajectory[i][:2],slave_trajectory[i][:2]])
+            collided_list.append([master_trajectory[i][:2], slave_trajectory[i][:2]])
             print("Oh no collision detected!")
 
 
@@ -99,12 +100,12 @@ def collisionDetection(trajList):
 def plot_polygons(polygons):
     # polygons is a list of Polygon objects
     for p in polygons:
-        x,y = p.exterior.xy
-        plt.plot(x,y)
+        x, y = p.exterior.xy
+        plt.plot(x, y)
     plt.show()
 
 
-def main(build=True, destroy_plots=True):
+def main(build=False, destroy_plots=False):
     traj_gen = init(build=build, self_destruct=destroy_plots)
     try:
         traj_gen.run(plot=1)
