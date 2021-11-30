@@ -14,6 +14,11 @@ from utils.config import SolverParams
 from shapely.geometry import Polygon
 from shapely.geometry import box as Box
 
+from collision_cs import Poly
+from collision_cs import Vector
+
+import collision as c
+
 # DEBUG to be deleted
 from main import plot_polygons_w_atr
 
@@ -370,8 +375,9 @@ class MpcModule:
             y_master = y_all_master[t]
             x_slave = x_all_slave[t]
             y_slave = y_all_slave[t]
-            gg = np.array([1,2])
-            plot_polygons_w_atr(gg,x_master,x_master)
+            #gg = np.array([1,2])
+            #plot_polygons_w_atr(gg,x_master,x_master)
+
             # Get shape of cargo
             # TODO: flexible definition of the cargo (orientate it depending on position of ATRs only)
             # Create Polygon for cargo online
@@ -386,8 +392,16 @@ class MpcModule:
             slave_corner_2 =  (x_slave  + a*y_delta/n , y_slave  - a*x_delta/n)
 
             # Cargo defined as a polygon
-            cargo = Polygon([master_corner_1,master_corner_2,slave_corner_2,slave_corner_1])
-
+            ### Cargo defined in shapely ###
+            # cargo = Polygon([master_corner_1,master_corner_2,slave_corner_2,slave_corner_1])
+            ### Cargo defined in collision ###
+            origin = Vector(x_slave, y_slave)   # local coordinate frame (only position) for cargo
+            master1 = Vector(x_master - a*y_delta/n, y_master + a*x_delta/n)
+            master2 = Vector(x_master + a*y_delta/n , y_master - a*x_delta/n)
+            slave1 = Vector(x_slave  - a*y_delta/n , y_slave  + a*x_delta/n)
+            slave2 = Vector(x_slave  + a*y_delta/n , y_slave  - a*x_delta/n)
+            vertices = [master1, master2, slave1, slave2]
+            cargo = Poly(origin, vertices)
             # Create axis aligned bounding boxes for current cargo
             bounds = cargo.bounds
             bounding_box_cargo = Box(bounds[0], bounds[1], bounds[2], bounds[3])
