@@ -5,12 +5,13 @@ from pathlib import Path
 from typing import Counter
 
 import numpy as np
+from trajectory_generator import TrajectoryGenerator
+from path_planner.global_path_planner import GlobalPathPlanner
 
 from shapely.geometry import LineString
 from shapely.geometry import box as Box
 from shapely.geometry import Polygon
 import matplotlib.pyplot as plt
-
 
 def init(build=False, self_destruct=False):
     # Get path to this file
@@ -19,16 +20,16 @@ def init(build=False, self_destruct=False):
     # For simulation. copy obstacles to obstacels_copy since obstacles_copy changEs for the dynamic simulation
     obs_original = os.path.join(str(file_path.parent.parent), 'data', 'obstacles.json')
     obs_copy     = os.path.join(str(file_path.parent.parent), 'data', 'obstacles_copy.json')
-    with open(obs_original) as f: 
+    with open(obs_original) as f:
         obs_json = json.load(f)
-    with open(obs_copy, mode='w') as f: 
+    with open(obs_copy, mode='w') as f:
         json.dump(obs_json,f)
 
     print("test json ", obs_json)
 
     # Given start and goal poses of the robots
     start_master = (4.5, 1, 1.57)
-    start_slave = (4.5,0,1.57)
+    start_slave = (4.5, 0, 1.57)
 
     # ORIGINAL NODES
     master_goal = [(5, 2, 1.57), (5, 9, 1.57), (4, 10, 1.57)] # for different modes
@@ -49,8 +50,8 @@ def init(build=False, self_destruct=False):
 
     # Create the trajectory generator and set global path
     start_pose = [start_master, start_slave]
-    traj_gen = TrajectoryGenerator(start_pose, verbose=True, name="TrajGen", 
-                                    self_destruct=self_destruct, master_goal= master_goal, 
+    traj_gen = TrajectoryGenerator(start_pose, verbose=True, name="TrajGen",
+                                    self_destruct=self_destruct, master_goal= master_goal,
                                     slave_goal=slave_goal, build_solver=build)
     traj_gen.set_global_path(global_path)
     return traj_gen
@@ -60,7 +61,7 @@ def init_obs():
     # Get path to this file and load obstacle definitions
     file_path = Path(__file__)
     obs_original = os.path.join(str(file_path.parent.parent), 'data', 'obstacles.json')
-    with open(obs_original) as f: 
+    with open(obs_original) as f:
         obs_json = json.load(f)
 
     # Construct obstacles as objects in shapely.geometry for collision detection
@@ -84,13 +85,13 @@ def init_obs():
 # Checks if there is a collision with the obstacles (only for static obstacles for now)
 # TODO: Implement a function to check wether or not a trajectory has collided with any obstacle.
 def collisionDetection(trajList):
-    # trajList should be a list of generated trajectores: 
+    # trajList should be a list of generated trajectores:
     # [[(x0_m,y0_m,theta0_m),...,(xN_m,yN_m,thetaN_m)],[(x0_s,y0_s,theta0_s),...,(xN_s,yN_s,thetaN_s)]], for N number of points.
-    # obstacle_corners could for example be a list containing the coordinates of all PADDED obstacles: 
+    # obstacle_corners could for example be a list containing the coordinates of all PADDED obstacles:
     # [[o1_x,o1_y],...,[oM_x,oM_y]], for M obstacles.
     # TODO: Fix the padded obstacles coordinates!
 
-    obstacle = Polygon([(5.0, 4.0),(5.0, 5.0), (6.0, 5.0), (6.0, 4.0)])
+    obstacle = Polygon([(5.0, 4.0), (5.0, 5.0), (6.0, 5.0), (6.0, 4.0)])
     nr_of_points = len(trajList[0])
     master_trajectory = trajList[0]
     slave_trajectory = trajList[1]
@@ -112,7 +113,7 @@ def collisionDetection(trajList):
 
         # Cargo defined as a polygon
         cargo = Polygon([master_corner_1,master_corner_2,slave_corner_2,slave_corner_1])
-        
+
         if cargo.intersects(obstacle):
             counter = counter + 1
             collision_intersection = cargo.intersection(obstacle)

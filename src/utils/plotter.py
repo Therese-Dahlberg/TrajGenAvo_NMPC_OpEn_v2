@@ -6,30 +6,32 @@ from PyQt5 import QtCore, QtWidgets
 import pyqtgraph as pg
 
 def start_plotter(config, plot_config, aut_test_config=None, width=800, height=600):
-    plot_queues_map  = {'master_path':multiprocessing.Queue(maxsize=1), 
-                'master_start':multiprocessing.Queue(maxsize=1), 
-                'master_end':multiprocessing.Queue(maxsize=1), 
-               'slave_path':multiprocessing.Queue(maxsize=1), 
-                'slave_start':multiprocessing.Queue(maxsize=1), 
-                'slave_end':multiprocessing.Queue(maxsize=1), 
-               'obstacles_original':multiprocessing.Queue(maxsize=1), 
-               'obstacles_padded':multiprocessing.Queue(maxsize=1), 
-               'closest_obstacles':multiprocessing.Queue(maxsize=1), 
-               'traversed_path':multiprocessing.Queue(maxsize=1), 
-               'planned_path':multiprocessing.Queue(maxsize=1), 
-               'planned_trajectory_master':multiprocessing.Queue(maxsize=1), 
-               'planned_trajectory_slave':multiprocessing.Queue(maxsize=1), 
-               'nodes':multiprocessing.Queue(maxsize=1), 
-               'boundry':multiprocessing.Queue(maxsize=1), 
-            #    'look_ahead':multiprocessing.Queue(maxsize=1), 
-               'trajectory_master':multiprocessing.Queue(maxsize=1), 
-               'trajectory_slave':multiprocessing.Queue(maxsize=1), 
-               'line_vertices_master':multiprocessing.Queue(maxsize=1), 
-               'line_vertices_slave':multiprocessing.Queue(maxsize=1), 
-               'ref_point_master':multiprocessing.Queue(maxsize=1), 
-               'ref_point_slave':multiprocessing.Queue(maxsize=1), 
-               'search_sector':multiprocessing.Queue(maxsize=1), 
-            } 
+    plot_queues_map  = {'master_path':multiprocessing.Queue(maxsize=1),
+                        'master_start':multiprocessing.Queue(maxsize=1),
+                        'master_end':multiprocessing.Queue(maxsize=1),
+                        'slave_path':multiprocessing.Queue(maxsize=1),
+                        'slave_start':multiprocessing.Queue(maxsize=1),
+                        'slave_end':multiprocessing.Queue(maxsize=1),
+                        'obstacles_original':multiprocessing.Queue(maxsize=1),
+                        'obstacles_padded':multiprocessing.Queue(maxsize=1),
+                        'closest_obstacles':multiprocessing.Queue(maxsize=1),
+                        'traversed_path':multiprocessing.Queue(maxsize=1),
+                        'planned_path':multiprocessing.Queue(maxsize=1),
+                        'planned_trajectory_master':multiprocessing.Queue(maxsize=1),
+                        'planned_trajectory_slave':multiprocessing.Queue(maxsize=1),
+                        'nodes':multiprocessing.Queue(maxsize=1),
+                        'boundry':multiprocessing.Queue(maxsize=1),
+                        #    'look_ahead':multiprocessing.Queue(maxsize=1),
+                        'trajectory_master':multiprocessing.Queue(maxsize=1),
+                        'trajectory_slave':multiprocessing.Queue(maxsize=1),
+                        'line_vertices_master':multiprocessing.Queue(maxsize=1),
+                        'line_vertices_slave':multiprocessing.Queue(maxsize=1),
+                        'ref_point_master':multiprocessing.Queue(maxsize=1),
+                        'ref_point_slave':multiprocessing.Queue(maxsize=1),
+                        'search_sector':multiprocessing.Queue(maxsize=1),
+
+                        'object': multiprocessing.Queue(maxsize=1),   # the carried object which needs to be plotted later on
+                        }
     
     plot_queues_data  = {'master_lin_vel':multiprocessing.Queue(maxsize=1), 
                'master_lin_acc':multiprocessing.Queue(maxsize=1), 
@@ -180,13 +182,19 @@ class PlotterMap():
         
         if self.plot_config['plot_slave']:
             self.map_plots['slave_path'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['slave_path_color'][:3], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['slave_path_color'][:3], name=plot_config['slave_label']+'-path')
+
+            # self.map_plots['object'] = self.map_plot.plot([], symbolBrush=plot_config['object_no_collision_color'][:3], symbolSize=17, symbol='--', symbolPen=plot_config['object_no_collision_color'][:3], name='Carried_object')
             self.map_plots['slave_start'] = self.map_plot.plot([], symbolBrush=plot_config['slave_path_color'][:3], symbolSize=17, symbol='star', symbolPen=plot_config['slave_path_color'][:3], name=plot_config['slave_label']+'-start')
             self.map_plots['slave_end'] = self.map_plot.plot([], symbolBrush=plot_config['slave_path_color'][:3], symbolSize=17, symbol='+', symbolPen=plot_config['slave_path_color'][:3], name=plot_config['slave_label']+'-goal')
             self.map_plots['planned_trajectory_slave'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['planned_trajectory_slave_color']), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['planned_trajectory_slave_color'], name=plot_config['planned_trajectory_slave_legend'])
             # self.map_plots['trajectory_slave'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['look_ahead_color']), symbolBrush=(255, 255, 255), symbolSize=3, symbolPen=plot_config['look_ahead_color'], name=plot_config['look_ahead_legend']+"-slave")
             self.map_plots['line_vertices_slave'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['lines_slave_color'], width=3), symbolBrush=(255, 255, 255), symbolSize=10, symbolPen=plot_config['lines_slave_color'], name=plot_config['lines_legend_slave'])
             self.map_plots['ref_point_slave'] = self.map_plot.plot([], pen=None, symbolBrush=plot_config['slave_ref_point_color'], symbolSize=10, symbolPen=plot_config['slave_ref_point_color'], name=plot_config['slave_ref_point_legend'])
-                          
+
+        self.map_plots['object'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3], name='object')
+
+        # self.map_plots['object'] = self.map_plot.plot([], pen=pg.mkPen('r', width=5), symbolBrush=(255, 255, 255),
+        #                                               symbolSize=7, symbolPen='r', name='object')
 
         # Set up data plots
         self.canvas_lin_vel = self.win_data.addPlot(title="Lin-Vel", row=0, col=0)

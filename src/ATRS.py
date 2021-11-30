@@ -192,6 +192,9 @@ class ATRS(MpcModule):
             self.plot_queues['master_end'].put_nowait([[goal_positions[0][0]], [goal_positions[0][1]]])
             if self.plot_config['plot_slave']:
                 self.plot_queues['slave_path'].put_nowait([x_slave, y_slave])
+
+                # self.plot_queues['object'].put_nowait([x_slave, x_master], [y_slave, y_master]) ########################################################
+
                 self.plot_queues['slave_start'].put_nowait([[x_slave[0]], [y_slave[0]]])
                 self.plot_queues['slave_end'].put_nowait([[goal_positions[1][0]], [goal_positions[1][1]]])
 
