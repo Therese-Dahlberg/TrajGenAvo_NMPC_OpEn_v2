@@ -5,8 +5,6 @@ from pathlib import Path
 from typing import Counter
 
 import numpy as np
-from trajectory_generator import TrajectoryGenerator
-from path_planner.global_path_planner import GlobalPathPlanner
 
 from shapely.geometry import LineString
 from shapely.geometry import box as Box
