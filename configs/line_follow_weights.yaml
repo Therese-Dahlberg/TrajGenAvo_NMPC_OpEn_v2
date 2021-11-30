@@ -16,7 +16,7 @@ q_theta_slave: 0              # Cost for each heading relative to the final refe
 q_distance: 0     # Cost for deviating from d
 q_theta_diff: 0   # Cost for angular difference between robots
 q_distance_c: 0   # Cost for deviating from d + tolerance, soft constraint
-q_obs_c: 500      # Cost for being inside an object, soft constraint
+q_obs_c: 5000      # Cost for being inside an object, soft constraint
 q_dyn_obs_c: 200  # Cost for being inside an dynamic object, soft constraint
 q_future_dyn_obs: 0 #20 # Cost for being inside a future dyn obs
 enable_distance_constraint: 0 #
@@ -28,6 +28,7 @@ q_acc_c: 0      # (delete) Cost for acceleration, soft constraint
 q_lin_jerk: 0.0 # (delete) Cost for linear jerk
 q_ang_jerk: 0.0 # (delete) Cost for angular jerk
 q_reverse: 0    # (delete) Cost for reverse
+# q_cargo: 1000    # Collision of cargo
 
 
 
