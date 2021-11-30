@@ -82,7 +82,7 @@ def collisionDetection(trajList):
             collision_intersection = load.intersection(padded_obstacle)
 
             # Plots all senarios of detected collisions.
-            plot_polygons([padded_obstacle,load])
+            # plot_polygons([padded_obstacle,load])
             
             intersection_area = collision_intersection.area
             
@@ -103,8 +103,60 @@ def plot_polygons(polygons):
         plt.plot(x,y)
     plt.show()
 
+# # Cargo and obstacle are modelled only as circles
+#     import casadi.casadi as cs
+#     import math
+    
+#     def cost_cargo_inside_static_circle(self, x_all_master, y_all_master, x_all_slave, y_all_slave, q, individual_costs=False):
+#         # If cost is just computed or also logged 
+#         if not individual_costs:    
+#             crash_in_trajectory = 0 
+#         else:
+#             crash_in_trajectory = [] 
+        
+#         # TODO: calculate the origin of the obstacle cirlce
+#         x_origin_obs = 5.5
+#         y_origin_obs = 4.5
 
-def main(build=False, destroy_plots=True):
+#         # TODO: calculate the radius of the obstacle circle
+#         r_obs = 1.5
+        
+#         # Loop over time steps along horizon, still useful
+#         for t in range(0, self.solver_param.base.n_hor):
+#             # Reset/init for each time step
+#             area = 0
+#             x_master = x_all_master[t]
+#             y_master = y_all_master[t]
+#             x_slave = x_all_slave[t]
+#             y_slave = y_all_slave[t]
+
+#             # TODO: create the origin of the cargo circle!
+#             x_origin_cargo = (x_master+x_slave)/2
+#             y_origin_cargo = (y_master + x_slave)/2
+
+#             # TODO: calculate the radius of the cargo circle
+#             r_cargo = math.sqrt((x_origin_cargo-x_master)**2 + (y_origin_cargo-y_master)**2)
+
+#             # TODO: define the distance between the two origins
+#             d_origins = math.sqrt((x_origin_cargo-x_origin_obs)**2 + (y_origin_cargo-y_origin_obs)**2)
+
+#             # TODO: define cargo and obstacle in casadi friendly syntax?
+
+#             # TODO: Loop over all static obstacles (Save for later so that we can model obstacles as more than one cirlce)
+           
+#             crash = cs.fmax(0.0, r_cargo+r_obs-d_origins)**2.0   # zero if cargo fulfills constraint, change area to the cirlce condition
+#             if crash !=0.0:
+#                 print("collision")
+            
+#             # Update cost with number of collisions for all obstacles for current time step
+#             if not individual_costs:
+#                 crash_in_trajectory += crash*q
+#             else:
+#                 crash_in_trajectory.append(crash*q)
+
+#         return crash_in_trajectory
+
+def main(build=True, destroy_plots=True):
     traj_gen = init(build=build, self_destruct=destroy_plots)
     try:
         traj_gen.run(plot=1)
