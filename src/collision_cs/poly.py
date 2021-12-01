@@ -4,7 +4,7 @@ from .util import Vector
 from . import tripy
 
 # Convert all if statements to casadi.fmax functions with equivalent logic to make the collision library casadi conform
-import casadi as cs
+import casadi.casadi as cs
 
 POLY_RECALC_ATTRS = ["angle"]
 
@@ -28,19 +28,19 @@ class Poly:
             self._recalc()
 
     def set_points(self, points):
-        if tripy.is_clockwise(points):      # either 0(s<=0) or 1(s>0)
-            points = points[::-1]
+        # if tripy.is_clockwise(points):      # either 0(s<=0) or 1(s>0)
+        #     points = points[::-1]
 
-        length_changed = len(self.base_points) != len(points) if hasattr(self, "base_points") else True
-        if length_changed:
-            self.rel_points = []
-            self.edges = []
-            self.normals = []
+        # length_changed = len(self.base_points) != len(points) if hasattr(self, "base_points") else True
+        # if length_changed:
+        self.rel_points = []
+        self.edges = []
+        self.normals = []
 
-            for i in range(len(points)):
-                self.rel_points.append(Vector(0, 0))
-                self.edges.append(Vector(0, 0))
-                self.normals.append(Vector(0, 0))
+        for i in range(len(points)):
+            self.rel_points.append(Vector(0, 0))
+            self.edges.append(Vector(0, 0))
+            self.normals.append(Vector(0, 0))
 
         self.base_points = points
         self._recalc()

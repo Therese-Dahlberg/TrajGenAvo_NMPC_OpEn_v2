@@ -1,6 +1,9 @@
 import math
 from numbers import Real
 from typing import Any, Union
+import casadi.casadi as cs
+
+from cs_tools import cs2bool
 
 
 LEFT_VORONOI_REGION = -1
@@ -144,10 +147,9 @@ def flatten_points_on(points, normal, result):
 
     for i in range(len(points)):
         dot = points[i].dot(normal)
-        if dot < minpoint:
-            minpoint = dot
-        if dot > maxpoint:
-            maxpoint = dot
+        # Changed for cs
+        minpoint = cs.fmin(minpoint, dot)
+        maxpoint = cs.fmax(maxpoint, dot)
 
     result[0] = minpoint
     result[1] = maxpoint
@@ -167,46 +169,69 @@ def is_separating_axis(a_pos, b_pos, a_points, b_points, axis, response=None):
     range_b[0] += projected_offset
     range_b[1] += projected_offset
 
-    if range_a[0] > range_b[1] or range_b[0] > range_a[1]:
-        return True
+    #### Changed for cs ####
+    # FOR READABILITY CHECK ORIGINAL util.py in collision library (https://github.com/qwertyquerty/collision/blob/master/collision/util.py)
+    # if range_a[0] > range_b[1] or range_b[0] > range_a[1]:
+    #     return True     # no collision
+    # collision: Boolean Flag with 1: no collision -> output is surpressed to 0 / 0: collision not excluded -> computations below will not be changed  
+    # Firstly, for first boolean (range_a[0] > range_b[1])
+    no_collision1 = cs2bool(range_a[0] - range_b[1])    # here -residual because we want 0 when True
+    # Then, for the second boolean (range_b[0] > range_a[1])
+    no_collision2 = cs2bool(range_b[0] - range_a[1])
+    # Combine in "or"
+    no_collision = cs.fmin(1.0,no_collision1+no_collision2)  # only 1 if at least one is 1
+    # flag to surpress output if no collision 
+    flag = (no_collision - 1)**no_collision  # map 1 to 0 and vice versa
 
-    if response:
+    # Measure overlap
+    overlap = 0
 
-        overlap = 0
+    # if range_a[0] < range_b[0]:
+    (b1,nb1) = cs2bool(range_b[0] - range_a[0], with_else=True)
+    # if range_a[1] < range_b[1]:
+    (b2,nb2) = cs2bool(range_b[1] - range_a[1], with_else=True)
+    # Add overlap (just one term remains without being canceled out)
+    overlap += b1*b2*(range_a[1] - range_b[0])
 
-        if range_a[0] < range_b[0]:
-            response.a_in_b = False
+    option_11 = range_a[1] - range_b[0]
+    option_12 = range_b[1] - range_a[0]
+    # overlap = option_1 if option_1 < option_2 else -option_2
+    (b3,nb3) = cs2bool(option_12 - option_11, with_else=True)
+    # Add overlap (just one term remains without being canceled out)
+    overlap += b1*nb2*b3*option_11
+    overlap += b1*nb2*nb3*(-option_12)
 
-            if range_a[1] < range_b[1]:
-                overlap = range_a[1] - range_b[0]
-                response.b_in_a = False
+    # if range_a[1] > range_b[1]:
+    (b4,nb4) = cs2bool(range_a[1] - range_b[1], with_else=True)
+    overlap += nb1*b4*range_a[0] - range_b[1]
 
-            else:
-                option_1 = range_a[1] - range_b[0]
-                option_2 = range_b[1] - range_a[0]
-                overlap = option_1 if option_1 < option_2 else -option_2
+    option_21 = range_a[1] - range_b[0]
+    option_22 = range_b[1] - range_a[0]
+    # overlap = option_1 if option_1 < option_2 else -option_2
+    (b5,nb5) = cs2bool(option_22 - option_21, with_else=True)
+    overlap += nb1*nb4*b5*option_21
+    overlap += nb1*nb4*nb5*(-option_22)
 
-        else:
-            response.b_in_a = False
+    # If no collision set overlap to 0, else don't change
+    overlap *= flag
 
-            if range_a[1] > range_b[1]:
-                overlap = range_a[0] - range_b[1]
-                response.a_in_b = False
+    # Take absolut value
+    abs_overlap = cs.sqrt(overlap**2)
+    # if abs_overlap < response.overlap:
+    # TODO: why no checking in the other direction???
+    b_abs = cs2bool(response.overlap - abs_overlap)
 
-            else:
-                option_1 = range_a[1] - range_b[0]
-                option_2 = range_b[1] - range_a[0]
+    # Update overlap
+    response.overlap += b_abs*(abs_overlap-response.overlap)  # increase if necessary
 
-                overlap = option_1 if option_1 < option_2 else -option_2
+    # DONT NEED NORMAL VECTOR
+    # response.overlap_n.set(axis)
+    # if overlap < 0:
+    #     response.overlap_n = response.overlap_n.reverse()
 
-        abs_overlap = abs(overlap)
-        if abs_overlap < response.overlap:
-            response.overlap = abs_overlap
-            response.overlap_n.set(axis)
-            if overlap < 0:
-                response.overlap_n = response.overlap_n.reverse()
-
-    return False
+    # DONT NEED RETURN
+    # return no_collision    # 1 if no collision, 0 if collision possible (no seperating axis found)
+    ####
 
 
 def voronoi_region(line, point):
