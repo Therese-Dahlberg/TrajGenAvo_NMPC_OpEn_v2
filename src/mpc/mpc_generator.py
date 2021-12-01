@@ -393,15 +393,18 @@ class MpcModule:
 
             # Cargo defined as a polygon
             ### Cargo defined in shapely ###
-            # cargo = Polygon([master_corner_1,master_corner_2,slave_corner_2,slave_corner_1])
+            cargo = Polygon([master_corner_1,master_corner_2,slave_corner_2,slave_corner_1])
             ### Cargo defined in collision ###
-            origin = Vector(x_slave, y_slave)   # local coordinate frame (only position) for cargo
-            master1 = Vector(x_master - a*y_delta/n, y_master + a*x_delta/n)
-            master2 = Vector(x_master + a*y_delta/n , y_master - a*x_delta/n)
-            slave1 = Vector(x_slave  - a*y_delta/n , y_slave  + a*x_delta/n)
-            slave2 = Vector(x_slave  + a*y_delta/n , y_slave  - a*x_delta/n)
-            vertices = [master1, master2, slave1, slave2]
-            cargo = Poly(origin, vertices)
+            # origin = Vector(x_slave, y_slave)   # local coordinate frame (only position) for cargo
+            # master1 = Vector(x_master - a*y_delta/n, y_master + a*x_delta/n)
+            # master2 = Vector(x_master + a*y_delta/n , y_master - a*x_delta/n)
+            # slave1 = Vector(x_slave  - a*y_delta/n , y_slave  + a*x_delta/n)
+            # slave2 = Vector(x_slave  + a*y_delta/n , y_slave  - a*x_delta/n)
+            # vertices = [master1, master2, slave1, slave2]
+            # maxxx = cs.fmax(0.0, x_slave)**2
+            # print(maxxx)
+            # print("type: ", type(maxxx))
+            # cargo = Poly(origin, vertices)
             # Create axis aligned bounding boxes for current cargo
             bounds = cargo.bounds
             bounding_box_cargo = Box(bounds[0], bounds[1], bounds[2], bounds[3])
@@ -795,7 +798,7 @@ class MpcModule:
         # cost += self.cost_inside_static_object((all_x_slave[1:]+all_x_master[1:])/2, (all_y_slave[1:]+all_y_master[1:])/2, self.q_obs_c)
         # cost += self.cost_inside_dyn_ellipse2((all_x_slave[1:]+all_x_master[1:])/2, (all_y_slave[1:]+all_y_master[1:])/2, self.q_dyn_obs_c)
         # TODO: separate weighting
-        # cost += self.cost_cargo_inside_static_object(all_x_master[1:], all_y_master[1:], all_x_slave[1:], all_y_slave[1:], self.q_obs_c)
+        cost += self.cost_cargo_inside_static_object(all_x_master[1:], all_y_master[1:], all_x_slave[1:], all_y_slave[1:], self.q_obs_c)
 
         # Cost for outside bounds
         cost += self.cost_outside_bounds(all_x_master[1:], all_y_master[1:], self.q_obs_c)
