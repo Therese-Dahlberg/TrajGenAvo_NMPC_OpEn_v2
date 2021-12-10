@@ -4,11 +4,12 @@ import os, sys
 
 import traceback
 import numpy as np
+import math
 
 import opengen as og
 import casadi.casadi as cs
+# TODO: why casadi.casadi?
 from collections import Iterable
-
 from utils.config import SolverParams
 
 from shapely.geometry import Polygon
@@ -16,6 +17,8 @@ from shapely.geometry import box as Box
 
 from collision_cs import Poly
 from collision_cs import Vector
+from collision_cs import collide
+from collision_cs import Response
 
 import collision as c
 
@@ -360,23 +363,26 @@ class MpcModule:
 
     # Cost for collision of cargo with obstacles
     @cost_positive
-    def cost_cargo_inside_static_object(self, x_all_master, y_all_master, x_all_slave, y_all_slave, q, individual_costs=False):
+    def cost_cargo_inside_static_object(self, x_all_master, y_all_master, x_all_slave, y_all_slave, q, individual_costs=False, vert_method=False, lib_method=False):
+        '''
+        Specify which method is used.
+        Options: vert_method=True OR lib_method=True
+        '''
         # If cost is just computed or also logged 
         if not individual_costs:    
-            crash_in_trajectory = 0 
+            crash_in_trajectory = 0
         else:
             crash_in_trajectory = []
         
         # Loop over time steps along horizon
         for t in range(0, self.solver_param.base.n_hor):
             # Reset/init for each time step
-            area = 0
+            crash = 0
+            base_vert_obs = 0
             x_master = x_all_master[t]
             y_master = y_all_master[t]
             x_slave = x_all_slave[t]
             y_slave = y_all_slave[t]
-            #gg = np.array([1,2])
-            #plot_polygons_w_atr(gg,x_master,x_master)
 
             # Get shape of cargo
             # TODO: flexible definition of the cargo (orientate it depending on position of ATRs only)
@@ -386,47 +392,104 @@ class MpcModule:
             y_delta = y_master-y_slave
             x_delta = x_master-x_slave
             n = cs.sqrt(y_delta*y_delta + x_delta*x_delta)
-            master_corner_1 = (x_master - a*y_delta/n , y_master + a*x_delta/n)
-            master_corner_2 = (x_master + a*y_delta/n , y_master - a*x_delta/n)
-            slave_corner_1 =  (x_slave  - a*y_delta/n , y_slave  + a*x_delta/n)
-            slave_corner_2 =  (x_slave  + a*y_delta/n , y_slave  - a*x_delta/n)
+            if vert_method:
+                master_corner_1 = (x_master - a*y_delta/n , y_master + a*x_delta/n)
+                master_corner_2 = (x_master + a*y_delta/n , y_master - a*x_delta/n)
+                slave_corner_1 =  (x_slave  - a*y_delta/n , y_slave  + a*x_delta/n)
+                slave_corner_2 =  (x_slave  + a*y_delta/n , y_slave  - a*x_delta/n)
+                vertices_cargo = [master_corner_1, master_corner_2, slave_corner_1, slave_corner_2]
+                # Loop over polygon types (triangles, rectangles, etc.) -> ellipses not handled 
+                for vert_obs in range(self.solver_param.base.min_vertices, self.solver_param.base.max_vertices + 1):
+                    # Loop over object index in polygon group        
+                    for obs in range(0, self.solver_param.base.n_obs_of_each_vertices):
+                        # init for each object
+                        inside = 1
+                        # Loop over lines in specified object (has "vert" nr of lines)
+                        for line in range(vert_obs):
+                            # Check if all vertices of the cargo are inside each obstacle
+                            for vert_cargo in vertices_cargo:
+                                # TODO: Create equations for obstacle and not padded obstacle in init
+                                # TODO: Use the real obstacles and not padded obstacles here! 
+                                x_vert_cargo = vert_cargo[0]
+                                y_vert_cargo = vert_cargo[1]
+                                # access in reference to base vertice index of current shape (all vertices of all objects of this shape is accessable here)
+                                # access then in reference to object index and number of vertices of its shape (all vertices of this object is accessable here)
+                                # access then in reference to lines of shape (this vertice is accessable here)
+                                b  = self.bs_static[base_vert_obs + obs * vert_obs + line]  # All base vertices stored
+                                a0 = self.a0s_static[base_vert_obs + obs * vert_obs + line] # All ??? stored
+                                a1 = self.a1s_static[base_vert_obs + obs * vert_obs + line] # All ??? stored
+                                obs_eq = b - a0*x_vert_cargo - a1*y_vert_cargo
+                                #h = (cs.fmax(0.0, obs_eq )/obs_eq)**2.0
+                                h = cs.fmax(0.0, obs_eq)**2.0   # zero if obs_eq is smaller than zero, i.e. if ATR position fulfills constraint (CasADi: Maximum function is "differentiable")
+                                inside *= h  # If all inequalities for current object is > 0, then inside is > 0, i.e. ATR is inside object
+                        crash += inside      # h also represents how much the constraint is violated
+                    # Set new index of base vertice for next object shape (every vertice has an index and the base vertice is the reference for every object)
+                    base_vert_obs += vert_obs * self.solver_param.base.n_obs_of_each_vertices
 
-            # Cargo defined as a polygon
-            ### Cargo defined in shapely ###
-            # cargo = Polygon([master_corner_1,master_corner_2,slave_corner_2,slave_corner_1])
-            ### Cargo defined in collision ###
-            origin = Vector(x_slave, y_slave)   # local coordinate frame (only position) for cargo
-            master1 = Vector(x_master - a*y_delta/n, y_master + a*x_delta/n)
-            master2 = Vector(x_master + a*y_delta/n , y_master - a*x_delta/n)
-            slave1 = Vector(x_slave  - a*y_delta/n , y_slave  + a*x_delta/n)
-            slave2 = Vector(x_slave  + a*y_delta/n , y_slave  - a*x_delta/n)
-            vertices = [master1, master2, slave1, slave2]
-            cargo = Poly(origin, vertices)
-            # Create axis aligned bounding boxes for current cargo
-            bounds = cargo.bounds
-            bounding_box_cargo = Box(bounds[0], bounds[1], bounds[2], bounds[3])
-
-            # Loop over all static obstacles
-            for obj_list in static_dict.values:
-                bounding_box_obj = obj_list[0]
-                # Simple check for x,y values that bounding boxes overlap
-                obj_xmin = min(bounding_box_obj.exterior.coords.xy[0])
-                obj_xmax = max(bounding_box_obj.exterior.coords.xy[0])
-                obj_ymin = min(bounding_box_obj.exterior.coords.xy[1])
-                obj_ymax = max(bounding_box_obj.exterior.coords.xy[1])
-                cargo_xmin = min(bounding_box_cargo.exterior.coords.xy[0])
-                cargo_xmax = max(bounding_box_cargo.exterior.coords.xy[0])
-                cargo_ymin = min(bounding_box_cargo.exterior.coords.xy[1])
-                cargo_ymax = max(bounding_box_cargo.exterior.coords.xy[1])
-                if (obj_xmin < cargo_xmax and obj_xmax > cargo_xmin and
-                    obj_ymin < cargo_ymax and obj_ymax > cargo_ymin):
-                    # Bounding boxes overlap
-                    # Compute collision area with shapely
-                    # TODO: get shapely object of static obstacle with its index in bounding box list
-                    obj = obj_list[1]
-                    area += cargo.intersection(obj).area/min(cargo.area,obj.area)   # intersecting area compared to the size of the cargo or obstacle for good estimation if intrusion is bad or negatable
-            crash = cs.fmax(0.0, area)**2.0   # zero if cargo fulfills constraint (CasADi: Maximum function is "differentiable")
+            if lib_method:
+                # Cargo defined as a polygon
+                ### Cargo defined in shapely ###
+                # cargo = Polygon([master_corner_1,master_corner_2,slave_corner_2,slave_corner_1])
+                ### Cargo defined in collision ###
+                origin = Vector(x_slave, y_slave)   # local coordinate frame (only position) for cargo
+                master1 = Vector(x_master - a*y_delta/n, y_master + a*x_delta/n)
+                master2 = Vector(x_master + a*y_delta/n , y_master - a*x_delta/n)
+                slave1 = Vector(x_slave  - a*y_delta/n , y_slave  + a*x_delta/n)
+                slave2 = Vector(x_slave  + a*y_delta/n , y_slave  - a*x_delta/n)
+                vertices = [master1, master2, slave1, slave2]
+                # maxxx = cs.fmax(0.0, x_slave)**2
+                # print(maxxx)
+                # print("type: ", type(maxxx))
+                cargo = Poly(origin, vertices)
                 
+                # TODO: all polygons have to be defined counter clockwise -> check outside of MPC
+                # TODO: include other shapes (concave, circles) aswell?
+                # TODO: in init and conversion between global def and local def
+                origin = Vector(5.0, 4.0)   # local coordinate frame (only position) for cargo
+                corner1 = Vector(5.0, 5.0) - origin
+                corner2 = Vector(6.0, 5.0) - origin
+                corner3 = Vector(6.0, 4.0) - origin
+                corner4 = Vector(5.0, 4.0) - origin
+                obstacle = Poly(origin, [corner1, corner2, corner3, corner4])
+
+                response = Response()
+                collide(cargo, obstacle, response=response)
+                # print(response.overlap)
+
+
+                # Create axis aligned bounding boxes for current cargo
+                # bounds = cargo.bounds
+                # bounding_box_cargo = Box(bounds[0], bounds[1], bounds[2], bounds[3])
+                
+                # Loop over all static obstacles
+                # for obj_list in static_dict.values:
+                #     bounding_box_obj = obj_list[0]
+                #     # Simple check for x,y values that bounding boxes overlap
+                #     obj_xmin = min(bounding_box_obj.exterior.coords.xy[0])
+                #     obj_xmax = max(bounding_box_obj.exterior.coords.xy[0])
+                #     obj_ymin = min(bounding_box_obj.exterior.coords.xy[1])
+                #     obj_ymax = max(bounding_box_obj.exterior.coords.xy[1])
+                #     cargo_xmin = min(bounding_box_cargo.exterior.coords.xy[0])
+                #     cargo_xmax = max(bounding_box_cargo.exterior.coords.xy[0])
+                #     cargo_ymin = min(bounding_box_cargo.exterior.coords.xy[1])
+                #     cargo_ymax = max(bounding_box_cargo.exterior.coords.xy[1])
+                #     if (obj_xmin < cargo_xmax and obj_xmax > cargo_xmin and
+                #         obj_ymin < cargo_ymax and obj_ymax > cargo_ymin):
+                #         # Bounding boxes overlap
+                #         # Compute collision area with shapely
+                #         # TODO: get shapely object of static obstacle with its index in bounding box list
+                #         obj = obj_list[1]
+                #         area += cargo.intersection(obj).area/min(cargo.area,obj.area)   # intersecting area compared to the size of the cargo or obstacle for good estimation if intrusion is bad or negatable
+                crash = cs.fmax(0.0, response.overlap)**2.0   # zero if cargo fulfills constraint (CasADi: Maximum function is "differentiable")
+                # print(crash)
+            
+            # Error handling due to wrong function call
+            if not vert_method and not lib_method:
+                # neither method chosen
+                raise NotImplementedError
+            if vert_method and lib_method:
+                # both methods chosen
+                raise ValueError
             # Update cost with number of collisions for all obstacles for current time step
             if not individual_costs:
                 crash_in_trajectory += crash*q
@@ -589,6 +652,10 @@ class MpcModule:
         
         return outside
 
+    def cargo_outside_bounds(self, x_master, y_master, x_slave, y_slave, bounds):
+        raise NotImplementedError
+        return _
+
     @cost_positive
     def cost_outside_bounds(self, x_all, y_all, q, individual_costs=False):
         if not individual_costs:
@@ -602,7 +669,23 @@ class MpcModule:
             else:
                 cost.append(self.outside_bounds(x_all[t], y_all[t], self.a0_bounds, self.a1_bounds, self.b0_bounds)* q)
             
-        return cost 
+        return cost
+
+    @cost_positive
+    def cost_cargo_outside_bounds(self, x_all_master, y_all_master, x_all_slave, y_all_slave, q, individual_costs=True):
+        if not individual_costs:
+            cost = 0
+        else:
+            cost = []
+
+        for t in range(self.solver_param.base.n_hor):
+            if not individual_costs:
+                # TODO: create bounds in init as Poly object
+                cost += self.cargo_outside_bounds(x_all[t], y_all[t], self.bounds)* q
+            else:
+                cost.append(self.cargo_outside_bounds(x_all[t], y_all[t], self.bounds)* q)
+            
+        return cost
 
     def calc_formation_angle_ref(self, x, vertix0, vertix1, vertix2):
         cur_line_ang = cs.arctan2(vertix1[1]-vertix0[1], vertix1[0]-vertix0[0])
@@ -794,12 +877,14 @@ class MpcModule:
         # CHANGED LINES
         # cost += self.cost_inside_static_object((all_x_slave[1:]+all_x_master[1:])/2, (all_y_slave[1:]+all_y_master[1:])/2, self.q_obs_c)
         # cost += self.cost_inside_dyn_ellipse2((all_x_slave[1:]+all_x_master[1:])/2, (all_y_slave[1:]+all_y_master[1:])/2, self.q_dyn_obs_c)
-        # TODO: separate weighting
-        # cost += self.cost_cargo_inside_static_object(all_x_master[1:], all_y_master[1:], all_x_slave[1:], all_y_slave[1:], self.q_obs_c)
+        # TODO: separate weighting -> create own weight
+        cost += self.cost_cargo_inside_static_object(all_x_master[1:], all_y_master[1:], all_x_slave[1:], all_y_slave[1:], self.q_obs_c, vert_method=True)
 
         # Cost for outside bounds
         cost += self.cost_outside_bounds(all_x_master[1:], all_y_master[1:], self.q_obs_c)
         cost += self.cost_outside_bounds(all_x_slave[1:], all_y_slave[1:], self.q_obs_c)
+        # TODO: implement
+        # cost += self.cost_cargo_outside_bounds(all_x_master[1:], all_y_master[1:], all_x_slave[1:], all_y_slave[1:], self.q_obs_c)
         # Cost for ideal states
         cost += self.cost_dist2ref_points(all_x_master[1:], all_y_master[1:], all_th_master[1:],  self.ref_points_master_x, self.ref_points_master_y, self.ref_points_master_th, self.q_pos_master, self.q_theta_master)
         cost += self.cost_dist2ref_points(all_x_slave[1:] , all_y_slave[1:] , all_th_slave[1:] ,  self.ref_points_slave_x , self.ref_points_slave_y , self.ref_points_slave_th , self.q_pos_slave , self.q_theta_slave)

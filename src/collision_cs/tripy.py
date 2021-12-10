@@ -1,6 +1,7 @@
 import imp
+
+from cs_tools import cs2bool
 from .util import Vector
-from casadi import fmax
 
 # This is my edit of the tripy lib. Changed to support my vectors, and some other additions. - qwerty
 
@@ -63,10 +64,7 @@ def is_clockwise(polygon):
         point2 = polygon[(i + 1) % polygon_count]
         s += (point2.x - point.x) * (point2.y + point.y)
     # return if s > 0 -> 1 and if s <= 0 -> 0
-    max = fmax(0.0,s)
-    # if max is zero -> is smaller equal to 1 -> get 0
-    # if max is nonzero -> max = s -> (max + s)*max = 2*s**2 -> 2*s**2/s**2=2 -> -1>-2 -> get 1
-    boolean = fmax(-1.0,-(max+s)*max/(s**2+1e-7))*-1      # divided by s**2 since we want to get 1 if max is non zero. For the case of s = 0 we add a constant for numerical stability 
+    boolean = cs2bool(s)
     return boolean
 
 

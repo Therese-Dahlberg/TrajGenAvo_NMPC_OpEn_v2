@@ -139,3 +139,4 @@ log/
 # General
 .idea
 src/test.py
+src/collision_bkup/
