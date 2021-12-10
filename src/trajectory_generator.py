@@ -18,6 +18,8 @@ from panoc_nmpc_trajectory_problem import PanocNMPCTrajectoryProblem
 
 from utils.plotter import start_plotter
 from utils.config import Configurator, SolverParams, Weights
+from shapely.geometry import box as Box
+from shapely.geometry import Polygon
 
 
 class TrajectoryGenerator:
@@ -288,8 +290,36 @@ class TrajectoryGenerator:
     # Returns the generated trajectory for the master and slave
     def getGeneratedTrajectory(self):
         return self.gen_traj
-        
-    
+
+    def onlineCllisionDetection(self, current_list):
+        # currentList should be a list of the current position of the cargo
+        # [[(x0_m,y0_m,theta0_m),...,(xN_m,yN_m,thetaN_m)],[(x0_s,y0_s,theta0_s),...,(xN_s,yN_s,thetaN_s)]], for N number of points.
+        # obstacle_corners could for example be a list containing the coordinates of all PADDED obstacles:
+        # [[o1_x,o1_y],...,[oM_x,oM_y]], for M obstacles.
+
+        obstacle = Polygon([(5.0, 4.0), (5.0, 5.0), (6.0, 5.0), (6.0, 4.0)])
+
+        masterPosition = current_list[0][0]
+        slavePosition = current_list[0][1]
+        scalar_for_corners = 0.5
+
+        x_master = float(masterPosition[0])
+        y_master = float(masterPosition[1])
+        x_slave = float(slavePosition[0])
+        y_slave = float(slavePosition[1])
+
+        master_corner_1 = np.array([x_master, y_master]) + scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
+        master_corner_2 = np.array([x_master, y_master]) - scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
+        slave_corner_1 = np.array([x_slave, y_slave]) + scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
+        slave_corner_2 = np.array([x_slave, y_slave]) - scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
+
+        cargo = Polygon([master_corner_1, master_corner_2, slave_corner_2, slave_corner_1])
+
+        if cargo.intersects(obstacle):
+            return 1
+        else:
+            return 0
+
     def plot(self, trajectory, u_master_prev, u_slave_prev, past_trajectory, u):
         
         # Call to plot whatever the path planner wants to plot
@@ -331,11 +361,24 @@ class TrajectoryGenerator:
                 self.plot_queues['slave_end'].put_nowait([[goal_positions[1][0]], [goal_positions[1][1]]])
         except Full:
             pass
-        try:
-            self.plot_queues['object'].put_nowait(((past_traj_master[-1][0], past_traj_slave[-1][0]),
-                                                   (past_traj_master[-1][1], past_traj_slave[-1][1])))
+        try: #plot the carried object here, set up the plot positions
+            currentList = [[past_traj_master[-1], past_traj_slave[-1]]]
+
+            output = self.onlineCllisionDetection(currentList)
+
+            if output == 1:
+                print('Collision!!!!')
+                self.plot_queues['object_collision'].put_nowait(((past_traj_master[-1][0], past_traj_slave[-1][0]), (past_traj_master[-1][1], past_traj_slave[-1][1])))
+                # if state_changed:
+                # self.plot_queues.get_nowait()
+            elif output == 0:
+                self.plot_queues['object_safe'].put_nowait(((past_traj_master[-1][0], past_traj_slave[-1][0]), (past_traj_master[-1][1], past_traj_slave[-1][1])))
+                # self.plot_queues['object_safe'].put_nowait(past_traj_master[-1][0], past_traj_master[-1][1])
+
         except:
             pass
+
+
         # Plot planned trajectory
         traj_master = trajectory[:,0:3]
         if self.solver_param.base.enable_slave and self.plot_config['plot_slave']:

@@ -10,6 +10,9 @@ from shapely.geometry import LineString
 from shapely.geometry import box as Box
 from shapely.geometry import Polygon
 import matplotlib.pyplot as plt
+# To suppress the warnings about elementwise comparison...
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 def init(build=False, self_destruct=False):
     # Get path to this file
@@ -125,10 +128,11 @@ def collisionDetection(trajList):
             collided_list.append([master_trajectory[i][:2],slave_trajectory[i][:2]])
             print("Oh no collision detected!")
 
-
     
     print("Collided: ", counter)
     return collided_list
+
+
 
 # A function to plot several polygons.
 def plot_polygons_w_atr(polygons, master_pos, slave_pos):
@@ -141,15 +145,15 @@ def plot_polygons_w_atr(polygons, master_pos, slave_pos):
     plt.show()
 
 
-def main(build=True, destroy_plots=True):
+def main(build=False, destroy_plots=False):
     traj_gen = init(build=build, self_destruct=destroy_plots)
     try:
         traj_gen.run(plot=1)
     finally:
         print("Should kill all running processes")
     generated_trajectory = traj_gen.getGeneratedTrajectory()
-    out = collisionDetection(generated_trajectory)
-        
+
+    # out = collisionDetection(generated_trajectory)
 
 if __name__ == '__main__':
     

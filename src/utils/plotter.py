@@ -4,6 +4,12 @@ from queue import Empty
 
 from PyQt5 import QtCore, QtWidgets
 import pyqtgraph as pg
+from shapely.geometry import box as Box
+from shapely.geometry import Polygon
+import matplotlib.pyplot as plt
+from src.main import collisionDetection
+import src.main
+# from trajectory_generator import TrajectoryGenerator
 
 def start_plotter(config, plot_config, aut_test_config=None, width=800, height=600):
     plot_queues_map  = {'master_path':multiprocessing.Queue(maxsize=1),
@@ -30,7 +36,8 @@ def start_plotter(config, plot_config, aut_test_config=None, width=800, height=6
                         'ref_point_slave':multiprocessing.Queue(maxsize=1),
                         'search_sector':multiprocessing.Queue(maxsize=1),
 
-                        'object': multiprocessing.Queue(maxsize=1),   # the carried object which needs to be plotted later on
+                        'object_collision': multiprocessing.Queue(maxsize=1),
+                        'object_safe': multiprocessing.Queue(maxsize=1), # the carried object which needs to be plotted later on
                         }
     
     plot_queues_data  = {'master_lin_vel':multiprocessing.Queue(maxsize=1), 
@@ -117,7 +124,6 @@ def show_plot_map(plot_queues_map, plot_queues_data, plot_queues_cost, width, he
     app.exec_()
 
 
-
 class PlotterMap():
     def __init__(self, plot_queues_map, plot_queues_data, plot_queues_cost, width, height, config, plot_config, aut_test_config, parent=None):
         self.plot_queues_map = plot_queues_map
@@ -191,10 +197,58 @@ class PlotterMap():
             self.map_plots['line_vertices_slave'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['lines_slave_color'], width=3), symbolBrush=(255, 255, 255), symbolSize=10, symbolPen=plot_config['lines_slave_color'], name=plot_config['lines_legend_slave'])
             self.map_plots['ref_point_slave'] = self.map_plot.plot([], pen=None, symbolBrush=plot_config['slave_ref_point_color'], symbolSize=10, symbolPen=plot_config['slave_ref_point_color'], name=plot_config['slave_ref_point_legend'])
 
-        self.map_plots['object'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3], name='object')
 
+        #now we are going to do the colour-changing step for online visualization
+        import collision
+        # from collision import *
+        # from collision import Vector as v
+        # p0 = Concave_Poly(v(0, 0), [v(-80, 0), v(-20, 20), v(0, 80), v(20, 20), v(80, 0), v(20, -20), v(0, -80), v(-20, -20)])
+        # p1 = Concave_Poly(v(20, 20), [v(-80, 0), v(-20, 20), v(0, 80), v(20, 20), v(80, 0), v(20, -20), v(0, -80), v(-20, -20)])
+        #
+        # print(collide(p0, p1))
+        # def collision_detected(trajList):
+        #
+        #     obstacle = Polygon([(5.0, 4.0), (5.0, 5.0), (6.0, 5.0), (6.0, 4.0)])
+        #     nr_of_points = len(trajList[0])
+        #     master_trajectory = trajList[0]
+        #     slave_trajectory = trajList[1]
+        #
+        #     a = 1
+        #     for i in range(nr_of_points):
+        #         # Cargo defined as a line
+        #         # cargo = LineString([master_trajectory[i][:2],slave_trajectory[i][:2]])
+        #         x_master = master_trajectory[i][0]
+        #         y_master = master_trajectory[i][1]
+        #         x_slave = slave_trajectory[i][0]
+        #         y_slave = slave_trajectory[i][1]
+        #
+        #         master_corner_1 = (x_master, y_master) + a * (y_slave - y_master, x_master - x_slave) / np.linalg.norm(
+        #             [y_master - y_slave, x_master - x_slave])
+        #         master_corner_2 = (x_master, y_master) - a * (y_slave - y_master, x_master - x_slave) / np.linalg.norm(
+        #             [y_master - y_slave, x_master - x_slave])
+        #         slave_corner_1 = (x_slave, y_slave) + a * (y_slave - y_master, x_master - x_slave) / np.linalg.norm(
+        #             [y_master - y_slave, x_master - x_slave])
+        #         slave_corner_2 = (x_slave, y_slave) - a * (y_slave - y_master, x_master - x_slave) / np.linalg.norm(
+        #             [y_master - y_slave, x_master - x_slave])
+        #
+        #         # Cargo defined as a polygon
+        #         cargo = Polygon([master_corner_1, master_corner_2, slave_corner_2, slave_corner_1])
+        #
+        #         if cargo.intersects(obstacle):
+        #             return 1
+        #             self.map_plots['object'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3], name='Cargo')
+        #
+        #         else: #if collision does not happen
+        #             return 0
+        #             self.map_plots['object'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3], name='Cargo')
+        #
         # self.map_plots['object'] = self.map_plot.plot([], pen=pg.mkPen('r', width=5), symbolBrush=(255, 255, 255),
         #                                               symbolSize=7, symbolPen='r', name='object')
+
+
+
+        self.map_plots['object_collision'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_collision_color'][:3], name='Cargo under the collision')
+        self.map_plots['object_safe'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3], name='safe Cargo')
 
         # Set up data plots
         self.canvas_lin_vel = self.win_data.addPlot(title="Lin-Vel", row=0, col=0)
@@ -495,7 +549,3 @@ class PlotterMap():
                 continue
             
             self.update_cost(key, data)
-            
-
-
-    
