@@ -148,9 +148,9 @@ class TrajectoryGenerator:
 
             # Local path planner, plans around unexpected obstacles
             _, static_padded_obs, _, _, unexpected_padded_obs, unexpected_obstacles_shapely = self.obs_handler.get_static_obstacles()
-            boundry = self.obs_handler.get_boundry()
+            boundary = self.obs_handler.get_boundary()
 
-            self.path_planner.local_path_plan(x[:3], unexpected_padded_obs, unexpected_obstacles_shapely, static_padded_obs, boundry)
+            self.path_planner.local_path_plan(x[:3], unexpected_padded_obs, unexpected_obstacles_shapely, static_padded_obs, boundary)
 
             # If the slave is disabled we shouldn't try to trajectory plan for it
             if not self.solver_param.base.enable_slave:
@@ -169,7 +169,7 @@ class TrajectoryGenerator:
             constraints, closest_static_unexpected_obs = self.panoc.convert_static_obs_to_eqs(closest_obs_static)
             dyn_constraints, closest_dynamic_obs_poly, closest_dynamic_obs_ellipse = list(self.panoc.convert_dynamic_obs_to_eqs(closest_obs_dynamic))
             active_dyn_obs = self.panoc.get_active_dyn_obs(dyn_constraints)
-            bounds_eqs = self.panoc.convert_bounds_to_eqs(boundry)
+            bounds_eqs = self.panoc.convert_bounds_to_eqs(boundary)
 
             # Generate reference values
             x_finish_master, line_vertices_master, goal_in_reach = self.panoc.generate_refs(x_cur, self.path_planner.path)
@@ -298,8 +298,8 @@ class TrajectoryGenerator:
         # Get the obstacles and plot that stuff
         static_original_obs, static_padded_obs, _, unexpected_original_obs, unexpected_padded_obs,_ = self.obs_handler.get_static_obstacles()
         dynamic_original_obs, dynamic_padded_obs, _ = self.obs_handler.get_dynamic_obstacles()
-        boundry = self.obs_handler.get_boundry()
-        self.obs_handler.plot(boundry, static_original_obs,static_padded_obs, unexpected_original_obs, unexpected_padded_obs, dynamic_original_obs, dynamic_padded_obs, self.panoc) 
+        boundary = self.obs_handler.get_boundary()
+        self.obs_handler.plot(boundary, static_original_obs,static_padded_obs, unexpected_original_obs, unexpected_padded_obs, dynamic_original_obs, dynamic_padded_obs, self.panoc) 
         
         # Plot the closest static and unexpected obstacles
         start_time = perf_counter_ns()
@@ -460,7 +460,7 @@ class TrajectoryGenerator:
 
         cost_static_master = float(self.mpc_generator.cost_inside_static_object(all_x_master, all_y_master, self.mpc_generator.q_obs_c))
         cost_static_slave = float(self.mpc_generator.cost_inside_static_object(all_x_slave, all_y_slave, self.mpc_generator.q_obs_c))
-        cost_static_cargo = float(self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, self.mpc_generator.q_obs_c, vert_method=True))
+        cost_static_cargo = float(self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, self.mpc_generator.q_obs_c, lib_method=True))
         cost_bounds_master = float(self.mpc_generator.cost_outside_bounds(all_x_master, all_y_master, self.mpc_generator.q_obs_c))
         cost_bounds_slave = float(self.mpc_generator.cost_outside_bounds(all_x_slave, all_y_slave, self.mpc_generator.q_obs_c))
         # cost_bounds_cargo = float(self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, self.mpc_generator.q_obs_c))
@@ -469,8 +469,8 @@ class TrajectoryGenerator:
         self.costs['cost_slave_static_obs'].append(float(cost_static_slave + cost_bounds_slave)) #TODO: Split boudns cost into seperate plot function
         self.costs_future['cost_future_slave_static_obs'] = self.mpc_generator.cost_inside_static_object(all_x_slave, all_y_slave, self.mpc_generator.q_obs_c, individual_costs=True)
         # TODO: create cargo bounds func (see above and below)
-        # self.costs['cost_cargo_static_obs'].append(float(cost_static_cargo))# + cost_bounds_cargo))
-        # self.costs_future['cost_future_cargo_static_obs'] = self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, self.mpc_generator.q_obs_c, individual_costs=True)
+        self.costs['cost_cargo_static_obs'].append(float(cost_static_cargo))# + cost_bounds_cargo))
+        self.costs_future['cost_future_cargo_static_obs'] = self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, self.mpc_generator.q_obs_c, individual_costs=True, lib_method=True)
         #######  
         # Master control signal costs
         master_u = trajectory[:, [6, 7]].reshape(-1, 1)

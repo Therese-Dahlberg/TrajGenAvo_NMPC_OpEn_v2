@@ -11,6 +11,10 @@ from shapely.geometry import box as Box
 from shapely.geometry import Polygon
 import matplotlib.pyplot as plt
 
+# To suppress the warnings about elementwise comparison...
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 def init(build=False, self_destruct=False):
     # Get path to this file
     file_path = Path(__file__)

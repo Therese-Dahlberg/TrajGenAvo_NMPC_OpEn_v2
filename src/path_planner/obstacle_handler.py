@@ -69,14 +69,14 @@ class ObstacleHandler:
         self.solve_mvee()
         self.count = 0
 
-    def get_boundry(self): 
+    def get_boundary(self): 
         map_fp = os.path.join(str(Path(__file__).parents[2]), 'data', 'map.json')
         with open(map_fp) as f: 
             map_json = json.load(f)
         extra_obs, new_bounds = self.bounds_to_obstacles_and_convex_hull(map_json['boundary'])
-        boundry_original = np.array(new_bounds.copy())
-        boundry_padded = self.pad_obstacles(np.array([boundry_original.tolist()]), decrease=True)[0]
-        return boundry_padded
+        boundary_original = np.array(new_bounds.copy())
+        boundary_padded = self.pad_obstacles(np.array([boundary_original.tolist()]), decrease=True)[0]
+        return boundary_padded
 
     def get_dynamic_obstacles(self): 
         obs_fp = os.path.join(str(Path(__file__).parent.parent.parent), 'data', 'obstacles_copy.json')
@@ -151,7 +151,7 @@ class ObstacleHandler:
         Args:
             obs (list of lists): list of lists of vertices describing the obstacles
             dynamic (bool, optional): If the obstacle is dynamic then obs is actually list of lists of vertices. Treat it accordingly. Defaults to False.
-            decreate (bool, optional): If the padded obstacle should be smaller. For example boundry. Defaults to False.
+            decreate (bool, optional): If the padded obstacle should be smaller. For example boundary. Defaults to False.
 
         Returns:
             list: Either a list of list of vertices or list of vertices depending on dynamic
@@ -277,19 +277,19 @@ class ObstacleHandler:
         return triangles
     
 
-    def bounds_to_obstacles_and_convex_hull(self, boundry_original):
+    def bounds_to_obstacles_and_convex_hull(self, boundary_original):
         """[summary]
 
         Args:
-            boundry_original ([type]): [description]
+            boundary_original ([type]): [description]
 
         Returns:
             List of list: tuple coordinates of obstacles
-            List: tuple coordinates of the convex boundry
+            List: tuple coordinates of the convex boundary
         """
-        org = shapely.geometry.Polygon(boundry_original)
+        org = shapely.geometry.Polygon(boundary_original)
         convex_part = org.convex_hull
-        # Get the difference between original boundry and convex hull
+        # Get the difference between original boundary and convex hull
         nonconvex_part = convex_part.symmetric_difference(org)
 
         extra_obs_list_coords = []
@@ -314,15 +314,15 @@ class ObstacleHandler:
         else:
             extra_obs_list_coords = None
 
-        # Make boundry into tuple list 
-        x_boundry, y_boundry = convex_part.exterior.xy
-        convex_boundry = []
-        for i in range(len(x_boundry)):
-            convex_boundry.append((x_boundry[i],y_boundry[i]))
+        # Make boundary into tuple list 
+        x_boundary, y_boundary = convex_part.exterior.xy
+        convex_boundary = []
+        for i in range(len(x_boundary)):
+            convex_boundary.append((x_boundary[i],y_boundary[i]))
         
         # Make sure the last coordinate isn't the same as the first
-        convex_boundry = convex_boundry if not np.all(convex_boundry[0] == convex_boundry[-1]) else convex_boundry[:-1]
-        return extra_obs_list_coords, convex_boundry
+        convex_boundary = convex_boundary if not np.all(convex_boundary[0] == convex_boundary[-1]) else convex_boundary[:-1]
+        return extra_obs_list_coords, convex_boundary
 
     def dist2closest_dyn_obs(self, point, poly_list):
         """[summary]
@@ -428,7 +428,7 @@ class ObstacleHandler:
         data  = np.vstack((xs,ys)).T
         return data
 
-    def plot(self, boundry_padded,static_original_obs, static_padded_obs, unexpected_original_obs, unexpected_padded_obs, dynamic_original_obs,dynamic_padded_obs, panoc):
+    def plot(self, boundary_padded,static_original_obs, static_padded_obs, unexpected_original_obs, unexpected_padded_obs, dynamic_original_obs,dynamic_padded_obs, panoc):
         start_time = perf_counter_ns()
         
         # Plot all obstacles unpadded
@@ -473,9 +473,9 @@ class ObstacleHandler:
         try: self.plot_queues['obstacles_padded'].put_nowait(obs)
         except Full: pass
 
-        # Plot boundry
-        data = np.vstack((boundry_padded, boundry_padded[0])).T
-        try: self.plot_queues['boundry'].put_nowait(data)
+        # Plot boundary
+        data = np.vstack((boundary_padded, boundary_padded[0])).T
+        try: self.plot_queues['boundary'].put_nowait(data)
         except Full: pass
 
 

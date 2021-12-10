@@ -28,10 +28,10 @@ class PathPlanner:
         self.path_shapely = [geometry.Point(p) for p in path]
         
 
-    def visability_graph(self, boundry, obstacles, start_pos, end_pos):
+    def visability_graph(self, boundary, obstacles, start_pos, end_pos):
         self.env = PolygonEnvironment()
         # Give obstacles and boundaries to environment
-        self.env.store(boundry, obstacles)
+        self.env.store(boundary, obstacles)
         # Prepare the visibility graph 
         self.env.prepare()
 
@@ -42,7 +42,7 @@ class PathPlanner:
 
         return path
 
-    def local_path_plan(self, x_cur, unexpected_obstacles, unexpected_obstacles_shapely, static_obstacles, boundry):
+    def local_path_plan(self, x_cur, unexpected_obstacles, unexpected_obstacles_shapely, static_obstacles, boundary):
         """This method plans a path around unexpected obstacles using visability graphs.
         The update path is stored in 
 
@@ -66,7 +66,7 @@ class PathPlanner:
         for i in range(len(start_pos_idx)):
             start = self.path[start_pos_idx[i]]
             end = self.path[end_pos_idx[i]]
-            path = self.visability_graph(boundry, all_obs, start, end)
+            path = self.visability_graph(boundary, all_obs, start, end)
             self.path[start_pos_idx[i] : end_pos_idx[i]+1] = path
 
         # Update the shapely path
@@ -138,7 +138,7 @@ class PathPlanner:
             x, y = ob.exterior.xy
             for node in self.path_shapely:
                 if not ob.intersection(node).is_empty:
-                # If the point is on the boundry it's ok
+                # If the point is on the boundary it's ok
                     if (node.bounds[0] in x) and (node.bounds[1] in y):
                         continue
                     return True
