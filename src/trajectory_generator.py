@@ -512,8 +512,8 @@ class TrajectoryGenerator:
         self.costs['cost_slave_static_obs'].append(float(cost_static_slave + cost_bounds_slave)) #TODO: Split boudns cost into seperate plot function
         self.costs_future['cost_future_slave_static_obs'] = self.mpc_generator.cost_inside_static_object(all_x_slave, all_y_slave, self.mpc_generator.q_obs_c, individual_costs=True)
         # TODO: create cargo bounds func (see above and below)
-        self.costs['cost_cargo_static_obs'].append(float(cost_static_cargo))# + cost_bounds_cargo))
-        self.costs_future['cost_future_cargo_static_obs'] = self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, self.mpc_generator.q_obs_c, individual_costs=True, lib_method=True)
+        # self.costs['cost_cargo_static_obs'].append(float(cost_static_cargo))# + cost_bounds_cargo))
+        # self.costs_future['cost_future_cargo_static_obs'] = self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, self.mpc_generator.q_obs_c, individual_costs=True, lib_method=True)
         #######  
         # Master control signal costs
         master_u = trajectory[:, [6, 7]].reshape(-1, 1)

@@ -926,7 +926,7 @@ class MpcModule:
         # cost += self.cost_inside_static_object((all_x_slave[1:]+all_x_master[1:])/2, (all_y_slave[1:]+all_y_master[1:])/2, self.q_obs_c)
         # cost += self.cost_inside_dyn_ellipse2((all_x_slave[1:]+all_x_master[1:])/2, (all_y_slave[1:]+all_y_master[1:])/2, self.q_dyn_obs_c)
         # TODO: separate weighting -> create own weight
-        cost += self.cost_cargo_inside_static_object(all_x_master[1:], all_y_master[1:], all_x_slave[1:], all_y_slave[1:], self.q_obs_c, vert_method=True)
+        # cost += self.cost_cargo_inside_static_object(all_x_master[1:], all_y_master[1:], all_x_slave[1:], all_y_slave[1:], self.q_obs_c, vert_method=True)
 
         # Cost for outside bounds
         cost += self.cost_outside_bounds(all_x_master[1:], all_y_master[1:], self.q_obs_c)

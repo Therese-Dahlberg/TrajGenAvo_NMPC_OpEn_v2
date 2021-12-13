@@ -7,8 +7,8 @@ import pyqtgraph as pg
 from shapely.geometry import box as Box
 from shapely.geometry import Polygon
 import matplotlib.pyplot as plt
-from src.main import collisionDetection
-import src.main
+# from src.main import collisionDetection
+# import src.main
 # from trajectory_generator import TrajectoryGenerator
 
 def start_plotter(config, plot_config, aut_test_config=None, width=800, height=600):
