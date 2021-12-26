@@ -11,8 +11,8 @@ q_pos_slave: 0                      # Cost for position deviation (each time ste
 q_d_lin_vel_upper:  0.3             # Cost for upper speed deviation each time step
 q_d_lin_vel_lower:  0.1             # Cost for lower speed deviation each time step
 q_d_ang_vel:  0               # Cost for speed deviation each time step
-q_theta_master: 0             # Cost for each heading relative to the final refernce position
-q_theta_slave: 0              # Cost for each heading relative to the final refernce position
+q_theta_master: 0             # Cost for each heading relative to the final reference position
+q_theta_slave: 0              # Cost for each heading relative to the final reference position
 q_distance: 0     # Cost for deviating from d
 q_theta_diff: 0   # Cost for angular difference between robots
 q_distance_c: 0   # Cost for deviating from d + tolerance, soft constraint

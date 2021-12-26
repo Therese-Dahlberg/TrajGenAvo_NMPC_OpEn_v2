@@ -14,8 +14,8 @@ q_d_lin_vel_upper:  0             # Cost for upper speed deviation each time ste
 q_d_lin_vel_lower:  0             # Cost for lower speed deviation each time step
 q_reverse: 0                 # Cost for reverse
 q_d_ang_vel:  0               # Cost for speed deviation each time step
-q_theta_master: 0.1             # Cost for each heading relative to the final refernce position
-q_theta_slave:  0.1             # Cost for each heading relative to the final refernce position
+q_theta_master: 0.1             # Cost for each heading relative to the final reference position
+q_theta_slave:  0.1             # Cost for each heading relative to the final reference position
 q_pos_N: 100                # Terminal cost; error relative to final reference position         
 q_theta_N: 10            # Terminal cost; error relative to final reference heading 
 q_distance: 0.0 #0.00 # Cost for deviating from d

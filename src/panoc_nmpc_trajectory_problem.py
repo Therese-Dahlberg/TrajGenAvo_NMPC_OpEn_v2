@@ -169,21 +169,21 @@ class PanocNMPCTrajectoryProblem:
         """
         # Convert the closest static and dynamic obstacles into inequalities 
         obs_equations = []
-        for key in closest_obs:
-            obs = closest_obs[key]
+        for key in closest_obs:     # keys are order of polygon
+            obs = closest_obs[key]  # get list of static obs of order 'key'
             key_obs_equations = np.array(self.obstacles_as_inequalities(obs)).reshape(-1)
 
             # If there aren't enough obstacles, fill with 0s
-            n_obs = len(obs)
+            n_obs = len(obs) 
             if n_obs < self.solver_param.base.n_obs_of_each_vertices: #TODO: Add special case for triangles
-                obs_array = np.zeros((self.solver_param.base.n_obs_of_each_vertices-n_obs)*3*key) # CHange 3 to the variable in self.solver_param
+                obs_array = np.zeros((self.solver_param.base.n_obs_of_each_vertices-n_obs)*self.solver_param.base.n_param_line*key) # Get zeros for equation params of every additional obs for each order
                 key_obs_equations = np.hstack((key_obs_equations, obs_array))
             obs_equations.append(key_obs_equations)
         
-        obs_equations = np.hstack(obs_equations)
+        obs_equations = np.hstack(obs_equations)  # Combine all equations of each order into one array
 
         # Make sure the correct number of params are sent
-        assert( sum(range(self.solver_param.base.min_vertices, self.solver_param.base.max_vertices+1)) *3 * self.solver_param.base.n_obs_of_each_vertices == sum(obs_equations.shape)), "An invalid amount of static obstacles parameters were sent."
+        assert(sum(range(self.solver_param.base.min_vertices, self.solver_param.base.max_vertices+1)) * self.solver_param.base.n_param_line * self.solver_param.base.n_obs_of_each_vertices == sum(obs_equations.shape)), "An invalid amount of static obstacles parameters were sent."
         return obs_equations, closest_obs
 
     def convert_dynamic_obs_to_eqs(self, closest_obs):

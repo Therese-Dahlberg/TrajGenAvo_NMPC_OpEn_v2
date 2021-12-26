@@ -366,10 +366,10 @@ class MpcModule:
 
     # Cost for collision of cargo with obstacles
     @cost_positive
-    def cost_cargo_inside_static_object(self, x_all_master, y_all_master, x_all_slave, y_all_slave, q, individual_costs=False, vert_method=False, lib_method=False):
+    def cost_cargo_inside_static_object(self, x_all_master, y_all_master, x_all_slave, y_all_slave, q, individual_costs=False, vert_method=False, lib_method=False, circ_method=False):
         '''
         Specify which method is used.
-        Options: vert_method=True OR lib_method=True
+        Options: vert_method=True OR lib_method=True OR circ_method=True
         '''
         # If cost is just computed or also logged 
         if not individual_costs:    
@@ -528,12 +528,57 @@ class MpcModule:
                 crash = cs.fmax(0.0, response.overlap)**2.0   # zero if cargo fulfills constraint (CasADi: Maximum function is "differentiable")
                 # print(crash)
             
+            if circ_method:        
+                # TODO: calculate the origin of the obstacle cirlce
+                x_origin_obs = 5.5
+                y_origin_obs = 4.5
+
+                # TODO: calculate the radius of the obstacle circle
+                r_obs = 1.5
+                
+                # Loop over time steps along horizon, still useful
+                for t in range(0, self.solver_param.base.n_hor):
+                    # Reset/init for each time step
+                    area = 0
+                    x_master = x_all_master[t]
+                    y_master = y_all_master[t]
+                    x_slave = x_all_slave[t]
+                    y_slave = y_all_slave[t]
+
+                    # TODO: create the origin of the cargo circle!
+                    x_origin_cargo = (x_master + x_slave)/2
+                    y_origin_cargo = (y_master + x_slave)/2
+
+                    # TODO: calculate the radius of the cargo circle
+                    r_cargo = cs.sqrt((x_origin_cargo-x_master)**2 + (y_origin_cargo-y_master)**2)
+
+                    # TODO: define the distance between the two origins
+                    d_origins = cs.sqrt((x_origin_cargo-x_origin_obs)**2 + (y_origin_cargo-y_origin_obs)**2)
+
+                    # TODO: define cargo and obstacle in casadi friendly syntax?
+
+                    # TODO: Loop over all static obstacles (Save for later so that we can model obstacles as more than one cirlce)
+                    # for bounding_box_obj in bb_list:
+                    #     # Simple check f
+                    #     if (obj_xmin < cargo_xmax and obj_xmax > cargo_xmin and
+                    #         obj_ymin < cargo_ymax and obj_ymax > cargo_ymin):
+                    #         # Bounding boxes overlap
+                    #         # Compute collision area with shapely
+                    #         # TODO: get shapely object of static obstacle with its index in bounding box list
+                    #         obj = obj_list[index]
+                    #         area += cargo.intersection(obj).area/min(cargo.area,obj.area)   # intersecting area compared to the size of the cargo or obstacle for good estimation if intrusion is bad or negatable
+                    
+                    crash = cs.fmax(0.0, r_cargo+r_obs-d_origins)**2.0   # zero if cargo fulfills constraint, change area to the cirlce condition
+                    print("crash", crash)
+                    # if crash !=0.0:
+                    #     print("crash added")
+
             # Error handling due to wrong function call
-            if not vert_method and not lib_method:
+            if not vert_method and not lib_method and not circ_method:
                 # neither method chosen
                 raise NotImplementedError
-            if vert_method and lib_method:
-                # both methods chosen
+            if (vert_method and lib_method) or (vert_method and circ_method) or (lib_method and circ_method):
+                # at least two methods chosen
                 raise ValueError
             # Update cost with number of collisions for all obstacles for current time step
             if not individual_costs:
@@ -926,7 +971,7 @@ class MpcModule:
         # cost += self.cost_inside_static_object((all_x_slave[1:]+all_x_master[1:])/2, (all_y_slave[1:]+all_y_master[1:])/2, self.q_obs_c)
         # cost += self.cost_inside_dyn_ellipse2((all_x_slave[1:]+all_x_master[1:])/2, (all_y_slave[1:]+all_y_master[1:])/2, self.q_dyn_obs_c)
         # TODO: separate weighting -> create own weight
-        # cost += self.cost_cargo_inside_static_object(all_x_master[1:], all_y_master[1:], all_x_slave[1:], all_y_slave[1:], self.q_obs_c, vert_method=True)
+        cost += self.cost_cargo_inside_static_object(all_x_master[1:], all_y_master[1:], all_x_slave[1:], all_y_slave[1:], self.q_obs_c, vert_method=True)
 
         # Cost for outside bounds
         cost += self.cost_outside_bounds(all_x_master[1:], all_y_master[1:], self.q_obs_c)
