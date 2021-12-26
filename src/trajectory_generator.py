@@ -5,6 +5,7 @@ from pathlib import Path
 from queue import Full
 
 import numpy as np
+import json
 
 # Own imports
 from ATRS import ATRS
@@ -18,6 +19,24 @@ from panoc_nmpc_trajectory_problem import PanocNMPCTrajectoryProblem
 
 from utils.plotter import start_plotter
 from utils.config import Configurator, SolverParams, Weights
+
+from shapely.geometry import box as Box
+from shapely.geometry import Polygon
+
+file_path = Path(__file__)
+obs_original = os.path.join(str(file_path.parent.parent), 'data', 'obstacles.json')
+with open(obs_original) as f:
+    distros_dict = json.load(f)
+
+static_obs = []
+unexpected_obs = []
+for elem in distros_dict['static']:
+    static_obs.append(elem)
+    # print("static ",static_obs)
+
+for elem in distros_dict['unexpected']:
+    unexpected_obs.append(elem['vertices'])
+    # print("unexpected ",unexpected_obs)
 
 
 class TrajectoryGenerator:
@@ -288,6 +307,37 @@ class TrajectoryGenerator:
     # Returns the generated trajectory for the master and slave
     def getGeneratedTrajectory(self):
         return self.gen_traj
+
+    #ONLINE COLLISION DETECTION FROM JAMIE
+    def onlineCollisionDetection(self, current_list):
+        # currentList should be a list of the current position of the cargo
+        # [[(x0_m,y0_m,theta0_m),...,(xN_m,yN_m,thetaN_m)],[(x0_s,y0_s,theta0_s),...,(xN_s,yN_s,thetaN_s)]], for N number of points.
+        # obstacle_corners could for example be a list containing the coordinates of all PADDED obstacles:
+        # [[o1_x,o1_y],...,[oM_x,oM_y]], for M obstacles.
+
+        #TODO: change this to the data from the json file
+        obstacle = Polygon([(5.0, 4.0), (5.0, 5.0), (6.0, 5.0), (6.0, 4.0)])
+
+        masterPosition = current_list[0][0]
+        slavePosition = current_list[0][1]
+        scalar_for_corners = 0.5
+
+        x_master = float(masterPosition[0])
+        y_master = float(masterPosition[1])
+        x_slave = float(slavePosition[0])
+        y_slave = float(slavePosition[1])
+
+        master_corner_1 = np.array([x_master, y_master]) + scalar_for_corners*np.array([y_slave - y_master, x_master - x_slave])/np.linalg.norm([y_master - y_slave, x_master - x_slave])
+        master_corner_2 = np.array([x_master, y_master]) - scalar_for_corners*np.array([y_slave - y_master, x_master - x_slave])/np.linalg.norm([y_master - y_slave, x_master - x_slave])
+        slave_corner_1 = np.array([x_slave, y_slave]) + scalar_for_corners*np.array([y_slave - y_master, x_master - x_slave])/np.linalg.norm([y_master - y_slave, x_master - x_slave])
+        slave_corner_2 = np.array([x_slave, y_slave]) - scalar_for_corners*np.array([y_slave - y_master, x_master - x_slave])/np.linalg.norm([y_master - y_slave, x_master - x_slave])
+
+        cargo = Polygon([master_corner_1, master_corner_2, slave_corner_2, slave_corner_1])
+
+        if cargo.intersects(obstacle):
+            return 1
+        else:
+            return 0
         
     
     def plot(self, trajectory, u_master_prev, u_slave_prev, past_trajectory, u):
@@ -299,6 +349,9 @@ class TrajectoryGenerator:
         static_original_obs, static_padded_obs, _, unexpected_original_obs, unexpected_padded_obs,_ = self.obs_handler.get_static_obstacles()
         dynamic_original_obs, dynamic_padded_obs, _ = self.obs_handler.get_dynamic_obstacles()
         boundry = self.obs_handler.get_boundry()
+        # circle_boundaries,circle_parameter_list = self.obs_handler.bounding_circles()
+
+        #This plots the obstacles
         self.obs_handler.plot(boundry, static_original_obs,static_padded_obs, unexpected_original_obs, unexpected_padded_obs, dynamic_original_obs, dynamic_padded_obs, self.panoc) 
         
         # Plot the closest static and unexpected obstacles
@@ -331,7 +384,23 @@ class TrajectoryGenerator:
                 self.plot_queues['slave_end'].put_nowait([[goal_positions[1][0]], [goal_positions[1][1]]])
         except Full:
             pass
+        # try: #plot the carried object here, set up the plot positions
+        #     currentList = [[past_traj_master[-1], past_traj_slave[-1]]]
 
+        #     output = self.onlineCollisionDetection(currentList)
+
+        #     if output == 1:
+        #         print('Collision!!!!')
+
+        #         #put_nowait adds an element in the plot_queue. A plot queue is a FIFO queue
+        #         self.plot_queues['object_collision'].put_nowait(((past_traj_master[-1][0], past_traj_slave[-1][0]), (past_traj_master[-1][1], past_traj_slave[-1][1])))
+        #         # if state_changed:
+        #         # self.plot_queues.get_nowait()
+        #     elif output == 0:
+        #         self.plot_queues['object_safe'].put_nowait(((past_traj_master[-1][0], past_traj_slave[-1][0]), (past_traj_master[-1][1], past_traj_slave[-1][1])))
+        #         # self.plot_queues['object_safe'].put_nowait(past_traj_master[-1][0], past_traj_master[-1][1])
+        # except:
+        #     pass
 
         # Plot planned trajectory 
         traj_master = trajectory[:,0:3]
@@ -463,6 +532,14 @@ class TrajectoryGenerator:
         self.costs_future['cost_future_master_static_obs'] = self.mpc_generator.cost_inside_static_object(all_x_master, all_y_master, self.mpc_generator.q_obs_c, individual_costs=True)
         self.costs['cost_slave_static_obs'].append(float(cost_static_slave + cost_bounds_slave)) #TODO: Split boudns cost into seperate plot function
         self.costs_future['cost_future_slave_static_obs'] = self.mpc_generator.cost_inside_static_object(all_x_slave, all_y_slave, self.mpc_generator.q_obs_c, individual_costs=True)
+
+        #TODO: add the cost for cargo colliding with obstacle!!
+        cost_static_cirlce = float(self.mpc_generator.cost_cargo_inside_static_circle(all_x_master, all_y_master, all_x_slave, all_y_slave, [static_obs[0], unexpected_obs[0]], 100))
+        self.costs['cost_circle'].append(float(cost_static_cirlce))
+        self.costs_future['cost_future_circles'] = self.mpc_generator.cost_cargo_inside_static_circle(all_x_master, all_y_master, all_x_slave, all_y_slave, [static_obs[0], unexpected_obs[0]], 100, individual_costs=True)
+
+
+
         #######  
         # Master control signal costs
         master_u = trajectory[:, [6, 7]].reshape(-1, 1)

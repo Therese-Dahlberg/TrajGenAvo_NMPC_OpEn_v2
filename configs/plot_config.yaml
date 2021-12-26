@@ -78,6 +78,9 @@ master_ref_point_legend: Leader-ref-point
 slave_ref_point_color: *slave_color
 slave_ref_point_legend: Follower-ref-point
 
+object_collision_color: r
+object_no_collision_color: g
+
 
 cost_master_vel_color: *master_color
 cost_master_ang_color: *master_color
@@ -105,6 +108,9 @@ cost_slave_dynamic_obs_color: *slave_jerk_color
 cost_slave_dynamic_obs_legend: Follower-dynamic-obstacles
 cost_slave_future_dynamic_obs_color: *slave_acc_color
 cost_slave_future_dynamic_obs_legend: Follower-future-dynamic-obstacles
+
+cost_circle_color: *slave_acc_color
+cost_circle_legend: Circle-cost
 
 cost_master_ref_points_color: *master_color
 cost_master_ref_points_legend: Leader-ref-points

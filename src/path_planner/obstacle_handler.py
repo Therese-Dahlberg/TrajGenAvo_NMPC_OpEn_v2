@@ -3,6 +3,7 @@ import os, sys, json
 from pathlib import Path
 from time import perf_counter_ns
 from queue import Full
+import math
 
 import numpy as np
 
@@ -11,10 +12,14 @@ import shapely
 
 from sympy import symbols, solve, lambdify
 from sympy.testing.pytest import ignore_warnings
+# from sympy.utilities.lambdify import NUMPY
 
 # Import CGAL, from own directory
 from CGAL.CGAL_Kernel import Point_2
 from CGAL.CGAL_Triangulation_2 import Constrained_Delaunay_triangulation_2
+
+import miniball
+from shapely import geometry as sg
 
 class DynamicObstacle:
     def __init__(self, polygon, p1, p2, vel, n_steps_ahead):
@@ -135,6 +140,31 @@ class ObstacleHandler:
         unexpected_padded_obs = self.pad_obstacles(unexpected_original_obs)
         unexpected_obstacles_shapely = self.obs_as_shapely_polygon(unexpected_padded_obs)
         return static_original_obs, static_padded_obs, static_obstacles_shapely, unexpected_original_obs, unexpected_padded_obs, unexpected_obstacles_shapely
+
+    #Creates a circular boundary around all static obstacles. Returns a list with parameters for each circle. Does not work right now.
+    def bounding_circles(self,obstacles):
+        # static_original_obs, static_padded_obs, static_obstacles_shapely, unexpected_original_obs,_,_ = self.get_static_obstacles()
+
+        #OBS this line assumes only one of each!!! If we want to have several this has to be changed!!
+        # print("static original obs: ", static_original_obs[0])
+        # print("unexpected original obs: ", unexpected_original_obs)
+        # obstacles = [static_original_obs[0],unexpected_original_obs[0]]
+        bounding_circles_list = []
+        circle_parameters_list = []
+
+        #TODO: minimum enclosing circle for all obstacels, right now this only is applicable for one obstacle
+        for o in obstacles:
+            #get minimum enclosing circle parameters from miniball
+            circle_coords, r_squared = miniball.get_bounding_ball(np.array(o))
+            radius = math.sqrt(r_squared)
+            
+            #Store the data given (x_orgin, y_orign, radius)
+            circle_parameters_list.append([circle_coords,radius])
+
+            circle = sg.Point(circle_coords[0],circle_coords[1]).buffer(radius)
+            bounding_circles_list.append(circle) #This should be plotted in the plotter function
+
+        return bounding_circles_list,circle_parameters_list
 
 
     def pad_obstacle(self, obstacle, inflation):
@@ -434,6 +464,7 @@ class ObstacleHandler:
         # Plot all obstacles unpadded
         if self.plot_config['enable_original_obs']:
             obs = []
+            # print("the shape of soo",static_original_obs.shape, static_original_obs, type(static_original_obs))
             if np.all(static_original_obs.shape):
                 obs += [ob for ob in static_original_obs]
             if np.all(len(unexpected_original_obs)):
@@ -443,9 +474,32 @@ class ObstacleHandler:
                 # Plot the future positions of the dynamic obstacles
                 if self.plot_config['plot_future_dyn_obs']:
                     obs += [ob for ob in dynamic_original_obs[:, self.config.n_hor -1, :, :]]
-                
+            # print("the static obs, they work: ", type(obs),obs)  
             try: self.plot_queues['obstacles_original'].put_nowait(obs)
             except Full: pass
+
+
+        #Try to plot circle boundary
+        #circle boundaries are a list.
+        obs_circles = []
+        # print("circle boundaries: ", type(circle_boundaries), circle_boundaries)
+        # print("static_padded obs: ", type(static_padded_obs))
+        if np.all(static_original_obs.shape):
+            _,circle_parameters_static = self.bounding_circles(static_original_obs)
+            npCircles_static = np.array(circle_parameters_static, dtype=object)
+            obs_circles+=[ob for ob in npCircles_static]
+        if np.all(len(unexpected_original_obs)):
+            _,circle_parameters_unexpected = self.bounding_circles(unexpected_original_obs)
+            npCircles_unexpected = np.array(circle_parameters_unexpected, dtype=object)
+            obs_circles += [ob for ob in npCircles_unexpected]
+        # npCircles = np.array([[[4.0, 3.0] , [4.7,6.3] , [5.2,3.3]]],dtype=object)
+        # print("new thing: ", type(npCircles),npCircles)
+        # if np.all(npCircles.shape):
+        #     # print("I'm here!")
+        #     obs+=[ob for ob in npCircles]
+        #     # print("obs is empty?", obs)
+        try: self.plot_queues['obstacles_test'].put_nowait(obs_circles)
+        except Full: pass
 
 
         # Plot all obstacles padded
