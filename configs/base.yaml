@@ -56,10 +56,11 @@ bad_exit_codes: ["NotConvergedIterations", "NotConvergedOutOfTime"] # Optimizer 
 optimizer_name: 'trajectory_generator_solver' # optimizer type
 
 # Obstacle parameters
-min_vertices: 3           # The minimum amount of vertices per obstacle
-max_vertices: 5           # The maximum amount of vertices per obstacle
-n_param_line: 3    # Number of variables per line
-n_param_dyn_obs: 6 # Number of variables per ellipse ( dynamic obs)
+min_vertices: 3         # The minimum amount of vertices per obstacle
+max_vertices: 5         # The maximum amount of vertices per obstacle
+n_param_line: 3         # Number of variables per line (describe how many parameters are needed for a line inequality/half-space)
+n_param_vertex: 2       # Number of variables per vertex (x,y coordinates of starting vertex of each line; since polygons are assumed to closed this defines the corners of the polygon)
+n_param_dyn_obs: 6      # Number of variables per ellipse ( dynamic obs)
 n_obs_of_each_vertices: 5 # How many obstacles there should be of each kind of obstacle 
 #TODO: Add special case for triangles. There should be allowed more triangles
 n_dyn_obs: 5 # Maximal number of dynamic obstacles

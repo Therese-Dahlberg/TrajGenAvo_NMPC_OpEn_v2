@@ -14,6 +14,10 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
+# To suppress the warnings about elementwise comparison...
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 def init(build=False, self_destruct=False):
     # Get path to this file
     file_path = Path(__file__)
@@ -145,7 +149,7 @@ def plot_polygons_w_atr(polygons, master_pos, slave_pos):
     plt.show()
 
 
-def main(build=False, destroy_plots=False):
+def main(build=True, destroy_plots=False):
     traj_gen = init(build=build, self_destruct=destroy_plots)
     try:
         traj_gen.run(plot=1)
