@@ -27,9 +27,8 @@ import miniball
 import json
 from pathlib import Path
 from shapely import geometry as sg
+from panoc_nmpc_trajectory_problem import obstacle_as_inequality
 
-# DEBUG to be deleted
-from main import plot_polygons_w_atr
 
 MAX_SOLVER_TIME_MICROS = 8_000_000 #500_000
 MAX_OUTER_ITERATIONS = 15
@@ -499,14 +498,12 @@ class MpcModule:
                                 y1 = vertices_cargo[line][1]
                                 y2 = vertices_cargo[(line+1)%len(vertices_cargo)][1] # loop over if line is last index to take the first as next vertex
                                 # b = -r_0[0]*v_y*(-v_x)/(v_x*(-v_x)+1e-5) + r_0[1] # add factor for case if v_x zero / compute b for current line of cargo 
-                            
-
-                                # TODO: Get A and b for cargo from panoc obstacle_as_inequality
-
-                                b = y1*x2 - y2*x1
-                                a_x = x1 - x2 # compute a0 for current line of cargo 
-                                a_y = y2 - y1 # compute a1 for current line of cargo 
-                                cargo_eq = b - a_x*x_vert_obs - a_y*y_vert_obs # inequality of half space corresponding to current line of cargo
+                                
+                                A, b = obstacle_as_inequality(np.mat(np.array([[x1, y1], [x2, y2]])))
+                                # b = y1*x2 - y2*x1
+                                # a_x = x1 - x2 # compute a0 for current line of cargo 
+                                # a_y = y2 - y1 # compute a1 for current line of cargo 
+                                cargo_eq = b - A[0]*x_vert_obs - A[1]*y_vert_obs # inequality of half space corresponding to current line of cargo
                                 h = cs.fmax(0.0, cargo_eq)**2.0
                                 inside *= h     # all inequalities must be greater zero, i.e. violated
                             crash += inside

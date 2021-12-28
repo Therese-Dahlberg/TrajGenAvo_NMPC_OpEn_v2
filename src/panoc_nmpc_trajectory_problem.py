@@ -37,6 +37,40 @@ class States(Enum):
             traceback.print_exc()
             raise(Exception("This state doesn't exist!"))
 
+
+def obstacle_as_inequality(Vs):
+    # def vert2con(Vs):
+    '''
+    Compute the H-representation of a set of points (facet enumeration).
+    Arguments:
+        Vs: np.mat(np.array([[x0, y0], [x1, y1], [x2, y2]]))
+    Returns:
+        A   (L x d) array. Each row in A represents hyperplane normal.
+        b   (L x 1) array. Each element in b represents the hyperpalne
+            constant bi
+    Taken from https://github.com/d-ming/AR-tools/blob/master/artools/artools.py
+    '''
+    hull = scipy.spatial.ConvexHull(Vs)
+    K = hull.simplices
+    c = np.mean(Vs[hull.vertices, :], 0)  # c is a (1xd) vector
+
+    # perform affine transformation (subtract c from every row in Vs)
+    V = Vs - c
+    A = scipy.NaN * np.empty((K.shape[0], Vs.shape[1]))
+
+    rc = 0
+    for i in range(K.shape[0]):
+        ks = K[i, :]
+        F = V[ks, :]
+        if np.linalg.matrix_rank(F) == F.shape[0]:
+            f = np.ones(F.shape[0])
+            A[rc, :] = scipy.linalg.solve(F, f)
+            rc += 1
+
+    A = A[0:rc, :]
+    b = np.dot(A, c.T) + 1.0
+    return (A, b)
+
 class PanocNMPCTrajectoryProblem: 
     def __init__(self, solver_param, solver, mpc_generator): 
         self.solver_param = solver_param
@@ -44,39 +78,6 @@ class PanocNMPCTrajectoryProblem:
         self.mpc_generator = mpc_generator
 
         self.initial_guess_pos = None
-
-    def obstacle_as_inequality(self, Vs):
-        # def vert2con(Vs):
-        '''
-        Compute the H-representation of a set of points (facet enumeration).
-        Arguments:
-            Vs: np.mat(np.array([[x0, y0], [x1, y1], [x2, y2]]))
-        Returns:
-            A   (L x d) array. Each row in A represents hyperplane normal.
-            b   (L x 1) array. Each element in b represents the hyperpalne
-                constant bi
-        Taken from https://github.com/d-ming/AR-tools/blob/master/artools/artools.py
-        '''
-        hull = scipy.spatial.ConvexHull(Vs)
-        K = hull.simplices
-        c = np.mean(Vs[hull.vertices, :], 0)  # c is a (1xd) vector
-
-        # perform affine transformation (subtract c from every row in Vs)
-        V = Vs - c
-        A = scipy.NaN * np.empty((K.shape[0], Vs.shape[1]))
-
-        rc = 0
-        for i in range(K.shape[0]):
-            ks = K[i, :]
-            F = V[ks, :]
-            if np.linalg.matrix_rank(F) == F.shape[0]:
-                f = np.ones(F.shape[0])
-                A[rc, :] = scipy.linalg.solve(F, f)
-                rc += 1
-
-        A = A[0:rc, :]
-        b = np.dot(A, c.T) + 1.0
-        return (A, b)
 
     def obstacles_as_inequalities_and_vertices(self, obstacles):
         """
@@ -87,7 +88,7 @@ class PanocNMPCTrajectoryProblem:
             # Get vertices of shapely object
             vert = np.vstack(ob.exterior.xy).T
             # Convert the obstacle into line inequalities and add them to the list
-            A, b = self.obstacle_as_inequality(np.mat(vert.ravel().reshape(-1, 2)))
+            A, b = obstacle_as_inequality(np.mat(vert.ravel().reshape(-1, 2)))
             obs_array = np.array(np.concatenate((b, A), axis = 1))
             # Clip last vertex that comes from shapely definition
             verts = vert[:-1]
@@ -152,7 +153,7 @@ class PanocNMPCTrajectoryProblem:
 
     def convert_bounds_to_eqs(self, boundary_padded):
         bounds = boundary_padded
-        A, B = self.obstacle_as_inequality(np.mat(bounds))
+        A, B = obstacle_as_inequality(np.mat(bounds))
         bounds_array = np.array(np.concatenate((B, A), axis = 1)).reshape(-1)
         #convert to list
         bounds_array = list(bounds_array)

@@ -36,8 +36,17 @@ def start_plotter(config, plot_config, aut_test_config=None, width=800, height=6
                         'ref_point_slave':multiprocessing.Queue(maxsize=1),
                         'search_sector':multiprocessing.Queue(maxsize=1),
 
-                        'object_collision': multiprocessing.Queue(maxsize=1),
-                        'object_safe': multiprocessing.Queue(maxsize=1), # the carried object which needs to be plotted later on
+                        'object_collision_1': multiprocessing.Queue(maxsize=1),
+                        'object_collision_2': multiprocessing.Queue(maxsize=1),
+                        'object_collision_3': multiprocessing.Queue(maxsize=1),
+                        'object_collision_4': multiprocessing.Queue(maxsize=1),
+                        'object_collision_5': multiprocessing.Queue(maxsize=1),
+                        'object_safe_1': multiprocessing.Queue(maxsize=1), # the carried object which needs to be plotted later on
+                        'object_safe_2': multiprocessing.Queue(maxsize=1),
+                        'object_safe_3': multiprocessing.Queue(maxsize=1),
+                        'object_safe_4': multiprocessing.Queue(maxsize=1),
+                        'object_safe_5': multiprocessing.Queue(maxsize=1),
+
                         }
     
     plot_queues_data  = {'master_lin_vel':multiprocessing.Queue(maxsize=1), 
@@ -247,8 +256,17 @@ class PlotterMap():
 
 
 
-        self.map_plots['object_collision'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_collision_color'][:3], name='Cargo under the collision')
-        self.map_plots['object_safe'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3], name='safe Cargo')
+        self.map_plots['object_collision_1'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_collision_color'][:3], name='Cargo under the collision')
+        self.map_plots['object_collision_2'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7,symbolPen=plot_config['object_collision_color'][:3])
+        self.map_plots['object_collision_3'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7,symbolPen=plot_config['object_collision_color'][:3])
+        self.map_plots['object_collision_4'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7,symbolPen=plot_config['object_collision_color'][:3])
+        self.map_plots['object_collision_5'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7,symbolPen=plot_config['object_collision_color'][:3])
+
+        self.map_plots['object_safe_1'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3], name='safe Cargo')
+        self.map_plots['object_safe_2'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3])
+        self.map_plots['object_safe_3'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3])
+        self.map_plots['object_safe_4'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3])
+        self.map_plots['object_safe_5'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3])
 
         # Set up data plots
         self.canvas_lin_vel = self.win_data.addPlot(title="Lin-Vel", row=0, col=0)

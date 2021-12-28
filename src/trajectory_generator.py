@@ -301,7 +301,7 @@ class TrajectoryGenerator:
 
         masterPosition = current_list[0][0]
         slavePosition = current_list[0][1]
-        scalar_for_corners = 0.5
+        scalar_for_corners = 0.75
 
         x_master = float(masterPosition[0])
         y_master = float(masterPosition[1])
@@ -364,16 +364,35 @@ class TrajectoryGenerator:
         try: #plot the carried object here, set up the plot positions
             currentList = [[past_traj_master[-1], past_traj_slave[-1]]]
 
-            output = self.onlineCllisionDetection(currentList)
+            masterPosition = currentList[0][0]
+            slavePosition = currentList[0][1]
+            scalar_for_corners = 0.75
 
+            x_master = float(masterPosition[0])
+            y_master = float(masterPosition[1])
+            x_slave = float(slavePosition[0])
+            y_slave = float(slavePosition[1])
+
+            master_corner_1 = np.array([x_master, y_master]) + scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
+            master_corner_2 = np.array([x_master, y_master]) - scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
+            slave_corner_1 = np.array([x_slave, y_slave]) + scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
+            slave_corner_2 = np.array([x_slave, y_slave]) - scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
+            cargo_corners_list = [master_corner_1, master_corner_2, slave_corner_2, slave_corner_1]
+            output = self.onlineCllisionDetection(currentList)
+            print(master_corner_2-master_corner_1)
+            print(slave_corner_1 - master_corner_1)
             if output == 1:
                 print('Collision!!!!')
-                self.plot_queues['object_collision'].put_nowait(((past_traj_master[-1][0], past_traj_slave[-1][0]), (past_traj_master[-1][1], past_traj_slave[-1][1])))
-                # if state_changed:
-                # self.plot_queues.get_nowait()
+                self.plot_queues['object_collision_1'].put_nowait(((cargo_corners_list[0][0], cargo_corners_list[1][0]),(cargo_corners_list[0][1], cargo_corners_list[1][1])))
+                self.plot_queues['object_collision_2'].put_nowait(((cargo_corners_list[1][0], cargo_corners_list[2][0]),(cargo_corners_list[1][1], cargo_corners_list[2][1])))
+                self.plot_queues['object_collision_3'].put_nowait(((cargo_corners_list[2][0], cargo_corners_list[3][0]),(cargo_corners_list[2][1], cargo_corners_list[3][1])))
+                self.plot_queues['object_collision_4'].put_nowait(((cargo_corners_list[3][0], cargo_corners_list[0][0]),(cargo_corners_list[3][1], cargo_corners_list[0][1])))
             elif output == 0:
-                self.plot_queues['object_safe'].put_nowait(((past_traj_master[-1][0], past_traj_slave[-1][0]), (past_traj_master[-1][1], past_traj_slave[-1][1])))
-                # self.plot_queues['object_safe'].put_nowait(past_traj_master[-1][0], past_traj_master[-1][1])
+                self.plot_queues['object_safe_1'].put_nowait(((cargo_corners_list[0][0], cargo_corners_list[1][0]), (cargo_corners_list[0][1], cargo_corners_list[1][1])))
+                self.plot_queues['object_safe_2'].put_nowait(((cargo_corners_list[1][0], cargo_corners_list[2][0]), (cargo_corners_list[1][1], cargo_corners_list[2][1])))
+                self.plot_queues['object_safe_3'].put_nowait(((cargo_corners_list[2][0], cargo_corners_list[3][0]), (cargo_corners_list[2][1], cargo_corners_list[3][1])))
+                self.plot_queues['object_safe_4'].put_nowait(((cargo_corners_list[3][0], cargo_corners_list[0][0]), (cargo_corners_list[3][1], cargo_corners_list[0][1])))
+
 
         except:
             pass
