@@ -14,10 +14,6 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-# To suppress the warnings about elementwise comparison...
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
-
 def init(build=False, self_destruct=False):
     # Get path to this file
     file_path = Path(__file__)

@@ -22,6 +22,12 @@ from collision_cs import Response
 
 import collision as c
 
+import math
+import miniball
+import json
+from pathlib import Path
+from shapely import geometry as sg
+
 # DEBUG to be deleted
 from main import plot_polygons_w_atr
 
@@ -36,6 +42,21 @@ MAX_OUTER_ITERATIONS = 15
 #     static_dict = pickle.load(f)
 from main import init_obs
 static_dict = init_obs()
+
+# Pre compute for circles approach in collision detection of cargo
+file_path = Path(__file__)
+#Get the path to the json file
+obs_original = os.path.join(str(file_path.parent.parent.parent), 'data', 'obstacles.json')
+with open(obs_original) as f:
+    distros_dict = json.load(f)
+static_obs = []
+unexpected_obs = []
+for elem in distros_dict['static']:
+    static_obs.append(elem)
+    # print("static ",static_obs)
+for elem in distros_dict['unexpected']:
+    unexpected_obs.append(elem['vertices'])
+    # print("unexpected ",unexpected_obs)
 
 def get_length(iterable):
     """Casadi can't handle len.
@@ -366,7 +387,7 @@ class MpcModule:
 
     # Cost for collision of cargo with obstacles
     @cost_positive
-    def cost_cargo_inside_static_object(self, x_all_master, y_all_master, x_all_slave, y_all_slave, q, individual_costs=False, vert_method=False, lib_method=False, circ_method=False):
+    def cost_cargo_inside_static_object(self, x_all_master, y_all_master, x_all_slave, y_all_slave, obstacles, q, individual_costs=False, vert_method=False, lib_method=False, circ_method=False):
         '''
         Specify which method is used.
         Options: vert_method=True OR lib_method=True OR circ_method=True
@@ -377,6 +398,24 @@ class MpcModule:
         else:
             crash_in_trajectory = []
         
+        # Init for circles
+        #TODO: import the vertices of the obstacles from json file
+        #TODO: get obstacles dynamically
+        #TODO: make list to storeprint("static= []
+        bounding_circles = []
+        circle_parameters_list = []
+        #TODO: minimum enclosing circle for all obstacels, right now this only is applicable for one obstacle
+        for o in obstacles:
+            #get minimum enclosing circle parameters from miniball
+            circle_coords, r_squared = miniball.get_bounding_ball(np.array(o))
+            radius = math.sqrt(r_squared)
+            
+            #Store the data given (x_orgin, y_orign, radius)
+            circle_parameters_list.append([circle_coords,radius])
+
+            circle = sg.Point(circle_coords[0],circle_coords[1]).buffer(radius)
+            bounding_circles.append(circle) #This should be plotted in the plotter function
+
         # Loop over time steps along horizon
         for t in range(0, self.solver_param.base.n_hor):
             # Reset/init for each time step
@@ -390,7 +429,7 @@ class MpcModule:
             # TODO: flexible definition of the cargo (orientate it depending on position of ATRs only)
             # Create Polygon for cargo online
             # deviate from line (cargo) in normal direction (if line=[x,y] then normal=[y,-x]or[-y,x])
-            a = 0.001    # in unit of x,y
+            a = 0.1    # in unit of x,y
             y_delta = y_master-y_slave
             x_delta = x_master-x_slave
             n = cs.sqrt(y_delta*y_delta + x_delta*x_delta)
@@ -460,6 +499,10 @@ class MpcModule:
                                 y1 = vertices_cargo[line][1]
                                 y2 = vertices_cargo[(line+1)%len(vertices_cargo)][1] # loop over if line is last index to take the first as next vertex
                                 # b = -r_0[0]*v_y*(-v_x)/(v_x*(-v_x)+1e-5) + r_0[1] # add factor for case if v_x zero / compute b for current line of cargo 
+                            
+
+                                # TODO: Get A and b for cargo from panoc obstacle_as_inequality
+
                                 b = y1*x2 - y2*x1
                                 a_x = x1 - x2 # compute a0 for current line of cargo 
                                 a_y = y2 - y1 # compute a1 for current line of cargo 
@@ -528,50 +571,41 @@ class MpcModule:
                 crash = cs.fmax(0.0, response.overlap)**2.0   # zero if cargo fulfills constraint (CasADi: Maximum function is "differentiable")
                 # print(crash)
             
-            if circ_method:        
-                # TODO: calculate the origin of the obstacle cirlce
-                x_origin_obs = 5.5
-                y_origin_obs = 4.5
+            if circ_method:       
+                #TODO: coordinates for the origin of the bounding circle
 
-                # TODO: calculate the radius of the obstacle circle
-                r_obs = 1.5
+                #TODO: radius of the bounding circle
+
+                #TODO: bounding circle of obstacle from the vertices as shapely object?
+
+                #TODO: model the cargo, start with easy shape.
                 
-                # Loop over time steps along horizon, still useful
-                for t in range(0, self.solver_param.base.n_hor):
-                    # Reset/init for each time step
-                    area = 0
-                    x_master = x_all_master[t]
-                    y_master = y_all_master[t]
-                    x_slave = x_all_slave[t]
-                    y_slave = y_all_slave[t]
+                #TODO: The distance between the ATR:s should be the same as the longest dimension of the cargo, for simple modelling?
 
-                    # TODO: create the origin of the cargo circle!
-                    x_origin_cargo = (x_master + x_slave)/2
-                    y_origin_cargo = (y_master + x_slave)/2
+                # Origin of the cargo circle!
+                x_origin_cargo = (x_master + x_slave)/2
+                y_origin_cargo = (y_master + y_slave)/2
 
-                    # TODO: calculate the radius of the cargo circle
-                    r_cargo = cs.sqrt((x_origin_cargo-x_master)**2 + (y_origin_cargo-y_master)**2)
+                # TODO: calculate the radius of the cargo circle, change to casadi instead of math. 
+                # r_cargo = math.sqrt((x_origin_cargo-x_master)**2 + (y_origin_cargo-y_master)**2)
+                r_cargo = cs.sqrt((x_origin_cargo-x_master)**2 + (y_origin_cargo-y_master)**2)
 
-                    # TODO: define the distance between the two origins
-                    d_origins = cs.sqrt((x_origin_cargo-x_origin_obs)**2 + (y_origin_cargo-y_origin_obs)**2)
+                # TODO: define the distance between the two origins, should be able to change distance between ATRs depending on the cargo.
+                #TODO: check all obstacles in the list
 
-                    # TODO: define cargo and obstacle in casadi friendly syntax?
-
-                    # TODO: Loop over all static obstacles (Save for later so that we can model obstacles as more than one cirlce)
-                    # for bounding_box_obj in bb_list:
-                    #     # Simple check f
-                    #     if (obj_xmin < cargo_xmax and obj_xmax > cargo_xmin and
-                    #         obj_ymin < cargo_ymax and obj_ymax > cargo_ymin):
-                    #         # Bounding boxes overlap
-                    #         # Compute collision area with shapely
-                    #         # TODO: get shapely object of static obstacle with its index in bounding box list
-                    #         obj = obj_list[index]
-                    #         area += cargo.intersection(obj).area/min(cargo.area,obj.area)   # intersecting area compared to the size of the cargo or obstacle for good estimation if intrusion is bad or negatable
+                crash = 0
+                for bc in range(len(bounding_circles)):
                     
-                    crash = cs.fmax(0.0, r_cargo+r_obs-d_origins)**2.0   # zero if cargo fulfills constraint, change area to the cirlce condition
-                    print("crash", crash)
-                    # if crash !=0.0:
-                    #     print("crash added")
+                    #TODO: check if these needs to be in casadi as well????
+                    obs_origin = circle_parameters_list[bc][0]
+                    obs_radius = circle_parameters_list[bc][1]
+
+                    #Calculate the distance between the origin of the cargo and obstacle, change to casadi instead of math
+                    # d_origins = math.sqrt((x_origin_cargo - obs_origin[0])**2 + (y_origin_cargo - obs_origin[1])**2)
+                    d_origins = cs.sqrt((x_origin_cargo - obs_origin[0])**2 + (y_origin_cargo - obs_origin[1])**2)
+
+                    crash = crash + cs.fmax(0.0, r_cargo + obs_radius - d_origins)**2.0   # zero if cargo fulfills constraint, change area to the cirlce condition
+                
 
             # Error handling due to wrong function call
             if not vert_method and not lib_method and not circ_method:
@@ -860,7 +894,7 @@ class MpcModule:
         self.base_ref_points = self.base_ref_u + self.solver_param.base.n_hor*self.solver_param.base.nu
         self.base_static_obs_param = self.base_ref_points + self.solver_param.base.nx * self.solver_param.base.n_hor
         self.base_dyn_obs_param = self.base_static_obs_param + self.n_static_obs_parameters
-        self.n_z0 = 2*self.solver_param.base.nx + 2 * self.solver_param.base.nu + self.solver_param.base.n_hor*self.solver_param.base.nu + self.n_distance_parameters + self.solver_param.pos_goal_weights.n_weights + self.solver_param.base.nx * self.solver_param.base.n_hor + self.n_static_obs_parameters + self.n_dyn_obs_parameters + self.solver_param.base.n_dyn_obs + self.n_static_param_line * self.solver_param.base.n_bounds_vertices
+        self.n_z0 = 2*self.solver_param.base.nx + 2 * self.solver_param.base.nu + self.solver_param.base.n_hor*self.solver_param.base.nu + self.n_distance_parameters + self.solver_param.pos_goal_weights.n_weights + self.solver_param.base.nx * self.solver_param.base.n_hor + self.n_static_obs_parameters + self.n_dyn_obs_parameters + self.solver_param.base.n_dyn_obs + self.solver_param.base.n_param_line * self.solver_param.base.n_bounds_vertices
 
         self.parameters = parameters
         # Define variables for solver
@@ -890,25 +924,26 @@ class MpcModule:
         # self.q_cargo = self.parameters[53]
 
         # u_ref  
-        self.v_ref_master        = self.parameters[self.base_ref_u    : self.base_ref_points : self.solver_param.base.nu]
-        self.ang_vel_ref_master    = self.parameters[self.base_ref_u + 1: self.base_ref_points : self.solver_param.base.nu]
-        self.v_ref_slave         = self.parameters[self.base_ref_u + 2: self.base_ref_points : self.solver_param.base.nu]
-        self.ang_vel_ref_slave     = self.parameters[self.base_ref_u + 3: self.base_ref_points : self.solver_param.base.nu]
+        self.v_ref_master       = self.parameters[self.base_ref_u    : self.base_ref_points : self.solver_param.base.nu]
+        self.ang_vel_ref_master = self.parameters[self.base_ref_u + 1: self.base_ref_points : self.solver_param.base.nu]
+        self.v_ref_slave        = self.parameters[self.base_ref_u + 2: self.base_ref_points : self.solver_param.base.nu]
+        self.ang_vel_ref_slave  = self.parameters[self.base_ref_u + 3: self.base_ref_points : self.solver_param.base.nu]
 
         # SX list of statics objects coords, self.length = Maximum num of objects 
-        self.ref_points_master_x     = self.parameters[self.base_ref_points : self.base_static_obs_param : self.solver_param.base.nx]
-        self.ref_points_master_y     = self.parameters[self.base_ref_points +1: self.base_static_obs_param : self.solver_param.base.nx]
-        self.ref_points_master_th    = self.parameters[self.base_ref_points +2: self.base_static_obs_param : self.solver_param.base.nx]
-        self.ref_points_slave_x      = self.parameters[self.base_ref_points +3: self.base_static_obs_param : self.solver_param.base.nx]
-        self.ref_points_slave_y      = self.parameters[self.base_ref_points +4: self.base_static_obs_param : self.solver_param.base.nx]
-        self.ref_points_slave_th     = self.parameters[self.base_ref_points +5: self.base_static_obs_param : self.solver_param.base.nx]
+        self.ref_points_master_x     = self.parameters[self.base_ref_points    : self.base_static_obs_param : self.solver_param.base.nx]
+        self.ref_points_master_y     = self.parameters[self.base_ref_points + 1: self.base_static_obs_param : self.solver_param.base.nx]
+        self.ref_points_master_th    = self.parameters[self.base_ref_points + 2: self.base_static_obs_param : self.solver_param.base.nx]
+        self.ref_points_slave_x      = self.parameters[self.base_ref_points + 3: self.base_static_obs_param : self.solver_param.base.nx]
+        self.ref_points_slave_y      = self.parameters[self.base_ref_points + 4: self.base_static_obs_param : self.solver_param.base.nx]
+        self.ref_points_slave_th     = self.parameters[self.base_ref_points + 5: self.base_static_obs_param : self.solver_param.base.nx]
 
-        self.bs_static = self.parameters[self.base_static_obs_param     :self.base_dyn_obs_param :self.n_static_param_line]
+        # TODO: n_param_line only? Check indices in debugger
+        self.bs_static  = self.parameters[self.base_static_obs_param    :self.base_dyn_obs_param :self.n_static_param_line]
         self.a0s_static = self.parameters[self.base_static_obs_param + 1:self.base_dyn_obs_param :self.n_static_param_line]
         self.a1s_static = self.parameters[self.base_static_obs_param + 2:self.base_dyn_obs_param :self.n_static_param_line]
         # x,y coordinates of the starting vertex of each line in all obstacles
-        self.vx_static = self.parameters[self.base_static_obs_param + 3 :self.base_dyn_obs_param :self.n_static_param_line]
-        self.vy_static = self.parameters[self.base_static_obs_param + 4 :self.base_dyn_obs_param :self.n_static_param_line]
+        self.vx_static  = self.parameters[self.base_static_obs_param + 3:self.base_dyn_obs_param :self.n_static_param_line]
+        self.vy_static  = self.parameters[self.base_static_obs_param + 4:self.base_dyn_obs_param :self.n_static_param_line]
         # ordering is x_master, y_master, r for obstacle 0 for n_hor timesteps, self.then x_master, y_master, r for obstalce 1 for n_hor timesteps etc.
         # Get dynamic obstacle parameters for each timestep 
         self.end_of_dynamic_obs_idx = self.base_dyn_obs_param + self.solver_param.base.n_param_dyn_obs * self.solver_param.base.n_dyn_obs * self.solver_param.base.n_hor
@@ -922,9 +957,9 @@ class MpcModule:
 
         self.base_bounds_param = self.end_of_dynamic_obs_idx + self.solver_param.base.n_dyn_obs
         # set up bounds ineqs into lists
-        self.b0_bounds = self.parameters[self.base_bounds_param    : self.base_bounds_param + self.n_static_param_line * self.solver_param.base.n_bounds_vertices : self.n_static_param_line]
-        self.a0_bounds = self.parameters[self.base_bounds_param + 1: self.base_bounds_param + self.n_static_param_line * self.solver_param.base.n_bounds_vertices : self.n_static_param_line]
-        self.a1_bounds = self.parameters[self.base_bounds_param + 2: self.base_bounds_param + self.n_static_param_line * self.solver_param.base.n_bounds_vertices : self.n_static_param_line]
+        self.b0_bounds = self.parameters[self.base_bounds_param    : self.base_bounds_param + self.solver_param.base.n_param_line * self.solver_param.base.n_bounds_vertices : self.solver_param.base.n_param_line]
+        self.a0_bounds = self.parameters[self.base_bounds_param + 1: self.base_bounds_param + self.solver_param.base.n_param_line * self.solver_param.base.n_bounds_vertices : self.solver_param.base.n_param_line]
+        self.a1_bounds = self.parameters[self.base_bounds_param + 2: self.base_bounds_param + self.solver_param.base.n_param_line * self.solver_param.base.n_bounds_vertices : self.solver_param.base.n_param_line]
 
     def build(self):
         # Init costs
@@ -971,7 +1006,7 @@ class MpcModule:
         # cost += self.cost_inside_static_object((all_x_slave[1:]+all_x_master[1:])/2, (all_y_slave[1:]+all_y_master[1:])/2, self.q_obs_c)
         # cost += self.cost_inside_dyn_ellipse2((all_x_slave[1:]+all_x_master[1:])/2, (all_y_slave[1:]+all_y_master[1:])/2, self.q_dyn_obs_c)
         # TODO: separate weighting -> create own weight
-        cost += self.cost_cargo_inside_static_object(all_x_master[1:], all_y_master[1:], all_x_slave[1:], all_y_slave[1:], self.q_obs_c, vert_method=True)
+        cost += self.cost_cargo_inside_static_object(all_x_master[1:], all_y_master[1:], all_x_slave[1:], all_y_slave[1:], [static_obs[0], unexpected_obs[0]], self.q_obs_c, circ_method=True)
 
         # Cost for outside bounds
         cost += self.cost_outside_bounds(all_x_master[1:], all_y_master[1:], self.q_obs_c)

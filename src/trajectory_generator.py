@@ -149,7 +149,7 @@ class TrajectoryGenerator:
             x = self.robot_state
 
             # Local path planner, plans around unexpected obstacles
-            static_original_obs, static_padded_obs, _, _, unexpected_padded_obs, unexpected_obstacles_shapely = self.obs_handler.get_static_obstacles()
+            _, static_padded_obs, _, _, unexpected_padded_obs, unexpected_obstacles_shapely = self.obs_handler.get_static_obstacles()
             boundary = self.obs_handler.get_boundary()
 
             self.path_planner.local_path_plan(x[:3], unexpected_padded_obs, unexpected_obstacles_shapely, static_padded_obs, boundary)
@@ -168,8 +168,7 @@ class TrajectoryGenerator:
             closest_obs_dynamic = self.obs_handler.get_closest_dynamic_obstacles(x_cur[:2])
             
             # Generate obstacle constraints in Panoc terms
-            constraints, closest_static_unexpected_obs = self.panoc.convert_static_obs_to_eqs(closest_obs_static)
-            vertices = self.panoc.convert_static_obs_to_eqs(static_original_obs)    # get vertices out of original static obs
+            constraints, closest_static_unexpected_obs = self.panoc.convert_static_obs_to_eqs_and_verts(closest_obs_static) # get half-spaces and vertices out of original static obs
             dyn_constraints, closest_dynamic_obs_poly, closest_dynamic_obs_ellipse = list(self.panoc.convert_dynamic_obs_to_eqs(closest_obs_dynamic))
             active_dyn_obs = self.panoc.get_active_dyn_obs(dyn_constraints)
             bounds_eqs = self.panoc.convert_bounds_to_eqs(boundary)
@@ -504,7 +503,7 @@ class TrajectoryGenerator:
 
         cost_static_master = float(self.mpc_generator.cost_inside_static_object(all_x_master, all_y_master, self.mpc_generator.q_obs_c))
         cost_static_slave = float(self.mpc_generator.cost_inside_static_object(all_x_slave, all_y_slave, self.mpc_generator.q_obs_c))
-        cost_static_cargo = float(self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, self.mpc_generator.q_obs_c, lib_method=True))
+        # cost_static_cargo = float(self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, self.mpc_generator.q_obs_c, lib_method=True))
         cost_bounds_master = float(self.mpc_generator.cost_outside_bounds(all_x_master, all_y_master, self.mpc_generator.q_obs_c))
         cost_bounds_slave = float(self.mpc_generator.cost_outside_bounds(all_x_slave, all_y_slave, self.mpc_generator.q_obs_c))
         # cost_bounds_cargo = float(self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, self.mpc_generator.q_obs_c))

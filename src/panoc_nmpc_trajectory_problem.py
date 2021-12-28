@@ -78,18 +78,24 @@ class PanocNMPCTrajectoryProblem:
         b = np.dot(A, c.T) + 1.0
         return (A, b)
 
-    def obstacles_as_inequalities(self, obstacles):
+    def obstacles_as_inequalities_and_vertices(self, obstacles):
         """
-        Returns the obstacles in a list of lists of flattened b and a: [[b0 a0^T] ... [bn an^T]]
+        Returns the obstacles in a list of lists of flattened b and a and v (= vx,vy): [[b0 a0^T v0^T] ... [bn an^T vn^T]]
         """
-        obs_equations = []
+        obs_equations_and_vertices = []
         for ob in obstacles:
+            # Get vertices of shapely object
+            vert = np.vstack(ob.exterior.xy).T
             # Convert the obstacle into line inequalities and add them to the list
-            A, b = self.obstacle_as_inequality(np.mat(np.vstack(ob.exterior.xy).T.ravel().reshape(-1, 2)))
-            obs_array = np.array(np.concatenate((b, A), axis = 1)).reshape(-1)
-            obs_equations.append(obs_array)
+            A, b = self.obstacle_as_inequality(np.mat(vert.ravel().reshape(-1, 2)))
+            obs_array = np.array(np.concatenate((b, A), axis = 1))
+            # Clip last vertex that comes from shapely definition
+            verts = vert[:-1]
+            # Combine and reshape
+            eqs_and_verts = np.concatenate((obs_array,verts), axis = 1).reshape(-1)
+            obs_equations_and_vertices.append(eqs_and_verts)
         
-        return obs_equations
+        return obs_equations_and_vertices
 
     def obstacle_as_ellipse(self, obstacle):
         """Converts obstacles into ellipses with representation:  (x-c).T * A * (x-c) = 1.
@@ -157,7 +163,7 @@ class PanocNMPCTrajectoryProblem:
             bounds_array = bounds_array + list(extra_params)
         return bounds_array
 
-    def convert_static_obs_to_eqs(self, closest_obs):
+    def convert_static_obs_to_eqs_and_verts(self, closest_obs):
         """[summary]
 
         Args:
@@ -167,23 +173,25 @@ class PanocNMPCTrajectoryProblem:
             obs_equations (numpy array): 1-d numpy array where the static and unexpected obstacles as [b0 a0^T ... bn an^T]
         
         """
-        # Convert the closest static and dynamic obstacles into inequalities 
+        # Convert the closest static and dynamic obstacles into inequalities AND x,y coordinates of all vertices
         obs_equations = []
+        n_param = self.solver_param.base.n_param_line + self.solver_param.base.n_param_vertex
         for key in closest_obs:     # keys are order of polygon
             obs = closest_obs[key]  # get list of static obs of order 'key'
-            key_obs_equations = np.array(self.obstacles_as_inequalities(obs)).reshape(-1)
-
+            key_obs_equations_and_vertices = np.array(self.obstacles_as_inequalities_and_vertices(obs)).reshape(-1)  # Obs converted in 'key' half-spaces with A*x = b in R^'key'
+            # check what happens with zeros of vertices
             # If there aren't enough obstacles, fill with 0s
             n_obs = len(obs) 
             if n_obs < self.solver_param.base.n_obs_of_each_vertices: #TODO: Add special case for triangles
-                obs_array = np.zeros((self.solver_param.base.n_obs_of_each_vertices-n_obs)*self.solver_param.base.n_param_line*key) # Get zeros for equation params of every additional obs for each order
-                key_obs_equations = np.hstack((key_obs_equations, obs_array))
-            obs_equations.append(key_obs_equations)
+                # obs_array = float('inf')*np.ones((self.solver_param.base.n_obs_of_each_vertices-n_obs)*n_param*key) # Set inf for equation params of every additional obs for each order
+                obs_array = np.zeros((self.solver_param.base.n_obs_of_each_vertices-n_obs)*n_param*key)
+                key_obs_equations_and_vertices = np.hstack((key_obs_equations_and_vertices, obs_array))
+            obs_equations.append(key_obs_equations_and_vertices)
         
         obs_equations = np.hstack(obs_equations)  # Combine all equations of each order into one array
 
         # Make sure the correct number of params are sent
-        assert(sum(range(self.solver_param.base.min_vertices, self.solver_param.base.max_vertices+1)) * self.solver_param.base.n_param_line * self.solver_param.base.n_obs_of_each_vertices == sum(obs_equations.shape)), "An invalid amount of static obstacles parameters were sent."
+        assert(sum(range(self.solver_param.base.min_vertices, self.solver_param.base.max_vertices+1)) * n_param * self.solver_param.base.n_obs_of_each_vertices == sum(obs_equations.shape)), "An invalid amount of static obstacles parameters were sent."
         return obs_equations, closest_obs
 
     def convert_dynamic_obs_to_eqs(self, closest_obs):
