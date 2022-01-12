@@ -1,18 +1,15 @@
-import math
-
 from .util import Vector
 from . import tripy
 
-# Convert all if statements to casadi.fmax functions with equivalent logic to make the collision library casadi conform
-import casadi.casadi as cs
 
 POLY_RECALC_ATTRS = ["angle"]
 
 
 class Poly:
-    def __init__(self, pos, points, angle=0):
+    def __init__(self, pos, points): #, angle=0):   angle not supported yet
+        # POLYGONS HAVE TO BE DEFINED ANTI-CLOCKWISE
         self.pos = pos
-        self.__dict__["angle"] = angle
+        # self.__dict__["angle"] = angle
         self.set_points(points)
 
     @classmethod
@@ -50,8 +47,9 @@ class Poly:
 
         for i in l:
             self.rel_points[i].set(self.base_points[i])
-            if self.angle != 0:
-                self.rel_points[i] = self.rel_points[i].rotate(self.angle)
+            # Following not supported yet
+            # if self.angle != 0:
+            #     self.rel_points[i] = self.rel_points[i].rotate(self.angle)
 
         for i in l:
             p1 = self.rel_points[i]
@@ -107,12 +105,13 @@ class Poly:
         for p in self.points:
             r += "\t\t{}\n".format(str(p))
         r += "\t]\n"
-        r += "\tpos = {}\n\tangle = {}\n".format(self.pos, self.angle)
+        r += "\tpos = {}\n\tangle = {}\n".format(self.pos)#, self.angle)
         r += "]"
         return r
 
     def __repr__(self):
         return self.__str__()
+
 
 
 class Concave_Poly():

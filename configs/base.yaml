@@ -48,6 +48,7 @@ nu: 4      # Number of control inputs
 # Vehicle parameters
 vehicle_width:  0.5   # Vehicle width in meters
 vehicle_margin: .25  # Extra margin used for padding in meters
+n_vert_cargo: 4      # number of vert of the cargo
 
 # Building options in the optimizer
 build_type: 'debug'           # Can have 'debug' or 'release'

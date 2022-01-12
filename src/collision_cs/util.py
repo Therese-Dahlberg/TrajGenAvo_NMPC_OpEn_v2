@@ -1,4 +1,4 @@
-import math
+# import math
 from numbers import Real
 from typing import Any, Union
 import casadi.casadi as cs
@@ -9,7 +9,7 @@ from cs_tools import cs2bool
 LEFT_VORONOI_REGION = -1
 MIDDLE_VORONOI_REGION = 0
 RIGHT_VORONOI_REGION = 1
-ALLOWED_NUM_TYPES = (int, float)
+ALLOWED_NUM_TYPES = (int, float, cs.SX)
 
 
 class Vector:
@@ -94,8 +94,8 @@ class Vector:
     def perp(self):
         return Vector(self.y, -self.x)
 
-    def rotate(self, angle: Union[int, float, Real]):
-        return Vector(self.x * math.cos(angle) - self.y * math.sin(angle), self.x * math.sin(angle) + self.y * math.cos(angle))
+    # def rotate(self, angle: Union[int, float, Real]):
+    #     return Vector(self.x * math.cos(angle) - self.y * math.sin(angle), self.x * math.sin(angle) + self.y * math.cos(angle))
 
     def reverse(self):
         return Vector(-self.x, -self.y)
@@ -138,12 +138,12 @@ class Vector:
         return self.dot(self)
 
     def ln(self):
-        return math.sqrt(self.ln2())
+        return cs.sqrt(self.ln2())
 
 
 def flatten_points_on(points, normal, result):
-    minpoint = math.inf
-    maxpoint = -math.inf
+    minpoint = 1e10 # cs.inf
+    maxpoint = -1e10 # cs.inf
 
     for i in range(len(points)):
         dot = points[i].dot(normal)
@@ -171,17 +171,15 @@ def is_separating_axis(a_pos, b_pos, a_points, b_points, axis, response=None):
 
     #### Changed for cs ####
     # FOR READABILITY CHECK ORIGINAL util.py in collision library (https://github.com/qwertyquerty/collision/blob/master/collision/util.py)
-    # if range_a[0] > range_b[1] or range_b[0] > range_a[1]:
-    #     return True     # no collision
-    # collision: Boolean Flag with 1: no collision -> output is surpressed to 0 / 0: collision not excluded -> computations below will not be changed  
+    # collision: Boolean Flag with 0: no collision -> output is surpressed to 0 / 1: collision possible (at least regarding this axis)   
     # Firstly, for first boolean (range_a[0] > range_b[1])
-    no_collision1 = cs2bool(range_a[0] - range_b[1])    # here -residual because we want 0 when True
+    collision1 = cs2bool(- (range_a[0] - range_b[1]))   # here -residual because we want 0 when True
     # Then, for the second boolean (range_b[0] > range_a[1])
-    no_collision2 = cs2bool(range_b[0] - range_a[1])
+    collision2 = cs2bool(- (range_b[0] - range_a[1]))   # here -residual because we want 0 when True
     # Combine in "or"
-    no_collision = cs.fmin(1.0,no_collision1+no_collision2)  # only 1 if at least one is 1
+    collision = cs.fmin(1.0,collision1+collision2)  # only 1 if at least one is 1
     # flag to surpress output if no collision 
-    flag = (no_collision - 1)**no_collision  # map 1 to 0 and vice versa
+    # flag = (no_collision - 1)**no_collision  # map 1 to 0 and vice versa
 
     # Measure overlap
     overlap = 0
@@ -203,7 +201,7 @@ def is_separating_axis(a_pos, b_pos, a_points, b_points, axis, response=None):
 
     # if range_a[1] > range_b[1]:
     (b4,nb4) = cs2bool(range_a[1] - range_b[1], with_else=True)
-    overlap += nb1*b4*range_a[0] - range_b[1]
+    overlap += nb1*b4*(range_a[0] - range_b[1])
 
     option_21 = range_a[1] - range_b[0]
     option_22 = range_b[1] - range_a[0]
@@ -212,8 +210,8 @@ def is_separating_axis(a_pos, b_pos, a_points, b_points, axis, response=None):
     overlap += nb1*nb4*b5*option_21
     overlap += nb1*nb4*nb5*(-option_22)
 
-    # If no collision set overlap to 0, else don't change
-    overlap *= flag
+    # If no collision set overlap to 0
+    overlap *= collision
 
     # Take absolut value
     abs_overlap = cs.sqrt(overlap**2)

@@ -79,21 +79,24 @@ class PanocNMPCTrajectoryProblem:
 
         self.initial_guess_pos = None
 
-    def obstacles_as_inequalities_and_vertices(self, obstacles):
+    def obstacles_as_inequalities_and_vertices(self, obstacles, obs_handler):
         """
         Returns the obstacles in a list of lists of flattened b and a and v (= vx,vy): [[b0 a0^T v0^T] ... [bn an^T vn^T]]
         """
         obs_equations_and_vertices = []
         for ob in obstacles:
             # Get vertices of shapely object
-            vert = np.vstack(ob.exterior.xy).T
+            vert = np.vstack(ob.exterior.xy).T[:-1] # Clip last vertex that is doubled due to shapely convention
+            # Unpad obstacle to get original and get vertices of original
+            vert_unpad = obs_handler.pad_obstacles(np.expand_dims(vert, axis=0), decrease=True)[0]
             # Convert the obstacle into line inequalities and add them to the list
             A, b = obstacle_as_inequality(np.mat(vert.ravel().reshape(-1, 2)))
             obs_array = np.array(np.concatenate((b, A), axis = 1))
-            # Clip last vertex that comes from shapely definition
-            verts = vert[:-1]
+            # H-representation for original as well
+            A_unpad, b_unpad = obstacle_as_inequality(np.mat(vert_unpad.ravel().reshape(-1, 2)))
+            obs_array_unpad = np.array(np.concatenate((b_unpad, A_unpad), axis = 1))
             # Combine and reshape
-            eqs_and_verts = np.concatenate((obs_array,verts), axis = 1).reshape(-1)
+            eqs_and_verts = np.concatenate((obs_array,obs_array_unpad,vert_unpad), axis = 1).reshape(-1)
             obs_equations_and_vertices.append(eqs_and_verts)
         
         return obs_equations_and_vertices
@@ -164,7 +167,7 @@ class PanocNMPCTrajectoryProblem:
             bounds_array = bounds_array + list(extra_params)
         return bounds_array
 
-    def convert_static_obs_to_eqs_and_verts(self, closest_obs):
+    def convert_static_obs_to_eqs_and_verts(self, closest_obs, obs_handler):
         """[summary]
 
         Args:
@@ -175,25 +178,25 @@ class PanocNMPCTrajectoryProblem:
         
         """
         # Convert the closest static and dynamic obstacles into inequalities AND x,y coordinates of all vertices
-        obs_equations = []
-        n_param = self.solver_param.base.n_param_line + self.solver_param.base.n_param_vertex
+        obs_equations_and_vertices = []
+        n_param = self.solver_param.base.n_param_line*2 + self.solver_param.base.n_param_vertex
         for key in closest_obs:     # keys are order of polygon
             obs = closest_obs[key]  # get list of static obs of order 'key'
-            key_obs_equations_and_vertices = np.array(self.obstacles_as_inequalities_and_vertices(obs)).reshape(-1)  # Obs converted in 'key' half-spaces with A*x = b in R^'key'
+            key_obs_equations_and_vertices = np.array(self.obstacles_as_inequalities_and_vertices(obs, obs_handler)).reshape(-1)  # Obs converted in 'key' half-spaces with A*x = b in R^'key'
             # check what happens with zeros of vertices
             # If there aren't enough obstacles, fill with 0s
             n_obs = len(obs) 
             if n_obs < self.solver_param.base.n_obs_of_each_vertices: #TODO: Add special case for triangles
-                # obs_array = float('inf')*np.ones((self.solver_param.base.n_obs_of_each_vertices-n_obs)*n_param*key) # Set inf for equation params of every additional obs for each order
-                obs_array = np.zeros((self.solver_param.base.n_obs_of_each_vertices-n_obs)*n_param*key)
+                obs_array = 1e9*np.ones((self.solver_param.base.n_obs_of_each_vertices-n_obs)*n_param*key) # Set nearly inf for equation params of every additional obs for each order (so high to be not common / not typical for normal points to lie there since this would lead to a bad behavior)
+                # obs_array = np.zeros((self.solver_param.base.n_obs_of_each_vertices-n_obs)*n_param*key)
                 key_obs_equations_and_vertices = np.hstack((key_obs_equations_and_vertices, obs_array))
-            obs_equations.append(key_obs_equations_and_vertices)
+            obs_equations_and_vertices.append(key_obs_equations_and_vertices)
         
-        obs_equations = np.hstack(obs_equations)  # Combine all equations of each order into one array
+        obs_equations_and_vertices = np.hstack(obs_equations_and_vertices)  # Combine all equations of each order into one array
 
         # Make sure the correct number of params are sent
-        assert(sum(range(self.solver_param.base.min_vertices, self.solver_param.base.max_vertices+1)) * n_param * self.solver_param.base.n_obs_of_each_vertices == sum(obs_equations.shape)), "An invalid amount of static obstacles parameters were sent."
-        return obs_equations, closest_obs
+        assert(sum(range(self.solver_param.base.min_vertices, self.solver_param.base.max_vertices+1)) * n_param * self.solver_param.base.n_obs_of_each_vertices == sum(obs_equations_and_vertices.shape)), "An invalid amount of static obstacles parameters were sent."
+        return obs_equations_and_vertices, closest_obs
 
     def convert_dynamic_obs_to_eqs(self, closest_obs):
         # Convert them into ellipses
@@ -260,7 +263,7 @@ class PanocNMPCTrajectoryProblem:
         assert solution.cost >= 0, f"The cost cannot be negative. It was {solution.cost}"
         return u, solution.cost
 
-    def gen_pos_traj(self, x_cur, x_finish, constraints, dyn_constraints, active_dyn_obs, distance_lb, distance_ub, bounds_eqs, u_previous, initial_guess_pos, prev_acc):
+    def gen_pos_traj(self, x_cur, x_finish, constraints, dyn_constraints, active_dyn_obs, distance_lb, distance_ub, bounds_eqs, u_previous, initial_guess_pos, prev_acc, vertices_cargo):
         d_near = 0.00001
         acc_init = prev_acc
 
@@ -307,7 +310,7 @@ class PanocNMPCTrajectoryProblem:
                 ]
         
         
-        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [0] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + refs +  list(constraints) + list(dyn_constraints) + active_dyn_obs + bounds_eqs
+        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [0] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + refs +  list(constraints) + list(dyn_constraints) + active_dyn_obs + bounds_eqs + vertices_cargo
         parameters = [float(param) for param in parameters]
 
         
@@ -319,7 +322,7 @@ class PanocNMPCTrajectoryProblem:
 
         return ref_cost, parameters, solution
 
-    def gen_line_following_traj(self, x_cur, dyn_constraints, line_vertices_master, line_vertices_slave, formation_angle_ref, constraints, active_dyn_obs, distance_lb, distance_ub, aggressive_factor, bounds_eqs, u_prev, initial_guess_master, prev_acc):
+    def gen_line_following_traj(self, x_cur, dyn_constraints, line_vertices_master, line_vertices_slave, formation_angle_ref, constraints, active_dyn_obs, distance_lb, distance_ub, aggressive_factor, bounds_eqs, u_prev, initial_guess_master, prev_acc, vertices_cargo):
         master_angle_ref = self.mpc_generator.calc_master_ref_angle(x_cur[:3], *line_vertices_master[:3])
 
         # Build parameter list
@@ -380,7 +383,7 @@ class PanocNMPCTrajectoryProblem:
             weight_list.append( mixed_weight)
 
         u_previous = u_prev[:2] + [0,0]
-        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [formation_angle_ref] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + refs +  list(constraints) + list(dyn_constraints) + active_dyn_obs + bounds_eqs
+        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [formation_angle_ref] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + refs +  list(constraints) + list(dyn_constraints) + active_dyn_obs + bounds_eqs + vertices_cargo
 
         parameters = [float(param) for param in parameters]
 
@@ -393,7 +396,7 @@ class PanocNMPCTrajectoryProblem:
         
         return ref_cost, parameters, solution
 
-    def gen_traj_following_traj(self, trajectory_ref, u_ref, x_cur, formation_angle_ref, x_finish, constraints, dyn_constraints, active_dyn_obs, distance_lb, distance_ub, aggressive_factor, bounds_eqs, u_previous, initial_guess_dual, prev_acc):
+    def gen_traj_following_traj(self, trajectory_ref, u_ref, x_cur, formation_angle_ref, x_finish, constraints, dyn_constraints, active_dyn_obs, distance_lb, distance_ub, aggressive_factor, bounds_eqs, u_previous, initial_guess_dual, prev_acc, vertices_cargo):
         acc_init = prev_acc
         
         x_ref_master = trajectory_ref[0::6]
@@ -477,7 +480,7 @@ class PanocNMPCTrajectoryProblem:
             mixed_weight = weight_list_soft[i]*(1-aggressive_factor) + weight_list_aggressive[i] * aggressive_factor
             weight_list.append( mixed_weight)
 
-        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [formation_angle_ref] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + trajectory_ref +  list(constraints) + list(dyn_constraints) + active_dyn_obs  + bounds_eqs
+        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [formation_angle_ref] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + trajectory_ref +  list(constraints) + list(dyn_constraints) + active_dyn_obs  + bounds_eqs + vertices_cargo
         parameters = [float(param) for param in parameters]
 
         

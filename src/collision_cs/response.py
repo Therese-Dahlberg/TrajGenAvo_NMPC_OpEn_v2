@@ -14,7 +14,7 @@ class Response:
         self.overlap_v = Vector(0,0)
         self.a_in_b = True
         self.b_in_a = True
-        self.overlap = math.inf
+        self.overlap = 1e11 # basically infinity but still good enough resolution
         return self
 
     def __str__(self):

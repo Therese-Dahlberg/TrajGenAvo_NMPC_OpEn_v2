@@ -22,12 +22,51 @@ from collision_cs import Response
 
 import collision as c
 
+### DEBUG TODO REMOVE
+import time
+###
+
+
 import math
 import miniball
 import json
 from pathlib import Path
 from shapely import geometry as sg
-from panoc_nmpc_trajectory_problem import obstacle_as_inequality
+# from panoc_nmpc_trajectory_problem import obstacle_as_inequality
+import scipy
+# TODO: fix circulat import error
+def obstacle_as_inequality(Vs):
+    # def vert2con(Vs):
+    '''
+    Compute the H-representation of a set of points (facet enumeration).
+    Arguments:
+        Vs: np.mat(np.array([[x0, y0], [x1, y1], [x2, y2]]))
+    Returns:
+        A   (L x d) array. Each row in A represents hyperplane normal.
+        b   (L x 1) array. Each element in b represents the hyperpalne
+            constant bi
+    Taken from https://github.com/d-ming/AR-tools/blob/master/artools/artools.py
+    '''
+    hull = scipy.spatial.ConvexHull(Vs)
+    K = hull.simplices
+    c = np.mean(Vs[hull.vertices, :], 0)  # c is a (1xd) vector
+
+    # perform affine transformation (subtract c from every row in Vs)
+    V = Vs - c
+    A = scipy.NaN * np.empty((K.shape[0], Vs.shape[1]))
+
+    rc = 0
+    for i in range(K.shape[0]):
+        ks = K[i, :]
+        F = V[ks, :]
+        if np.linalg.matrix_rank(F) == F.shape[0]:
+            f = np.ones(F.shape[0])
+            A[rc, :] = scipy.linalg.solve(F, f)
+            rc += 1
+
+    A = A[0:rc, :]
+    b = np.dot(A, c.T) + 1.0
+    return (A, b)
 
 
 MAX_SOLVER_TIME_MICROS = 8_000_000 #500_000
@@ -363,14 +402,7 @@ class MpcModule:
                         obs_eq = b - a0*x - a1*y
                         #h = (cs.fmax(0.0, obs_eq )/obs_eq)**2.0
                         h = cs.fmax(0.0, obs_eq)**2.0   # zero if obs_eq is smaller than zero, i.e. if ATR position fulfills constraint (CasADi: Maximum function is "differentiable")
-                        inside *= h
-                        # Set equation of hard constraints
-                        # if obs_eq == 0:
-                        #     # When h or obs_eq is zero for one line no crash is detected (interpretation: ATR is outside of at least one halfspace so not in object) 
-                        #     inside = 0
-                        #     break
-                        # else:
-                        #     inside *= h    
+                        inside *= h   
                     # If all inequalities for current object is > 0, then inside is > 0, i.e. ATR is inside object
                     crash += inside     # h also represents how much the constraint is violated
                 # Set new index of base vertice for next object shape (every vertice has an index and the base vertice is the reference for every object)
@@ -386,7 +418,7 @@ class MpcModule:
 
     # Cost for collision of cargo with obstacles
     @cost_positive
-    def cost_cargo_inside_static_object(self, x_all_master, y_all_master, x_all_slave, y_all_slave, obstacles, q, individual_costs=False, vert_method=False, lib_method=False, circ_method=False):
+    def cost_cargo_inside_static_object(self, x_all_master, y_all_master, x_all_slave, y_all_slave, obstacles, q, individual_costs=False, vert_method=False, vert2_method=False, lib_method=False, circ_method=False):
         '''
         Specify which method is used.
         Options: vert_method=True OR lib_method=True OR circ_method=True
@@ -397,23 +429,24 @@ class MpcModule:
         else:
             crash_in_trajectory = []
         
-        # Init for circles
-        #TODO: import the vertices of the obstacles from json file
-        #TODO: get obstacles dynamically
-        #TODO: make list to storeprint("static= []
-        bounding_circles = []
-        circle_parameters_list = []
-        #TODO: minimum enclosing circle for all obstacels, right now this only is applicable for one obstacle
-        for o in obstacles:
-            #get minimum enclosing circle parameters from miniball
-            circle_coords, r_squared = miniball.get_bounding_ball(np.array(o))
-            radius = math.sqrt(r_squared)
-            
-            #Store the data given (x_orgin, y_orign, radius)
-            circle_parameters_list.append([circle_coords,radius])
+        if circ_method:
+            # Init for circles
+            #TODO: import the vertices of the obstacles from json file
+            #TODO: get obstacles dynamically
+            #TODO: make list to storeprint("static= []
+            bounding_circles = []
+            circle_parameters_list = []
+            #TODO: minimum enclosing circle for all obstacels, right now this only is applicable for one obstacle
+            for o in obstacles:
+                #get minimum enclosing circle parameters from miniball
+                circle_coords, r_squared = miniball.get_bounding_ball(np.array(o))
+                radius = cs.sqrt(r_squared)
+                
+                #Store the data given (x_orgin, y_orign, radius)
+                circle_parameters_list.append([circle_coords,radius])
 
-            circle = sg.Point(circle_coords[0],circle_coords[1]).buffer(radius)
-            bounding_circles.append(circle) #This should be plotted in the plotter function
+                circle = sg.Point(circle_coords[0],circle_coords[1]).buffer(radius)
+                bounding_circles.append(circle) #This should be plotted in the plotter function
 
         # Loop over time steps along horizon
         for t in range(0, self.solver_param.base.n_hor):
@@ -428,11 +461,16 @@ class MpcModule:
             # TODO: flexible definition of the cargo (orientate it depending on position of ATRs only)
             # Create Polygon for cargo online
             # deviate from line (cargo) in normal direction (if line=[x,y] then normal=[y,-x]or[-y,x])
-            a = 0.1    # in unit of x,y
+            scalar_for_corners = 1    # in unit of x,y
+            a=scalar_for_corners
             y_delta = y_master-y_slave
             x_delta = x_master-x_slave
             n = cs.sqrt(y_delta*y_delta + x_delta*x_delta)
             if vert_method:
+                # TODO Problem 1: vertex check also detects if outside, need additional req
+                # TODO Problem 2: b has different sign then me? Or just multiplied by -1?s
+
+                # TODO: Special case for cargo completely being inside obs and other way around (just add cost if all vertices are inside)
                 # TODO: cargo needs to be defined in order such that two corners in list build the connecting line
                 master_corner_1 = (x_master - a*y_delta/n , y_master + a*x_delta/n)
                 master_corner_2 = (x_master + a*y_delta/n , y_master - a*x_delta/n)
@@ -441,36 +479,45 @@ class MpcModule:
                 vertices_cargo = [master_corner_1, master_corner_2, slave_corner_2, slave_corner_1]
                 ### TODO: Check in parallel(!!!) if vertice of cargo is inside current obstacle OR if vertice of current obstacle is inside cargo ###   
                 ## Check if each vertice of the CARGO is inside any OBSTACLE ##
-                for vert_cargo in vertices_cargo:
-                    # Reset 
-                    base_vert_obs = 0
-                    # Current vertice of cargo
-                    x_vert_cargo = vert_cargo[0]
-                    y_vert_cargo = vert_cargo[1]
-                    # Loop over polygon types (triangles, rectangles, etc.) -> ellipses not handled 
-                    for nr_vert_obs in range(self.solver_param.base.min_vertices, self.solver_param.base.max_vertices + 1):
-                        # Loop over obstacle index in polygon group        
-                        for obs in range(0, self.solver_param.base.n_obs_of_each_vertices):
-                            # init for each object
-                            inside = 1
-                            # Loop over lines in specified object (has "nr_vert_obs" nr of lines)
-                            for line in range(nr_vert_obs):
-                                # TODO: Create equations for obstacle and not padded obstacle in init
-                                # TODO: Use the real obstacles and not padded obstacles here! 
-                                # access in reference to base vertice index of current shape (all vertices of all objects of this shape is accessable here)
-                                # access then in reference to object index and number of vertices of its shape (all vertices of this object is accessable here)
-                                # access then in reference to lines of shape (this vertice is accessable here)
-                                b  = self.bs_static[base_vert_obs + obs * nr_vert_obs + line]  # All base vertices stored
-                                a0 = self.a0s_static[base_vert_obs + obs * nr_vert_obs + line] # All ??? stored
-                                a1 = self.a1s_static[base_vert_obs + obs * nr_vert_obs + line] # All ??? stored
-                                obs_eq = b - a0*x_vert_cargo - a1*y_vert_cargo
-                                #h = (cs.fmax(0.0, obs_eq )/obs_eq)**2.0
-                                h = cs.fmax(0.0, obs_eq)**2.0   # zero if obs_eq is smaller than zero, i.e. if vertice fulfills constraint (CasADi: Maximum function is "differentiable")
-                                inside *= h     # If all inequalities for current object is > 0, then inside is > 0, i.e. ATR is inside object
-                            crash += inside     # h also represents how much the constraint is violated
-                        # Set new index of base vertice for next object shape (every vertice has an index and the base vertice is the reference for every object)
-                        base_vert_obs += nr_vert_obs * self.solver_param.base.n_obs_of_each_vertices
-                
+                # Loop over polygon types (triangles, rectangles, etc.) -> ellipses not handled 
+                # Reset 
+                # TODO outsource as a func with different inputs -> inline function
+                base_vert_obs = 0
+                for nr_vert_obs in range(self.solver_param.base.min_vertices, self.solver_param.base.max_vertices + 1):
+                    # Loop over obstacle index in polygon group        
+                    for obs in range(0, self.solver_param.base.n_obs_of_each_vertices):
+                        # Collision metric init for each object
+                        inside = 0
+                        # Loop over lines in specified object (has "nr_vert_obs" nr of lines)
+                        for line in range(nr_vert_obs):
+                            S_j = 0  # j = line
+                            # TODO: Create equations for obstacle and not padded obstacle in init
+                            # TODO: Use the real obstacles and not padded obstacles here! 
+                            # access in reference to base vertice index of current shape (all vertices of all objects of this shape is accessable here)
+                            # access then in reference to object index and number of vertices of its shape (all vertices of this object is accessable here)
+                            # access then in reference to lines of shape (this vertice is accessable here)
+                            b  = self.bs_static[base_vert_obs + obs * nr_vert_obs + line]  # All base vertices stored
+                            a0 = self.a0s_static[base_vert_obs + obs * nr_vert_obs + line] # All ??? stored
+                            a1 = self.a1s_static[base_vert_obs + obs * nr_vert_obs + line] # All ??? stored
+                            # TODO: Get b, a0, a1 from obs not pad obs or compute self
+                            # Evaluate j'th halfspace of Obstacle (O) at first vertex (1)
+                            x_vert_cargo = vertices_cargo[0][0]
+                            y_vert_cargo = vertices_cargo[0][1]
+                            h_jO_0C = b - a0*x_vert_cargo - a1*y_vert_cargo
+                            for vert_cargo in vertices_cargo[1:]:  # skip first since we compare every vertex to the first one
+                                # Current vertice of cargo
+                                x_vert_cargo = vert_cargo[0]
+                                y_vert_cargo = vert_cargo[1]
+                                # TODO: Debugger problem with signs! Why?!?!?! b!
+                                h_jO_kC = b - a0*x_vert_cargo - a1*y_vert_cargo  # k = vert_cago_index  / O = halfpsace of obstacle
+                                Vj_1k = h_jO_0C*h_jO_kC
+                                S_j += cs.fmax(0.0, -Vj_1k)
+                                # TODO Und es muss 
+                            inside += S_j # all inequalities must be greater zero, i.e. violated
+                        crash += inside**2  # crash cost per obstacle 
+                    # Set new index of base vertice for next object shape (every vertice has an index and the base vertice is the reference for every object)
+                    base_vert_obs += nr_vert_obs * self.solver_param.base.n_obs_of_each_vertices
+
                 ## Check if each vertice of each OBSTACLE is inside the CARGO: ##
                 base_vert_obs = 0
                 # Loop over polygon types (triangles, rectangles, etc.) -> ellipses not handled 
@@ -478,63 +525,260 @@ class MpcModule:
                     # Loop over obstacle index in polygon group        
                     for obs in range(0, self.solver_param.base.n_obs_of_each_vertices):
                         # init for each object
-                        inside = 1
-                        # TODO: implement self.v_static: vertices are stacked upon each other of all obs in one dimension. Each vertice is a list with x,y value in 0,1 index 
-                        # Loop over all vertices of current obstacle
-                        for vert_obs in range(nr_vert_obs):
-                            # TODO: How do the SX variables get actually replaced by real values? There we need to change smth too
-                            x_vert_obs = self.vx_static[base_vert_obs + obs * nr_vert_obs + vert_obs]
-                            y_vert_obs = self.vy_static[base_vert_obs + obs * nr_vert_obs + vert_obs]
-                            # Loop over lines in cargo (has len(vertices_cargo) nr of lines)
-                            for line in range(len(vertices_cargo)):
-                                # TODO: Compute b, a0, a1 with taking current cargo vertice and combining it with the next vertice in list 
-                                    # loop around at the end with module of length operation [i%len(vertices_cargo)]
-                                # Compute parameters to describe halfspace. A point p which satisfies the inequality b - a^T p > 0 is not 
-                                # inside the halfspace that's describing an edge of the cargo. These parameters need to describe the line on which the edge lies
-                                # where p not being inside the cargo leads to a^T < b
-                                # TODO: not as symbolic variable? But where to input it
-                                x1 = vertices_cargo[line][0]
-                                x2 = vertices_cargo[(line+1)%len(vertices_cargo)][0] # loop over if line is last index to take the first as next vertex
-                                y1 = vertices_cargo[line][1]
-                                y2 = vertices_cargo[(line+1)%len(vertices_cargo)][1] # loop over if line is last index to take the first as next vertex
-                                # b = -r_0[0]*v_y*(-v_x)/(v_x*(-v_x)+1e-5) + r_0[1] # add factor for case if v_x zero / compute b for current line of cargo 
+                        inside = 0
+                        # Loop over lines in cargo (has len(vertices_cargo) nr of lines)
+                        for line in range(1,len(vertices_cargo)): # compare first vertex to all other -> start at index 1
+                            S_j = 0   # j = vert_obs
+                            # Compute b, a0, a1 with taking current cargo vertice and combining it with the next vertice in list 
+                            # loop around at the end with module of length operation [i%len(vertices_cargo)]
+                            x1 = vertices_cargo[line][0]
+                            x2 = vertices_cargo[(line+1)%len(vertices_cargo)][0] # loop over if line is last index to take the first as next vertex
+                            y1 = vertices_cargo[line][1]
+                            y2 = vertices_cargo[(line+1)%len(vertices_cargo)][1] # loop over if line is last index to take the first as next vertex
+                            
+                            # Compute parameters to describe halfspace. A point p which satisfies the inequality b - a^T p > 0 is not 
+                            # inside the halfspace that's describing an edge of the cargo. These parameters need to describe the line on which the edge lies
+                            # where p not being inside the cargo leads to a^T < b
+                            # b = -r_0[0]*v_y*(-v_x)/(v_x*(-v_x)+1e-5) + r_0[1] # add factor for case if v_x zero / compute b for current line of cargo 
+                            # Normalize ineq such that a has 2-norm of 1
+                            # a_x = x1 - x2
+                            # a_y = y2 - y1
+                            # a_x = a_x / cs.sqrt(a_x**2 + a_y**2)  # compute a0 for current line of cargo 
+                            # a_y = a_y / cs.sqrt(a_x**2 + a_y**2)  # compute a1 for current line of cargo
+                            # b = (y1*x2 - y2*x1) / cs.sqrt(a_x**2 + a_y**2) 
+                            # technically needed to get same result as obstacle_as_inequality(Vs) func but since only sign is interesting not needed
+                            a_x = y1 - y2  # compute a0 for current line of cargo 
+                            a_y = x2 - x1  # compute a1 for current line of cargo
+                            b = y1*x2 - y2*x1
+
+                             
+                            # TODO is this the same as other function??
+                            # A, b = obstacle_as_inequality(np.mat(np.array([[x1, y1], [x2, y2]])))
+                            # TODO these are the vertices from the padded obs -> get unpadded 
+                            x_vert_obs = self.vx_static[base_vert_obs + obs * nr_vert_obs]  # vert_obs = 0 / first vertex of obs
+                            y_vert_obs = self.vy_static[base_vert_obs + obs * nr_vert_obs]
+                            # Evaluate j'th halfspace of Obstacle (O) at first vertex (1)
+                            h_jC_0O = b - a_x*x_vert_obs - a_y*y_vert_obs
+                            # Loop over all vertices of current obstacle
+                            for vert_obs in range(1, nr_vert_obs):  # skip first since we compare every vertex to the first one
+                                x_vert_obs = self.vx_static[base_vert_obs + obs * nr_vert_obs + vert_obs]
+                                y_vert_obs = self.vy_static[base_vert_obs + obs * nr_vert_obs + vert_obs]
                                 
-                                A, b = obstacle_as_inequality(np.mat(np.array([[x1, y1], [x2, y2]])))
-                                # b = y1*x2 - y2*x1
-                                # a_x = x1 - x2 # compute a0 for current line of cargo 
-                                # a_y = y2 - y1 # compute a1 for current line of cargo 
-                                cargo_eq = b - A[0]*x_vert_obs - A[1]*y_vert_obs # inequality of half space corresponding to current line of cargo
-                                h = cs.fmax(0.0, cargo_eq)**2.0
-                                inside *= h     # all inequalities must be greater zero, i.e. violated
-                            crash += inside
+                                h_jC_kO = b - a_x*x_vert_obs - a_y*y_vert_obs # inequality of half space corresponding to current line of cargo
+                                Vj_1k = h_jC_0O*h_jC_kO
+                                S_j += cs.fmax(0.0, -Vj_1k)
+                            inside += S_j # all inequalities must be greater zero, i.e. violated
+                        crash += inside**2
                     # Set new index of base vertice for next object shape (every vertice has an index and the base vertice is the reference for every object)
                     base_vert_obs += nr_vert_obs * self.solver_param.base.n_obs_of_each_vertices
                 
+            if vert2_method:
+                start = time.time()
+                # Problems: run into obs! -> somehow obs point constraint way larger ... why does circ work?
+                #           obs not unpadded
+                #           runtime
+                # TODO: cargo needs to be defined in order such that two corners in list build the connecting line
+                # Cargo defined anti-clockwise (this is important!)
+                master_corner_1 = (x_master - a*y_delta/n , y_master + a*x_delta/n)
+                master_corner_2 = (x_master + a*y_delta/n , y_master - a*x_delta/n)
+                slave_corner_1 =  (x_slave  - a*y_delta/n , y_slave  + a*x_delta/n)
+                slave_corner_2 =  (x_slave  + a*y_delta/n , y_slave  - a*x_delta/n)
+                vertices_cargo = [master_corner_1, slave_corner_1, slave_corner_2, master_corner_2]
+                ### compute center point of cargo (here only for rectangle)
+                center_x_cargo = (vertices_cargo[0][0] + vertices_cargo[2][0])/2
+                center_y_cargo = (vertices_cargo[0][1] + vertices_cargo[2][1])/2
+                for vertices_obs in obstacles:
+                    # OBS ARE NOT ANTI-CLOCKWISE TODO CHECK DYNAMICALLY SINCE NOT SX ANYMORE
+                    vertices_obs = vertices_obs[::-1]
+                    ### compute center point of obs (here only for rectangle)
+                    center_x_obs = (vertices_obs[0][0] + vertices_obs[2][0])/2
+                    center_y_obs = (vertices_obs[0][1] + vertices_obs[2][1])/2
+                    # Compute distance of center points and multiply that to cost
+                    d = cs.sqrt((center_x_cargo - center_x_obs)**2 +(center_y_cargo - center_y_obs)**2)
+
+                    for vert_cargo in vertices_cargo:
+                        # Collision metric init for each vertex
+                        inside = 1
+                        for edge_obs in range(len(vertices_obs)):
+                            x1 = vertices_obs[edge_obs][0]
+                            x2 = vertices_obs[(edge_obs+1)%len(vertices_obs)][0] # loop over if line is last index to take the first as next vertex
+                            y1 = vertices_obs[edge_obs][1]
+                            y2 = vertices_obs[(edge_obs+1)%len(vertices_obs)][1] # loop over if line is last index to take the first as next vertex
+                            # Compute parameters to describe halfspace. A point p which satisfies the inequality b - a^T p > 0 is not 
+                            # inside the halfspace that's describing an edge of the cargo. These parameters need to describe the line on which the edge lies
+                            # where p not being inside the cargo leads to a^T < b
+                            # note: negate equations to have positive values inside cargo if cargo is defined anti-clockwise
+                            a0 = - ( y1 - y2 )  # compute a0 for current line of cargo 
+                            a1 = - ( x2 - x1 )  # compute a1 for current line of cargo
+                            b = - ( y1*x2 - y2*x1 )
+                            # Evaluate half-space
+                            obs_eq = b - a0*vert_cargo[0] - a1*vert_cargo[1]
+                            h = cs.fmax(0.0, obs_eq)**2   # zero if obs_eq is smaller than zero, i.e. if ATR position fulfills constraint (CasADi: Maximum function is "differentiable")
+                            inside *= h  # choose max h value as cost
+                        crash += inside*(1/d) # crash cost per obstacle
+                    print("First crash: ", crash)
+                    # Loop over all vertices of current obstacle
+                    for vert_obs in vertices_obs:
+                        # Collision metric init for each vertex
+                        inside = 1
+                        # Loop over edges of the cargo
+                        for edge_cargo in range(len(vertices_cargo)):
+                            # Compute b, a0, a1 with taking current cargo vertice and combining it with the next vertice in list 
+                            # loop around at the end with module of length operation [i%len(vertices_cargo)]
+                            x1 = self.vx_cargo[edge_cargo]
+                            y1 = self.vy_cargo[edge_cargo]
+                            x2 = self.vx_cargo[(edge_cargo+1)%len(vertices_cargo)] # loop over if line is last index to take the first as next vertex
+                            y2 = self.vy_cargo[(edge_cargo+1)%len(vertices_cargo)] # loop over if line is last index to take the first as next vertex
+                            # TODO STORE VERTICES AT EVERY TIMESTEP IN PLANNING AND NOT JUST AT T=0 
+
+                            # Compute parameters to describe halfspace. A point p which satisfies the inequality b - a^T p > 0 is not 
+                            # inside the halfspace that's describing an edge of the cargo. These parameters need to describe the line on which the edge lies
+                            # where p not being inside the cargo leads to a^T < b
+                            # note: negate equations to have positive values inside cargo if cargo is defined anti-clockwise
+                            a_x = - y1 + y2  # compute a0 for current line of cargo 
+                            a_y = - x2 + x1  # compute a1 for current line of cargo
+                            b = - y1*x2 + y2*x1
+                            # Evaluate half-space
+                            obs_eq = b - a_x*vert_obs[0] - a_y*vert_obs[1]
+                            h = cs.fmax(0.0, obs_eq)**2   # zero if obs_eq is smaller than zero, i.e. if ATR position fulfills constraint (CasADi: Maximum function is "differentiable")
+                            inside *= h # choose max h value as cost
+                        crash += inside*(1/d) # crash cost per obstacle 
+                    print("Total crash: ", crash)
+                    # # Loop over all vertices of current obstacle
+                    # for vert_obs in vertices_obs:
+                    #     # Collision metric init for each vertex
+                    #     inside = 1e8
+                    #     # Loop over edges of the cargo
+                    #     for edge_cargo in range(len(vertices_cargo)):
+                    #         # Compute b, a0, a1 with taking current cargo vertice and combining it with the next vertice in list 
+                    #         # loop around at the end with module of length operation [i%len(vertices_cargo)]
+                    #         x1 = vertices_cargo[edge_cargo][0]
+                    #         y1 = vertices_cargo[edge_cargo][1]
+                    #         x2 = vertices_cargo[(edge_cargo+1)%len(vertices_cargo)][0] # loop over if line is last index to take the first as next vertex
+                    #         y2 = vertices_cargo[(edge_cargo+1)%len(vertices_cargo)][1] # loop over if line is last index to take the first as next vertex
+
+                    #         # Compute parameters to describe halfspace. A point p which satisfies the inequality b - a^T p > 0 is not 
+                    #         # inside the halfspace that's describing an edge of the cargo. These parameters need to describe the line on which the edge lies
+                    #         # where p not being inside the cargo leads to a^T < b
+                    #         # note: negate equations to have positive values inside cargo if cargo is defined anti-clockwise
+                    #         a_x = - y1 + y2  # compute a0 for current line of cargo 
+                    #         a_y = - x2 + x1  # compute a1 for current line of cargo
+                    #         b = - y1*x2 + y2*x1
+                    #         # Evaluate half-space
+                    #         obs_eq = b - a_x*vert_obs[0] - a_y*vert_obs[1]
+                    #         h = cs.fmax(0.0, obs_eq)**2   # zero if obs_eq is smaller than zero, i.e. if ATR position fulfills constraint (CasADi: Maximum function is "differentiable")
+                    #         inside = cs.fmin(inside, h) # choose max h value as cost
+                    #     crash += inside*(1/d) # crash cost per obstacle 
+                    # print("Total crash: ", crash)
+                    
+                ### TODO: Check in parallel(!!!) if vertex of cargo is inside current obstacle OR if vertex of current obstacle is inside cargo ###
+                ## Check if each vertex of the CARGO is inside any OBSTACLE ##
+                # Loop over polygon types (triangles, rectangles, etc.); ellipses not handled 
+                # base_vert_obs = 0
+                # for nr_vert_obs in range(self.solver_param.base.min_vertices, self.solver_param.base.max_vertices + 1):
+                #     # Loop over obstacle index in polygon group        
+                #     for obs in range(0, self.solver_param.base.n_obs_of_each_vertices):
+                #         # Reset 
+                #         vert_cost = 0
+
+                #         ## NEW ##
+                #         # Get all vert of obs (not as SX) can be pre-done
+                #         #obs_vert = obstacle_list[(nr_vert_obs - self.solver_param.base.min_vertices)*self.solver_param.base.n_obs_of_each_vertices + obs]
+                #         ## NEW ##
+                #         # Loop over vertices of the cargo
+                #         for vert_cargo in vertices_cargo:
+                #             # Collision metric init for each vertex
+                #             inside = 1
+                #             # Loop over edges of obstacle (has "nr_vert_obs" nr of lines)
+                #             for edge in range(nr_vert_obs):
+                #                 # TODO: Create equations for obstacle and not padded obstacle in init
+                #                 # TODO: Use the real obstacles and not padded obstacles here! 
+                #                 # access in reference to base vertice index of current shape (all vertices of all objects of this shape is accessable here)
+                #                 # access then in reference to object index and number of vertices of its shape (all vertices of this object is accessable here)
+                #                 # access then in reference to lines of shape (this vertice is accessable here)
+                #                 b  = self.bs_static_unpad[base_vert_obs + obs * nr_vert_obs + edge]  # All base vertices stored
+                #                 a0 = self.a0s_static_unpad[base_vert_obs + obs * nr_vert_obs + edge] # All ??? stored
+                #                 a1 = self.a1s_static_unpad[base_vert_obs + obs * nr_vert_obs + edge] # All ??? stored
+                                
+                #                 # Evaluate half-space
+                #                 obs_eq = b - a0*vert_cargo[0] - a1*vert_cargo[1]
+                #                 h = cs.fmax(0.0, obs_eq)**2   # zero if obs_eq is smaller than zero, i.e. if ATR position fulfills constraint (CasADi: Maximum function is "differentiable")
+                #                 inside *= h  # only nonzero if vertex is "inside" regarding all half-spaces, i.e. if all h's are nonzero
+                #             vert_cost = cs.fmax(inside, vert_cost) # max crash cost over vertices    
+                #         crash += vert_cost # crash cost per obstacle 
+                #     # Set new index of base vertex for next object shape (every vertex has an index and the base vertex is the reference for every object)
+                #     base_vert_obs += nr_vert_obs * self.solver_param.base.n_obs_of_each_vertices
+                # print("First crash: ", crash)
+                ## Check if each vertice of each OBSTACLE is inside the CARGO ##
+                # Loop over polygon types (triangles, rectangles, etc.); ellipses not handled 
+                # base_vert_obs = 0
+                # for nr_vert_obs in range(self.solver_param.base.min_vertices, self.solver_param.base.max_vertices + 1):
+                #     # Loop over obstacle index in polygon group        
+                #     for obs in range(0, self.solver_param.base.n_obs_of_each_vertices):
+                        # # Reset 
+                        # vert_cost = 0
+                        # # Loop over all vertices of current obstacle
+                        # for vert_obs in range(nr_vert_obs):
+                        #     # Collision metric init for each vertex
+                        #     inside = 1
+                        #     # TODO these are the vertices from the padded obs -> get unpadded 
+                        #     x_vert_obs = self.vx_static_unpad[base_vert_obs + obs * nr_vert_obs + vert_obs]
+                        #     y_vert_obs = self.vy_static_unpad[base_vert_obs + obs * nr_vert_obs + vert_obs]
+                        #     # Loop over edges of the cargo
+                        #     for edge in range(len(vertices_cargo)):
+                        #         # Compute b, a0, a1 with taking current cargo vertice and combining it with the next vertice in list 
+                        #         # loop around at the end with module of length operation [i%len(vertices_cargo)]
+                        #         x1 = vertices_cargo[edge][0]
+                        #         x2 = vertices_cargo[(edge+1)%len(vertices_cargo)][0] # loop over if line is last index to take the first as next vertex
+                        #         y1 = vertices_cargo[edge][1]
+                        #         y2 = vertices_cargo[(edge+1)%len(vertices_cargo)][1] # loop over if line is last index to take the first as next vertex
+                        #         # Compute parameters to describe halfspace. A point p which satisfies the inequality b - a^T p > 0 is not 
+                        #         # inside the halfspace that's describing an edge of the cargo. These parameters need to describe the line on which the edge lies
+                        #         # where p not being inside the cargo leads to a^T < b
+                        #         # note: negate equations to have positive values inside cargo if cargo is defined anti-clockwise
+                        #         a_x = - ( y1 - y2 )  # compute a0 for current line of cargo 
+                        #         a_y = - ( x2 - x1 )  # compute a1 for current line of cargo
+                        #         b = - ( y1*x2 - y2*x1 )
+                        #         # Evaluate half-space
+                        #         obs_eq = b - a_x*x_vert_obs - a_y*y_vert_obs
+                        #         h = cs.fmax(0.0, obs_eq)**2   # zero if obs_eq is smaller than zero, i.e. if ATR position fulfills constraint (CasADi: Maximum function is "differentiable")
+                        #         inside *= h  # choose max h value as cost
+                        #     vert_cost = cs.fmax(inside, vert_cost) # max crash cost over vertices    
+                        # crash += vert_cost # crash cost per obstacle 
+                #     # Set new index of base vertex for next object shape (every vertex has an index and the base vertex is the reference for every object)
+                #     base_vert_obs += nr_vert_obs * self.solver_param.base.n_obs_of_each_vertices
+                # print("Total crash: ", crash)
+                # end = time.time()
+                # print('Execution time: ', end - start)
+
             if lib_method:
                 # Cargo defined as a polygon
                 ### Cargo defined in shapely ###
                 # cargo = Polygon([master_corner_1,master_corner_2,slave_corner_2,slave_corner_1])
                 ### Cargo defined in collision ###
-                origin = Vector(x_slave, y_slave)   # local coordinate frame (only position) for cargo
-                master1 = Vector(x_master - a*y_delta/n, y_master + a*x_delta/n)
-                master2 = Vector(x_master + a*y_delta/n , y_master - a*x_delta/n)
-                slave1 = Vector(x_slave  - a*y_delta/n , y_slave  + a*x_delta/n)
-                slave2 = Vector(x_slave  + a*y_delta/n , y_slave  - a*x_delta/n)
-                vertices = [master1, master2, slave1, slave2]
+                origin = Vector(x_slave, y_slave)   # local coordinate frame 
+                master1 = Vector(x_master - a*y_delta/n, y_master + a*x_delta/n) - origin  # relative points
+                master2 = Vector(x_master + a*y_delta/n , y_master - a*x_delta/n) - origin
+                slave1 = Vector(x_slave  - a*y_delta/n , y_slave  + a*x_delta/n) - origin
+                slave2 = Vector(x_slave  + a*y_delta/n , y_slave  - a*x_delta/n) - origin
+                vertices = [master1, slave1, slave2, master2]
+                
                 # maxxx = cs.fmax(0.0, x_slave)**2
                 # print(maxxx)
                 # print("type: ", type(maxxx))
+                # Polygon has to be defined anti-clockwise
                 cargo = Poly(origin, vertices)
                 
                 # TODO: all polygons have to be defined counter clockwise -> check outside of MPC
                 # TODO: include other shapes (concave, circles) aswell?
                 # TODO: in init and conversion between global def and local def
-                origin = Vector(5.0, 4.0)   # local coordinate frame (only position) for cargo
-                corner1 = Vector(5.0, 5.0) - origin
+                origin = Vector(5.0, 4.0)   # local coordinate frame 
+                corner1 = Vector(5.0, 5.0) - origin # relative points
                 corner2 = Vector(6.0, 5.0) - origin
                 corner3 = Vector(6.0, 4.0) - origin
                 corner4 = Vector(5.0, 4.0) - origin
-                obstacle = Poly(origin, [corner1, corner2, corner3, corner4])
+                # Polygon has to be defined anti-clockwise
+                obstacle = Poly(origin, [corner1, corner4, corner3, corner2])
 
                 response = Response()
                 collide(cargo, obstacle, response=response)
@@ -564,11 +808,10 @@ class MpcModule:
                 #         # TODO: get shapely object of static obstacle with its index in bounding box list
                 #         obj = obj_list[1]
                 #         area += cargo.intersection(obj).area/min(cargo.area,obj.area)   # intersecting area compared to the size of the cargo or obstacle for good estimation if intrusion is bad or negatable
-                print(response.overlap)
                 crash = cs.fmax(0.0, response.overlap)**2.0   # zero if cargo fulfills constraint (CasADi: Maximum function is "differentiable")
                 # print(crash)
             
-            if circ_method:       
+            if circ_method:    
                 #TODO: coordinates for the origin of the bounding circle
 
                 #TODO: radius of the bounding circle
@@ -589,8 +832,34 @@ class MpcModule:
 
                 # TODO: define the distance between the two origins, should be able to change distance between ATRs depending on the cargo.
                 #TODO: check all obstacles in the list
+                # bounding_circles = []
+                # circle_parameters_list = []
+                # #TODO: minimum enclosing circle for all obstacels, right now this only is applicable for one obstacle
+                
+                # # Loop over polygon types (triangles, rectangles, etc.); ellipses not handled 
+                # base_vert_obs = 0
+                # for nr_vert_obs in range(self.solver_param.base.min_vertices, self.solver_param.base.max_vertices + 1):
+                #     # Loop over obstacle index in polygon group        
+                #     for obs in range(0, self.solver_param.base.n_obs_of_each_vertices):
+                #         vert_obs_list = []
+                #         # Loop over all vertices of current obstacle
+                #         for vert_obs in range(nr_vert_obs):
+                #             # Collision metric init for each vertex
+                #             inside = 1
+                #             # TODO these are the vertices from the padded obs -> get unpadded 
+                #             x_vert_obs = self.vx_static_unpad[base_vert_obs + obs * nr_vert_obs + vert_obs]
+                #             y_vert_obs = self.vy_static_unpad[base_vert_obs + obs * nr_vert_obs + vert_obs]
 
-                crash = 0
+                #             vert_obs_list.append([x_vert_obs, y_vert_obs])
+                #         # get minimum enclosing circle parameters from miniball
+                #         circle_coords, r_squared = miniball.get_bounding_ball(np.array(vert_obs_list))
+                #         radius = cs.sqrt(r_squared)
+
+                #         # Calculate the distance between the origin of the cargo and obstacle, change to casadi instead of math
+                #         # d_origins = math.sqrt((x_origin_cargo - obs_origin[0])**2 + (y_origin_cargo - obs_origin[1])**2)
+                #         d_origins = cs.sqrt((x_origin_cargo - circle_coords[0])**2 + (y_origin_cargo - circle_coords[1])**2)
+
+                #         crash += cs.fmax(0.0, r_cargo + radius - d_origins)**2.0   # zero if cargo fulfills constraint, change area to the cirlce condition
                 for bc in range(len(bounding_circles)):
                     
                     #TODO: check if these needs to be in casadi as well????
@@ -601,11 +870,11 @@ class MpcModule:
                     # d_origins = math.sqrt((x_origin_cargo - obs_origin[0])**2 + (y_origin_cargo - obs_origin[1])**2)
                     d_origins = cs.sqrt((x_origin_cargo - obs_origin[0])**2 + (y_origin_cargo - obs_origin[1])**2)
 
-                    crash = crash + cs.fmax(0.0, r_cargo + obs_radius - d_origins)**2.0   # zero if cargo fulfills constraint, change area to the cirlce condition
-                
-
-            # Error handling due to wrong function call
-            if not vert_method and not lib_method and not circ_method:
+                    crash += cs.fmax(0.0, r_cargo + obs_radius - d_origins)**2.0   # zero if cargo fulfills constraint, change area to the cirlce condition                
+                print('Circle cost: ', crash)
+            print('----')
+            # Error handling due to wrong function call TODO vert2_method not checked
+            if not vert_method and not lib_method and not circ_method and not vert2_method:
                 # neither method chosen
                 raise NotImplementedError
             if (vert_method and lib_method) or (vert_method and circ_method) or (lib_method and circ_method):
@@ -616,7 +885,7 @@ class MpcModule:
                 crash_in_trajectory += crash*q
             else:
                 crash_in_trajectory.append(crash*q)
-
+        print('xxxxxxxx')
         return crash_in_trajectory
 
     @cost_positive
@@ -882,7 +1151,7 @@ class MpcModule:
         # Build parametric optimizer
         # ------------------------------------
         # Create index numbers
-        self.n_static_param_line = self.solver_param.base.n_param_line + self.solver_param.base.n_param_vertex  # Increase parameters of lines to also include x,y coordinate of starting vertex of line (don't increase n_param_line directly since it's used for another checking where the number of terms of the typical inequality 0 < b + a0*x + a1*y are needed)
+        self.n_static_param_line = self.solver_param.base.n_param_line*2 + self.solver_param.base.n_param_vertex  # Increase parameters of lines to also include H-representation of orginial obs and x,y coordinate of starting vertex of line (don't increase n_param_line directly since it's used for another checking where the number of terms of the typical inequality 0 < b + a0*x + a1*y are needed)
         self.n_static_obs_parameters = sum(range(self.solver_param.base.min_vertices, self.solver_param.base.max_vertices+1)) * self.n_static_param_line * self.solver_param.base.n_obs_of_each_vertices
         self.n_dyn_obs_parameters = self.solver_param.base.n_param_dyn_obs * self.solver_param.base.n_hor * self.solver_param.base.n_dyn_obs
         self.n_distance_parameters = 5 # Excluding slave offset
@@ -891,7 +1160,9 @@ class MpcModule:
         self.base_ref_points = self.base_ref_u + self.solver_param.base.n_hor*self.solver_param.base.nu
         self.base_static_obs_param = self.base_ref_points + self.solver_param.base.nx * self.solver_param.base.n_hor
         self.base_dyn_obs_param = self.base_static_obs_param + self.n_static_obs_parameters
-        self.n_z0 = 2*self.solver_param.base.nx + 2 * self.solver_param.base.nu + self.solver_param.base.n_hor*self.solver_param.base.nu + self.n_distance_parameters + self.solver_param.pos_goal_weights.n_weights + self.solver_param.base.nx * self.solver_param.base.n_hor + self.n_static_obs_parameters + self.n_dyn_obs_parameters + self.solver_param.base.n_dyn_obs + self.solver_param.base.n_param_line * self.solver_param.base.n_bounds_vertices
+        # Add parameters for vert of cargo
+        self.n_param_vert_cargo = self.solver_param.base.n_vert_cargo*2  # 2 because each vertex has 2 parameters
+        self.n_z0 = 2*self.solver_param.base.nx + 2 * self.solver_param.base.nu + self.solver_param.base.n_hor*self.solver_param.base.nu + self.n_distance_parameters + self.solver_param.pos_goal_weights.n_weights + self.solver_param.base.nx * self.solver_param.base.n_hor + self.n_static_obs_parameters + self.n_dyn_obs_parameters + self.solver_param.base.n_dyn_obs + self.solver_param.base.n_param_line * self.solver_param.base.n_bounds_vertices + self.n_param_vert_cargo
 
         self.parameters = parameters
         # Define variables for solver
@@ -934,13 +1205,17 @@ class MpcModule:
         self.ref_points_slave_y      = self.parameters[self.base_ref_points + 4: self.base_static_obs_param : self.solver_param.base.nx]
         self.ref_points_slave_th     = self.parameters[self.base_ref_points + 5: self.base_static_obs_param : self.solver_param.base.nx]
 
-        # TODO: n_param_line only? Check indices in debugger
+        # Half-space representation of obs 
         self.bs_static  = self.parameters[self.base_static_obs_param    :self.base_dyn_obs_param :self.n_static_param_line]
         self.a0s_static = self.parameters[self.base_static_obs_param + 1:self.base_dyn_obs_param :self.n_static_param_line]
         self.a1s_static = self.parameters[self.base_static_obs_param + 2:self.base_dyn_obs_param :self.n_static_param_line]
-        # x,y coordinates of the starting vertex of each line in all obstacles
-        self.vx_static  = self.parameters[self.base_static_obs_param + 3:self.base_dyn_obs_param :self.n_static_param_line]
-        self.vy_static  = self.parameters[self.base_static_obs_param + 4:self.base_dyn_obs_param :self.n_static_param_line]
+        # Half-space representation of original obs 
+        self.bs_static_unpad  = self.parameters[self.base_static_obs_param + 3:self.base_dyn_obs_param :self.n_static_param_line]
+        self.a0s_static_unpad = self.parameters[self.base_static_obs_param + 4:self.base_dyn_obs_param :self.n_static_param_line]
+        self.a1s_static_unpad = self.parameters[self.base_static_obs_param + 5:self.base_dyn_obs_param :self.n_static_param_line]
+        # x,y coordinates of the starting vertex of each line in all original obstacles
+        self.vx_static_unpad  = self.parameters[self.base_static_obs_param + 6:self.base_dyn_obs_param :self.n_static_param_line]
+        self.vy_static_unpad  = self.parameters[self.base_static_obs_param + 7:self.base_dyn_obs_param :self.n_static_param_line]
         # ordering is x_master, y_master, r for obstacle 0 for n_hor timesteps, self.then x_master, y_master, r for obstalce 1 for n_hor timesteps etc.
         # Get dynamic obstacle parameters for each timestep 
         self.end_of_dynamic_obs_idx = self.base_dyn_obs_param + self.solver_param.base.n_param_dyn_obs * self.solver_param.base.n_dyn_obs * self.solver_param.base.n_hor
@@ -953,10 +1228,16 @@ class MpcModule:
         self.active_dyn_obs = self.parameters[self.end_of_dynamic_obs_idx : self.end_of_dynamic_obs_idx + self.solver_param.base.n_dyn_obs]
 
         self.base_bounds_param = self.end_of_dynamic_obs_idx + self.solver_param.base.n_dyn_obs
+        self.end_of_bounds_idx = self.base_bounds_param + self.solver_param.base.n_param_line * self.solver_param.base.n_bounds_vertices
         # set up bounds ineqs into lists
-        self.b0_bounds = self.parameters[self.base_bounds_param    : self.base_bounds_param + self.solver_param.base.n_param_line * self.solver_param.base.n_bounds_vertices : self.solver_param.base.n_param_line]
-        self.a0_bounds = self.parameters[self.base_bounds_param + 1: self.base_bounds_param + self.solver_param.base.n_param_line * self.solver_param.base.n_bounds_vertices : self.solver_param.base.n_param_line]
-        self.a1_bounds = self.parameters[self.base_bounds_param + 2: self.base_bounds_param + self.solver_param.base.n_param_line * self.solver_param.base.n_bounds_vertices : self.solver_param.base.n_param_line]
+        self.b0_bounds = self.parameters[self.base_bounds_param    : self.end_of_bounds_idx : self.solver_param.base.n_param_line]
+        self.a0_bounds = self.parameters[self.base_bounds_param + 1: self.end_of_bounds_idx : self.solver_param.base.n_param_line]
+        self.a1_bounds = self.parameters[self.base_bounds_param + 2: self.end_of_bounds_idx : self.solver_param.base.n_param_line]
+
+        self.end_of_vert_cargo_idx = self.end_of_bounds_idx + self.solver_param.base.n_vert_cargo*2 # 2 because every vert has 2 coordinates
+        # Vertices of the cargo as explicit parameters for collision detection
+        self.vx_cargo = self.parameters[self.end_of_bounds_idx     : self.end_of_vert_cargo_idx : 2] # 2 because every vert has 2 coordinates
+        self.vy_cargo = self.parameters[self.end_of_bounds_idx + 1 : self.end_of_vert_cargo_idx : 2]
 
     def build(self):
         # Init costs
@@ -1003,7 +1284,7 @@ class MpcModule:
         # cost += self.cost_inside_static_object((all_x_slave[1:]+all_x_master[1:])/2, (all_y_slave[1:]+all_y_master[1:])/2, self.q_obs_c)
         # cost += self.cost_inside_dyn_ellipse2((all_x_slave[1:]+all_x_master[1:])/2, (all_y_slave[1:]+all_y_master[1:])/2, self.q_dyn_obs_c)
         # TODO: separate weighting -> create own weight
-        cost += self.cost_cargo_inside_static_object(all_x_master[1:], all_y_master[1:], all_x_slave[1:], all_y_slave[1:], [static_obs[0], unexpected_obs[0]], self.q_obs_c, circ_method=True)
+        cost += self.cost_cargo_inside_static_object(all_x_master[1:], all_y_master[1:], all_x_slave[1:], all_y_slave[1:], [static_obs[0], unexpected_obs[0]], self.q_obs_c, vert2_method=True)
 
         # Cost for outside bounds
         cost += self.cost_outside_bounds(all_x_master[1:], all_y_master[1:], self.q_obs_c)
