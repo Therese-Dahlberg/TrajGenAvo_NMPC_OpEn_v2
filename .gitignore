@@ -140,3 +140,8 @@ log/
 .idea
 src/test.py
 src/collision_bkup/
+
+# Miscellaneous
+*.odg
+*.odt
+*phi*
