@@ -174,7 +174,8 @@ class TrajectoryGenerator:
         done = False
         # Generate one full trajectory
         generated_trajectory = [[],[]]    
-        
+        # Init trajectory for calculation of cargo vertices
+        trajectory_previous = np.zeros((self.solver_param.base.n_hor, self.solver_param.base.nx + self.solver_param.base.nu))
         while not done: 
             x = self.robot_state
 
@@ -224,25 +225,27 @@ class TrajectoryGenerator:
             '''
             Running starts here
             '''
-            # Calculate vertices of the cargo
-            x_master = x_cur[0]
-            y_master = x_cur[1]
-            x_slave = x_cur[3]
-            y_slave = x_cur[4]
-            # Get shape of cargo
-            # TODO: flexible definition of the cargo (orientate it depending on position of ATRs only)
-            # Create Polygon for cargo online
-            # deviate from line (cargo) in normal direction (if line=[x,y] then normal=[y,-x]or[-y,x])
-            scalar_for_corners = 1    # in unit of x,y
-            a=scalar_for_corners
-            y_delta = y_master-y_slave
-            x_delta = x_master-x_slave
-            n = np.sqrt(y_delta*y_delta + x_delta*x_delta)
-            master_corner_1 = (x_master - a*y_delta/n , y_master + a*x_delta/n)
-            master_corner_2 = (x_master + a*y_delta/n , y_master - a*x_delta/n)
-            slave_corner_1 =  (x_slave  - a*y_delta/n , y_slave  + a*x_delta/n)
-            slave_corner_2 =  (x_slave  + a*y_delta/n , y_slave  - a*x_delta/n)
-            vertices_cargo = [master_corner_1[0], master_corner_1[1],  slave_corner_1[0], slave_corner_1[1], slave_corner_2[0], slave_corner_2[1], master_corner_2[0], master_corner_2[1]]
+            vertices_cargo = []
+            # Calculate vertices of the cargo at every timestep in planning (due to constraints of the solver here approximated by last trajectory, there may be a better solution)
+            for t in range(trajectory_previous.shape[0]):
+                x_master = trajectory_previous[t,0]
+                y_master = trajectory_previous[t,1]
+                x_slave = trajectory_previous[t,3]
+                y_slave = trajectory_previous[t,4]
+                # Get shape of cargo
+                # TODO: flexible definition of the cargo (orientate it depending on position of ATRs only)
+                # Create Polygon for cargo online
+                # deviate from line (cargo) in normal direction (if line=[x,y] then normal=[y,-x]or[-y,x])
+                scalar_for_corners = 1    # in unit of x,y
+                a=scalar_for_corners
+                y_delta = y_master-y_slave
+                x_delta = x_master-x_slave
+                n = np.sqrt(y_delta*y_delta + x_delta*x_delta)
+                master_corner_1 = (x_master - a*y_delta/n , y_master + a*x_delta/n)
+                master_corner_2 = (x_master + a*y_delta/n , y_master - a*x_delta/n)
+                slave_corner_1 =  (x_slave  - a*y_delta/n , y_slave  + a*x_delta/n)
+                slave_corner_2 =  (x_slave  + a*y_delta/n , y_slave  - a*x_delta/n)
+                vertices_cargo.extend([master_corner_1[0], master_corner_1[1],  slave_corner_1[0], slave_corner_1[1], slave_corner_2[0], slave_corner_2[1], master_corner_2[0], master_corner_2[1]])
 
 
             # Calculate trajectory when not in formation
