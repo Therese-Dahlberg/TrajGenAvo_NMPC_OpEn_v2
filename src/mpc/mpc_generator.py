@@ -511,7 +511,7 @@ class MpcModule:
 
     #     return crash_in_trajectory
     
-    # Cargo and obstacle are modelled only as circles
+    # Bounding circle approach
     @cost_positive
     def cost_cargo_inside_static_circle(self, x_all_master, y_all_master, x_all_slave, y_all_slave, obstacles, q, individual_costs=False):
         #Obstacles should be a list containing all vertices of all obstacles
@@ -583,8 +583,8 @@ class MpcModule:
             y_origin_cargo = (y_master + y_slave)/2
 
             # TODO: calculate the radius of the cargo circle, change to casadi instead of math. 
-            r_cargo = math.sqrt((x_origin_cargo-x_master)**2 + (y_origin_cargo-y_master)**2)
-            # r_cargo = cs.sqrt((x_origin_cargo-x_master)**2 + (y_origin_cargo-y_master)**2)
+            # r_cargo = math.sqrt((x_origin_cargo-x_master)**2 + (y_origin_cargo-y_master)**2)
+            r_cargo = cs.sqrt((x_origin_cargo-x_master)**2 + (y_origin_cargo-y_master)**2)
 
 
             # TODO: define the distance between the two origins, should be able to change distance between ATRs depending on the cargo.
@@ -593,19 +593,16 @@ class MpcModule:
             crash = 0
             for bc in range(len(bounding_circles)):
                 
-                #TODO: check if these needs to be in casadi as well????
                 obs_origin = circle_parameters_list[bc][0]
                 obs_radius = circle_parameters_list[bc][1]
 
                 #Calculate the distance between the origin of the cargo and obstacle, change to casadi instead of math
-                d_origins = math.sqrt((x_origin_cargo - obs_origin[0])**2 + (y_origin_cargo - obs_origin[1])**2)
-                # d_origins = cs.sqrt((x_origin_cargo - obs_origin[0])**2 + (y_origin_cargo - obs_origin[1])**2)
+                # d_origins = math.sqrt((x_origin_cargo - obs_origin[0])**2 + (y_origin_cargo - obs_origin[1])**2)
+                d_origins = cs.sqrt((x_origin_cargo - obs_origin[0])**2 + (y_origin_cargo - obs_origin[1])**2)
 
                 crash = crash + cs.fmax(0.0, r_cargo + obs_radius - d_origins)**2.0   # zero if cargo fulfills constraint, change area to the cirlce condition
                 # if crash > 0.0:
                 #     print("crash added", crash)
-
-            # TODO: define cargo and obstacle in casadi friendly syntax?
 
             # TODO: Loop over all static obstacles (Save for later so that we can model obstacles as more than one cirlce)
             # for bounding_box_obj in bb_list:

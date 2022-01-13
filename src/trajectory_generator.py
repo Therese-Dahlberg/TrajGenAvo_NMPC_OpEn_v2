@@ -384,23 +384,24 @@ class TrajectoryGenerator:
                 self.plot_queues['slave_end'].put_nowait([[goal_positions[1][0]], [goal_positions[1][1]]])
         except Full:
             pass
-        # try: #plot the carried object here, set up the plot positions
-        #     currentList = [[past_traj_master[-1], past_traj_slave[-1]]]
+        
+        try: #plot the carried object here, set up the plot positions
+            currentList = [[past_traj_master[-1], past_traj_slave[-1]]]
 
-        #     output = self.onlineCollisionDetection(currentList)
+            output = self.onlineCollisionDetection(currentList)
 
-        #     if output == 1:
-        #         print('Collision!!!!')
+            if output == 1:
+                print('Collision!!!!')
 
-        #         #put_nowait adds an element in the plot_queue. A plot queue is a FIFO queue
-        #         self.plot_queues['object_collision'].put_nowait(((past_traj_master[-1][0], past_traj_slave[-1][0]), (past_traj_master[-1][1], past_traj_slave[-1][1])))
-        #         # if state_changed:
-        #         # self.plot_queues.get_nowait()
-        #     elif output == 0:
-        #         self.plot_queues['object_safe'].put_nowait(((past_traj_master[-1][0], past_traj_slave[-1][0]), (past_traj_master[-1][1], past_traj_slave[-1][1])))
-        #         # self.plot_queues['object_safe'].put_nowait(past_traj_master[-1][0], past_traj_master[-1][1])
-        # except:
-        #     pass
+                #put_nowait adds an element in the plot_queue. A plot queue is a FIFO queue
+                self.plot_queues['object_collision'].put_nowait(((past_traj_master[-1][0], past_traj_slave[-1][0]), (past_traj_master[-1][1], past_traj_slave[-1][1])))
+                # if state_changed:
+                # self.plot_queues.get_nowait()
+            elif output == 0:
+                self.plot_queues['object_safe'].put_nowait(((past_traj_master[-1][0], past_traj_slave[-1][0]), (past_traj_master[-1][1], past_traj_slave[-1][1])))
+                # self.plot_queues['object_safe'].put_nowait(past_traj_master[-1][0], past_traj_master[-1][1])
+        except:
+            pass
 
         # Plot planned trajectory 
         traj_master = trajectory[:,0:3]
