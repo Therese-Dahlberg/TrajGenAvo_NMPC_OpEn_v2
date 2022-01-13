@@ -45,7 +45,6 @@ required_config_params = {
     'n_obs_of_each_vertices':  'How many obstacles there should be of each kind of obstacle', 
     'n_dyn_obs':  'How many dynamic obstacles there should be', 
     'n_bounds_vertices':  'Number of vertices for drivable area', 
-    'n_vert_cargo': 'Number of vertices of the cargo',
 }
 
 required_weights_params = {

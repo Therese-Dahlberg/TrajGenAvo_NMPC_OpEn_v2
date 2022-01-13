@@ -263,7 +263,7 @@ class PanocNMPCTrajectoryProblem:
         assert solution.cost >= 0, f"The cost cannot be negative. It was {solution.cost}"
         return u, solution.cost
 
-    def gen_pos_traj(self, x_cur, x_finish, constraints, dyn_constraints, active_dyn_obs, distance_lb, distance_ub, bounds_eqs, u_previous, initial_guess_pos, prev_acc, vertices_cargo):
+    def gen_pos_traj(self, x_cur, x_finish, constraints, dyn_constraints, active_dyn_obs, distance_lb, distance_ub, bounds_eqs, u_previous, initial_guess_pos, prev_acc):
         d_near = 0.00001
         acc_init = prev_acc
 
@@ -310,7 +310,7 @@ class PanocNMPCTrajectoryProblem:
                 ]
         
         
-        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [0] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + refs +  list(constraints) + list(dyn_constraints) + active_dyn_obs + bounds_eqs + vertices_cargo
+        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [0] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + refs +  list(constraints) + list(dyn_constraints) + active_dyn_obs + bounds_eqs
         parameters = [float(param) for param in parameters]
 
         
@@ -322,7 +322,7 @@ class PanocNMPCTrajectoryProblem:
 
         return ref_cost, parameters, solution
 
-    def gen_line_following_traj(self, x_cur, dyn_constraints, line_vertices_master, line_vertices_slave, formation_angle_ref, constraints, active_dyn_obs, distance_lb, distance_ub, aggressive_factor, bounds_eqs, u_prev, initial_guess_master, prev_acc, vertices_cargo):
+    def gen_line_following_traj(self, x_cur, dyn_constraints, line_vertices_master, line_vertices_slave, formation_angle_ref, constraints, active_dyn_obs, distance_lb, distance_ub, aggressive_factor, bounds_eqs, u_prev, initial_guess_master, prev_acc):
         master_angle_ref = self.mpc_generator.calc_master_ref_angle(x_cur[:3], *line_vertices_master[:3])
 
         # Build parameter list
@@ -383,7 +383,7 @@ class PanocNMPCTrajectoryProblem:
             weight_list.append( mixed_weight)
 
         u_previous = u_prev[:2] + [0,0]
-        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [formation_angle_ref] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + refs +  list(constraints) + list(dyn_constraints) + active_dyn_obs + bounds_eqs + vertices_cargo
+        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [formation_angle_ref] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + refs +  list(constraints) + list(dyn_constraints) + active_dyn_obs + bounds_eqs
 
         parameters = [float(param) for param in parameters]
 
@@ -396,7 +396,7 @@ class PanocNMPCTrajectoryProblem:
         
         return ref_cost, parameters, solution
 
-    def gen_traj_following_traj(self, trajectory_ref, u_ref, x_cur, formation_angle_ref, x_finish, constraints, dyn_constraints, active_dyn_obs, distance_lb, distance_ub, aggressive_factor, bounds_eqs, u_previous, initial_guess_dual, prev_acc, vertices_cargo):
+    def gen_traj_following_traj(self, trajectory_ref, u_ref, x_cur, formation_angle_ref, x_finish, constraints, dyn_constraints, active_dyn_obs, distance_lb, distance_ub, aggressive_factor, bounds_eqs, u_previous, initial_guess_dual, prev_acc):
         acc_init = prev_acc
         
         x_ref_master = trajectory_ref[0::6]
@@ -480,7 +480,7 @@ class PanocNMPCTrajectoryProblem:
             mixed_weight = weight_list_soft[i]*(1-aggressive_factor) + weight_list_aggressive[i] * aggressive_factor
             weight_list.append( mixed_weight)
 
-        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [formation_angle_ref] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + trajectory_ref +  list(constraints) + list(dyn_constraints) + active_dyn_obs  + bounds_eqs + vertices_cargo
+        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [formation_angle_ref] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + trajectory_ref +  list(constraints) + list(dyn_constraints) + active_dyn_obs  + bounds_eqs
         parameters = [float(param) for param in parameters]
 
         

@@ -623,33 +623,6 @@ class MpcModule:
                         d_obs = d[obs_idx]
                         crash += inside*(1/d_obs) # crash cost per obstacle
                     print("First crash: ", crash)
-                    # # Loop over all vertices of current obstacle
-                    # for vert_obs in vertices_obs:
-                    #     # Collision metric init for each vertex
-                    #     inside = 1
-                    #     # Loop over edges of the cargo
-                    #     for edge_cargo in range(len(vertices_cargo)):
-                    #         # Compute b, a0, a1 with taking current cargo vertice and combining it with the next vertice in list 
-                    #         # loop around at the end with module of length operation [i%len(vertices_cargo)]
-                    #         # times 2 because for every vertex at each time step there are 2 parameters
-                    #         x1 = self.vx_cargo[t*len(vertices_cargo) + edge_cargo]
-                    #         y1 = self.vy_cargo[t*len(vertices_cargo) + edge_cargo]
-                    #         x2 = self.vx_cargo[t*len(vertices_cargo) + (edge_cargo+1)%len(vertices_cargo)] # loop over if line is last index to take the first as next vertex
-                    #         y2 = self.vy_cargo[t*len(vertices_cargo) + (edge_cargo+1)%len(vertices_cargo)] # loop over if line is last index to take the first as next vertex
-                    #         # Compute parameters to describe halfspace. A point p which satisfies the inequality b - a^T p > 0 is not 
-                    #         # inside the halfspace that's describing an edge of the cargo. These parameters need to describe the line on which the edge lies
-                    #         # where p not being inside the cargo leads to a^T < b
-                    #         # note: negate equations to have positive values inside cargo if cargo is defined anti-clockwise
-                    #         a_x = - y1 + y2  # compute a0 for current line of cargo 
-                    #         a_y = - x2 + x1  # compute a1 for current line of cargo
-                    #         b = - y1*x2 + y2*x1
-                    #         # Evaluate half-space
-                    #         obs_eq = b - a_x*vert_obs[0] - a_y*vert_obs[1]
-                    #         h = cs.fmax(0.0, obs_eq)**2   # zero if obs_eq is smaller than zero, i.e. if ATR position fulfills constraint (CasADi: Maximum function is "differentiable")
-                    #         inside *= h # choose max h value as cost
-                    #     d_obs = d[obs_idx]
-                    #     crash += inside*(1/d_obs)*3e-2 # crash cost per obstacle 
-                    # print("Total crash: ", crash)
                     
                     # Loop over all vertices of current obstacle
                     for vert_obs in vertices_obs:
@@ -1169,9 +1142,7 @@ class MpcModule:
         self.base_ref_points = self.base_ref_u + self.solver_param.base.n_hor*self.solver_param.base.nu
         self.base_static_obs_param = self.base_ref_points + self.solver_param.base.nx * self.solver_param.base.n_hor
         self.base_dyn_obs_param = self.base_static_obs_param + self.n_static_obs_parameters
-        # Add parameters for vert of cargo at every timestep in planning 
-        self.n_param_vert_cargo = self.solver_param.base.n_vert_cargo * 2 * self.solver_param.base.n_hor  # 2 because each vertex has 2 parameters
-        self.n_z0 = 2*self.solver_param.base.nx + 2 * self.solver_param.base.nu + self.solver_param.base.n_hor*self.solver_param.base.nu + self.n_distance_parameters + self.solver_param.pos_goal_weights.n_weights + self.solver_param.base.nx * self.solver_param.base.n_hor + self.n_static_obs_parameters + self.n_dyn_obs_parameters + self.solver_param.base.n_dyn_obs + self.solver_param.base.n_param_line * self.solver_param.base.n_bounds_vertices + self.n_param_vert_cargo
+        self.n_z0 = 2*self.solver_param.base.nx + 2 * self.solver_param.base.nu + self.solver_param.base.n_hor*self.solver_param.base.nu + self.n_distance_parameters + self.solver_param.pos_goal_weights.n_weights + self.solver_param.base.nx * self.solver_param.base.n_hor + self.n_static_obs_parameters + self.n_dyn_obs_parameters + self.solver_param.base.n_dyn_obs + self.solver_param.base.n_param_line * self.solver_param.base.n_bounds_vertices
 
         self.parameters = parameters
         # Define variables for solver
@@ -1242,11 +1213,6 @@ class MpcModule:
         self.b0_bounds = self.parameters[self.base_bounds_param    : self.end_of_bounds_idx : self.solver_param.base.n_param_line]
         self.a0_bounds = self.parameters[self.base_bounds_param + 1: self.end_of_bounds_idx : self.solver_param.base.n_param_line]
         self.a1_bounds = self.parameters[self.base_bounds_param + 2: self.end_of_bounds_idx : self.solver_param.base.n_param_line]
-
-        self.end_of_vert_cargo_idx = self.end_of_bounds_idx + self.solver_param.base.n_vert_cargo*2*self.solver_param.base.n_hor # 2 because every vert has 2 coordinates
-        # Vertices of the cargo as explicit parameters for collision detection
-        self.vx_cargo = self.parameters[self.end_of_bounds_idx     : self.end_of_vert_cargo_idx : 2] # 2 because every vert has 2 coordinates
-        self.vy_cargo = self.parameters[self.end_of_bounds_idx + 1 : self.end_of_vert_cargo_idx : 2]
 
     def build(self):
         # Init costs

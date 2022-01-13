@@ -174,8 +174,6 @@ class TrajectoryGenerator:
         done = False
         # Generate one full trajectory
         generated_trajectory = [[],[]]    
-        # Init trajectory for calculation of cargo vertices
-        trajectory_previous = np.zeros((self.solver_param.base.n_hor, self.solver_param.base.nx + self.solver_param.base.nu))
         while not done: 
             x = self.robot_state
 
@@ -225,39 +223,16 @@ class TrajectoryGenerator:
             '''
             Running starts here
             '''
-            vertices_cargo = []
-            # Calculate vertices of the cargo at every timestep in planning (due to constraints of the solver here approximated by last trajectory, there may be a better solution)
-            for t in range(trajectory_previous.shape[0]):
-                x_master = trajectory_previous[t,0]
-                y_master = trajectory_previous[t,1]
-                x_slave = trajectory_previous[t,3]
-                y_slave = trajectory_previous[t,4]
-                # Get shape of cargo
-                # TODO: flexible definition of the cargo (orientate it depending on position of ATRs only)
-                # Create Polygon for cargo online
-                # deviate from line (cargo) in normal direction (if line=[x,y] then normal=[y,-x]or[-y,x])
-                scalar_for_corners = 1    # in unit of x,y
-                a=scalar_for_corners
-                y_delta = y_master-y_slave
-                x_delta = x_master-x_slave
-                n = np.sqrt(y_delta*y_delta + x_delta*x_delta)
-                master_corner_1 = (x_master - a*y_delta/n , y_master + a*x_delta/n)
-                master_corner_2 = (x_master + a*y_delta/n , y_master - a*x_delta/n)
-                slave_corner_1 =  (x_slave  - a*y_delta/n , y_slave  + a*x_delta/n)
-                slave_corner_2 =  (x_slave  + a*y_delta/n , y_slave  - a*x_delta/n)
-                vertices_cargo.extend([master_corner_1[0], master_corner_1[1],  slave_corner_1[0], slave_corner_1[1], slave_corner_2[0], slave_corner_2[1], master_corner_2[0], master_corner_2[1]])
-
-
             # Calculate trajectory when not in formation
             if self.state == States.COUPLING or self.state == States.DECOUPLING:
-                ref_cost, parameters, solution = self.panoc.gen_pos_traj(x_cur, self.master_end + self.slave_end, constraints, dyn_constraints, active_dyn_obs,  self.solver_param.base.vehicle_margin, 1e100, bounds_eqs, self.u_previous, self.initial_guess_pos, prev_acc, vertices_cargo)
+                ref_cost, parameters, solution = self.panoc.gen_pos_traj(x_cur, self.master_end + self.slave_end, constraints, dyn_constraints, active_dyn_obs,  self.solver_param.base.vehicle_margin, 1e100, bounds_eqs, self.u_previous, self.initial_guess_pos, prev_acc)
                 self.initial_guess_pos = solution
             # Calculate trajectory when in formation
             elif self.state == States.FORMATION: 
                 # If goal is not in reach, follow the lines
                 if not goal_in_reach:
                     # Generate one trajectory for master
-                    ref_cost, parameters, solution = self.panoc.gen_line_following_traj(x_cur, dyn_constraints, line_vertices_master, line_vertices_slave, formation_angle_ref, constraints, active_dyn_obs, self.solver_param.base.constraint['distance_lb'], self.solver_param.base.constraint['distance_ub'], self.solver_param.base.aggressive_factor, bounds_eqs, self.u_previous, self.initial_guess_master, prev_acc, vertices_cargo)
+                    ref_cost, parameters, solution = self.panoc.gen_line_following_traj(x_cur, dyn_constraints, line_vertices_master, line_vertices_slave, formation_angle_ref, constraints, active_dyn_obs, self.solver_param.base.constraint['distance_lb'], self.solver_param.base.constraint['distance_ub'], self.solver_param.base.aggressive_factor, bounds_eqs, self.u_previous, self.initial_guess_master, prev_acc)
                     self.initial_guess_master = solution
                     
                     if self.solver_param.base.enable_slave:
@@ -265,15 +240,15 @@ class TrajectoryGenerator:
                         trajectory = self.panoc.calculate_trajectory(solution[:2*2*self.solver_param.base.trajectory_length], x_cur[:3], x_cur[3:], self.plot_config)
                         ref_trajectory = self.panoc.offset_trajectory(trajectory, formation_angle_ref)
                         
-                        ref_cost, parameters, solution = self.panoc.gen_traj_following_traj(ref_trajectory, solution, x_cur, formation_angle_ref, x_finish_master + x_finish_slave, constraints, dyn_constraints, active_dyn_obs, self.solver_param.base.constraint['distance_lb'], self.solver_param.base.constraint['distance_ub'], self.solver_param.base.aggressive_factor, bounds_eqs, self.u_previous, self.initial_guess_dual, prev_acc, vertices_cargo)
+                        ref_cost, parameters, solution = self.panoc.gen_traj_following_traj(ref_trajectory, solution, x_cur, formation_angle_ref, x_finish_master + x_finish_slave, constraints, dyn_constraints, active_dyn_obs, self.solver_param.base.constraint['distance_lb'], self.solver_param.base.constraint['distance_ub'], self.solver_param.base.aggressive_factor, bounds_eqs, self.u_previous, self.initial_guess_dual, prev_acc)
                         self.initial_guess_dual = solution
                 # If goal is in reach, go to the goal
                 elif goal_in_reach:
                     if self.solver_param.base.enable_slave:
-                        ref_cost, parameters, solution = self.panoc.gen_pos_traj(x_cur, self.master_end + self.slave_end, constraints, dyn_constraints, active_dyn_obs, self.solver_param.base.constraint['distance_lb'], self.solver_param.base.constraint['distance_ub'], bounds_eqs, self.u_previous, self.initial_guess_pos, prev_acc, vertices_cargo)
+                        ref_cost, parameters, solution = self.panoc.gen_pos_traj(x_cur, self.master_end + self.slave_end, constraints, dyn_constraints, active_dyn_obs, self.solver_param.base.constraint['distance_lb'], self.solver_param.base.constraint['distance_ub'], bounds_eqs, self.u_previous, self.initial_guess_pos, prev_acc)
                         self.initial_guess_pos = solution
                     else:
-                        ref_cost, parameters, solution = self.panoc.gen_pos_traj(x_cur, self.master_end + self.slave_end, constraints, dyn_constraints, active_dyn_obs, self.solver_param.base.vehicle_margin, 1e100, bounds_eqs, self.u_previous, self.initial_guess_pos, prev_acc, vertices_cargo)
+                        ref_cost, parameters, solution = self.panoc.gen_pos_traj(x_cur, self.master_end + self.slave_end, constraints, dyn_constraints, active_dyn_obs, self.solver_param.base.vehicle_margin, 1e100, bounds_eqs, self.u_previous, self.initial_guess_pos, prev_acc)
                         self.initial_guess_pos = solution
             else:
                 raise ValueError(f"Invalid state to be in: {self.state}!")
@@ -283,12 +258,12 @@ class TrajectoryGenerator:
             self.mpc_generator.store_params(parameters)
             
             # From the control inputs calculate the trajectory using discretized robot model
-            trajectory_previous = self.panoc.calculate_trajectory(solution[:2*2*self.solver_param.base.trajectory_length], x_cur[:3], x_cur[3:], self.plot_config)
+            trajectory = self.panoc.calculate_trajectory(solution[:2*2*self.solver_param.base.trajectory_length], x_cur[:3], x_cur[3:], self.plot_config)
             # Update the state to the last position in the trajectory 
             if self.two_seconds: 
-                self.robot_state = list(trajectory_previous[-1][0:3]) + list(trajectory_previous[-1][3:6])
+                self.robot_state = list(trajectory[-1][0:3]) + list(trajectory[-1][3:6])
             else: 
-                self.robot_state = list(trajectory_previous[0][0:3])  + list(trajectory_previous[0][3:6])
+                self.robot_state = list(trajectory[0][0:3])  + list(trajectory[0][3:6])
             
             # Plot
             if plot:
@@ -300,20 +275,20 @@ class TrajectoryGenerator:
                 if len(self.u_slave_prev) > 4: 
                     self.u_slave_prev.pop(0)
                     self.u_slave_prev.pop(0)
-                self.plot(trajectory_previous, self.u_master_prev, self.u_slave_prev, generated_trajectory,solution[:2*2*self.solver_param.base.trajectory_length])
+                self.plot(trajectory, self.u_master_prev, self.u_slave_prev, generated_trajectory,solution[:2*2*self.solver_param.base.trajectory_length])
                 #time.sleep(0.5)
 
             # Update the generated trajectory with the recently generated trajectory
             if self.two_seconds: 
                 [generated_trajectory[0].append(pose) for pose in trajectory[:,0:3]]
             else:
-                generated_trajectory[0].append(trajectory_previous[0,0:3])
+                generated_trajectory[0].append(trajectory[0,0:3])
             
             if self.solver_param.base.enable_slave:
                 if self.two_seconds: 
-                    [generated_trajectory[1].append(pose) for pose in trajectory_previous[:,3:6]]
+                    [generated_trajectory[1].append(pose) for pose in trajectory[:,3:6]]
                 else: 
-                    generated_trajectory[1].append(trajectory_previous[0,3:6])
+                    generated_trajectory[1].append(trajectory[0,3:6])
               
 
             t += self.solver_param.base.num_steps_taken
