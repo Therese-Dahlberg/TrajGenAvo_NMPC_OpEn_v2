@@ -181,8 +181,9 @@ class PlotterMap():
                           'master_start':self.map_plot.plot([], symbolBrush=plot_config['master_path_color'][:3], symbolSize=17, symbol='star', symbolPen=plot_config['master_path_color'][:3], name=plot_config['master_label']+'-start'), 
                           'master_end':self.map_plot.plot([], symbolBrush=plot_config['master_path_color'][:3], symbolSize=17, symbol='+', symbolPen=plot_config['master_path_color'][:3], name=plot_config['master_label']+'-goal'), 
                           'obstacles_original':self.map_plot.plot([], pen=pg.mkPen(plot_config['obs_sta_org_color'], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['obs_sta_org_color'], name=plot_config['obs_org_legend']), 
-                          'obstacles_padded':self.map_plot.plot([], pen=pg.mkPen(plot_config['obs_sta_pad_color'], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['obs_sta_pad_color'], name=plot_config['obs_sta_pad_legend']), 
-                          'closest_obstacles':self.map_plot.plot([], pen=pg.mkPen(plot_config['obs_sta_un_closest_color'], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['obs_sta_un_closest_color'], name=plot_config['obs_sta_un_closest_legend']), 
+                          # 'obstacles_padded':self.map_plot.plot([], pen=pg.mkPen(plot_config['obs_sta_pad_color'], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['obs_sta_pad_color'], name=plot_config['obs_sta_pad_legend']),
+                          'obstacles_padded': self.map_plot.plot([], pen=None, symbolBrush=(255, 255, 255), symbolSize=0.1),
+                          'closest_obstacles':self.map_plot.plot([], pen=pg.mkPen(plot_config['obs_sta_un_closest_color'], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['obs_sta_un_closest_color'], name=plot_config['obs_sta_un_closest_legend']),
                           'traversed_path':self.map_plot.plot([], pen='b', symbolBrush=(255, 0, 0), symbolSize=5, symbolPen='g'), 
                           'planned_path':self.map_plot.plot([], pen=pg.mkPen(plot_config['planned_path_color'], style=QtCore.Qt.DashLine), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['planned_path_color'], name=plot_config['planned_path_label']), 
                           'planned_trajectory_master':self.map_plot.plot([], pen=pg.mkPen(plot_config['planned_trajectory_master_color']), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['planned_trajectory_master_color'], name=plot_config['planned_trajectory_master_legend']), 
@@ -205,55 +206,6 @@ class PlotterMap():
             # self.map_plots['trajectory_slave'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['look_ahead_color']), symbolBrush=(255, 255, 255), symbolSize=3, symbolPen=plot_config['look_ahead_color'], name=plot_config['look_ahead_legend']+"-slave")
             self.map_plots['line_vertices_slave'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['lines_slave_color'], width=3), symbolBrush=(255, 255, 255), symbolSize=10, symbolPen=plot_config['lines_slave_color'], name=plot_config['lines_legend_slave'])
             self.map_plots['ref_point_slave'] = self.map_plot.plot([], pen=None, symbolBrush=plot_config['slave_ref_point_color'], symbolSize=10, symbolPen=plot_config['slave_ref_point_color'], name=plot_config['slave_ref_point_legend'])
-
-
-        #now we are going to do the colour-changing step for online visualization
-        import collision
-        # from collision import *
-        # from collision import Vector as v
-        # p0 = Concave_Poly(v(0, 0), [v(-80, 0), v(-20, 20), v(0, 80), v(20, 20), v(80, 0), v(20, -20), v(0, -80), v(-20, -20)])
-        # p1 = Concave_Poly(v(20, 20), [v(-80, 0), v(-20, 20), v(0, 80), v(20, 20), v(80, 0), v(20, -20), v(0, -80), v(-20, -20)])
-        #
-        # print(collide(p0, p1))
-        # def collision_detected(trajList):
-        #
-        #     obstacle = Polygon([(5.0, 4.0), (5.0, 5.0), (6.0, 5.0), (6.0, 4.0)])
-        #     nr_of_points = len(trajList[0])
-        #     master_trajectory = trajList[0]
-        #     slave_trajectory = trajList[1]
-        #
-        #     a = 1
-        #     for i in range(nr_of_points):
-        #         # Cargo defined as a line
-        #         # cargo = LineString([master_trajectory[i][:2],slave_trajectory[i][:2]])
-        #         x_master = master_trajectory[i][0]
-        #         y_master = master_trajectory[i][1]
-        #         x_slave = slave_trajectory[i][0]
-        #         y_slave = slave_trajectory[i][1]
-        #
-        #         master_corner_1 = (x_master, y_master) + a * (y_slave - y_master, x_master - x_slave) / np.linalg.norm(
-        #             [y_master - y_slave, x_master - x_slave])
-        #         master_corner_2 = (x_master, y_master) - a * (y_slave - y_master, x_master - x_slave) / np.linalg.norm(
-        #             [y_master - y_slave, x_master - x_slave])
-        #         slave_corner_1 = (x_slave, y_slave) + a * (y_slave - y_master, x_master - x_slave) / np.linalg.norm(
-        #             [y_master - y_slave, x_master - x_slave])
-        #         slave_corner_2 = (x_slave, y_slave) - a * (y_slave - y_master, x_master - x_slave) / np.linalg.norm(
-        #             [y_master - y_slave, x_master - x_slave])
-        #
-        #         # Cargo defined as a polygon
-        #         cargo = Polygon([master_corner_1, master_corner_2, slave_corner_2, slave_corner_1])
-        #
-        #         if cargo.intersects(obstacle):
-        #             return 1
-        #             self.map_plots['object'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3], name='Cargo')
-        #
-        #         else: #if collision does not happen
-        #             return 0
-        #             self.map_plots['object'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3], name='Cargo')
-        #
-        # self.map_plots['object'] = self.map_plot.plot([], pen=pg.mkPen('r', width=5), symbolBrush=(255, 255, 255),
-        #                                               symbolSize=7, symbolPen='r', name='object')
-
 
 
         self.map_plots['object_collision_1'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_collision_color'][:3], name='Cargo under the collision')
@@ -458,7 +410,8 @@ class PlotterMap():
         self.win_cost.raise_()
 
     def update_map(self, key, data):
-        if key == 'obstacles_original' or key == 'obstacles_padded' or key == 'look_ahead' or key == 'closest_obstacles':
+        if key == 'obstacles_original' or key == 'look_ahead' or key == 'closest_obstacles' or key == 'obstacles_padded':
+            # or key == 'obstacles_padded'
             connect = []
             x = []
             y = []
