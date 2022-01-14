@@ -89,9 +89,9 @@ with open(obs_original) as f:
     distros_dict = json.load(f)
 static_obs = []
 unexpected_obs = []
-for elem in distros_dict['static']:
-    static_obs.append(elem)
-    # print("static ",static_obs)
+# for elem in distros_dict['static']:
+#     static_obs.append(elem)
+#     # print("static ",static_obs)
 for elem in distros_dict['unexpected']:
     unexpected_obs.append(elem['vertices'])
     # print("unexpected ",unexpected_obs)

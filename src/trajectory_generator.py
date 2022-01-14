@@ -43,9 +43,9 @@ with open(obs_original) as f:
     distros_dict = json.load(f)
 static_obs = []
 unexpected_obs = []
-for elem in distros_dict['static']:
-    static_obs.append(elem)
-    # print("static ",static_obs)
+# for elem in distros_dict['static']:
+#     static_obs.append(elem)
+#     # print("static ",static_obs)
 for elem in distros_dict['unexpected']:
     unexpected_obs.append(elem['vertices'])
     # print("unexpected ",unexpected_obs)
@@ -589,7 +589,8 @@ class TrajectoryGenerator:
 
         cost_static_master = float(self.mpc_generator.cost_inside_static_object(all_x_master, all_y_master, self.mpc_generator.q_obs_c))
         cost_static_slave = float(self.mpc_generator.cost_inside_static_object(all_x_slave, all_y_slave, self.mpc_generator.q_obs_c))
-        cost_static_cargo = float(self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, [static_obs[0], unexpected_obs[0]], self.mpc_generator.q_obs_c, vert2_method=True))
+        # cost_static_cargo = float(self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, [static_obs[0], unexpected_obs[0]], self.mpc_generator.q_obs_c, vert2_method=True))
+        cost_static_cargo = float(self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, [unexpected_obs[0]], self.mpc_generator.q_obs_c, vert2_method=True))
         cost_bounds_master = float(self.mpc_generator.cost_outside_bounds(all_x_master, all_y_master, self.mpc_generator.q_obs_c))
         cost_bounds_slave = float(self.mpc_generator.cost_outside_bounds(all_x_slave, all_y_slave, self.mpc_generator.q_obs_c))
         # cost_bounds_cargo = float(self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, self.mpc_generator.q_obs_c))

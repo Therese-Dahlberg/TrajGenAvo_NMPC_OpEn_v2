@@ -65,23 +65,24 @@ def init_obs():
     with open(obs_original) as f:
         obs_json = json.load(f)
 
-    # Construct obstacles as objects in shapely.geometry for collision detection
-    static_obs = obs_json['static']
-    static_dict = dict()
-    index = 0
-    for obs in static_obs:
-        obs_shapely = Polygon(obs)
-        # Compute axis-aligned bounding boxes
-        bounds = obs_shapely.bounds
-        box = Box(bounds[0], bounds[1], bounds[2], bounds[3])
-        # Store
-        static_dict[str(index)] = [box, static_obs]
-        index += 1
-    # Save
-    # shapely_pickle = os.path.join(str(file_path.parent.parent), 'data', 'shapely_obstacles_w_bounding_boxes.p')
-    # with open(shapely_pickle, mode='wb') as f:
-    #     pickle.dump(static_dict,f)
-    return static_dict
+    # static obstacle dict was commented below for a better visualization, if needed, the coodnites for static obstacle should be added back in the 'obstacles.json' file under 'data' folder, changes also are needed on line 92-94 in "mpc_generator" file under 'mpc' folder, line 592-593 in file 'trajectory_generator', line 46-48 in file 'trajectory_generator', , line 122-123 in file 'trajectory_generator'
+    # # Construct obstacles as objects in shapely.geometry for collision detection
+    # static_obs = obs_json['static']
+    # static_dict = dict()
+    # index = 0
+    # for obs in static_obs:
+    #     obs_shapely = Polygon(obs)
+    #     # Compute axis-aligned bounding boxes
+    #     bounds = obs_shapely.bounds
+    #     box = Box(bounds[0], bounds[1], bounds[2], bounds[3])
+    #     # Store
+    #     static_dict[str(index)] = [box, static_obs]
+    #     index += 1
+    # # Save
+    # # shapely_pickle = os.path.join(str(file_path.parent.parent), 'data', 'shapely_obstacles_w_bounding_boxes.p')
+    # # with open(shapely_pickle, mode='wb') as f:
+    # #     pickle.dump(static_dict,f)
+    # return static_dict
 
 # Checks if there is a collision with the obstacles (only for static obstacles for now)
 # TODO: Implement a function to check wether or not a trajectory has collided with any obstacle.
