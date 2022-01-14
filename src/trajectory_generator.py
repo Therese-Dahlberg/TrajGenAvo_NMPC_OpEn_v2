@@ -412,16 +412,29 @@ class TrajectoryGenerator:
             # print(slave_corner_1 - master_corner_1)
             if output == 1:
                 print('Collision!!!!')
+
+                # plot the not needed box far away
+                self.plot_queues['object_safe_1'].put_nowait(((cargo_corners_list[0][0]+100, cargo_corners_list[1][0]+100), (cargo_corners_list[0][1]+100, cargo_corners_list[1][1]+100)))
+                self.plot_queues['object_safe_2'].put_nowait(((cargo_corners_list[1][0]+100, cargo_corners_list[2][0]+100), (cargo_corners_list[1][1]+100, cargo_corners_list[2][1]+100)))
+                self.plot_queues['object_safe_3'].put_nowait(((cargo_corners_list[2][0]+100, cargo_corners_list[3][0]+100), (cargo_corners_list[2][1]+100, cargo_corners_list[3][1]+100)))
+                self.plot_queues['object_safe_4'].put_nowait(((cargo_corners_list[3][0]+100, cargo_corners_list[0][0]+100), (cargo_corners_list[3][1]+100, cargo_corners_list[0][1]+100)))
+                # plot the needed box of collision
                 self.plot_queues['object_collision_1'].put_nowait(((cargo_corners_list[0][0], cargo_corners_list[1][0]),(cargo_corners_list[0][1], cargo_corners_list[1][1])))
                 self.plot_queues['object_collision_2'].put_nowait(((cargo_corners_list[1][0], cargo_corners_list[2][0]),(cargo_corners_list[1][1], cargo_corners_list[2][1])))
                 self.plot_queues['object_collision_3'].put_nowait(((cargo_corners_list[2][0], cargo_corners_list[3][0]),(cargo_corners_list[2][1], cargo_corners_list[3][1])))
                 self.plot_queues['object_collision_4'].put_nowait(((cargo_corners_list[3][0], cargo_corners_list[0][0]),(cargo_corners_list[3][1], cargo_corners_list[0][1])))
+
             elif output == 0:
+                # plot the not needed box far away
+                self.plot_queues['object_collision_1'].put_nowait(((cargo_corners_list[0][0]+100, cargo_corners_list[1][0]+100), (cargo_corners_list[0][1]+100, cargo_corners_list[1][1]+100)))
+                self.plot_queues['object_collision_2'].put_nowait(((cargo_corners_list[1][0]+100, cargo_corners_list[2][0]+100), (cargo_corners_list[1][1]+100, cargo_corners_list[2][1]+100)))
+                self.plot_queues['object_collision_3'].put_nowait(((cargo_corners_list[2][0]+100, cargo_corners_list[3][0]+100), (cargo_corners_list[2][1]+100, cargo_corners_list[3][1]+100)))
+                self.plot_queues['object_collision_4'].put_nowait(((cargo_corners_list[3][0]+100, cargo_corners_list[0][0]+100), (cargo_corners_list[3][1]+100, cargo_corners_list[0][1]+100)))
+                # plot the needed box of safe cargo
                 self.plot_queues['object_safe_1'].put_nowait(((cargo_corners_list[0][0], cargo_corners_list[1][0]), (cargo_corners_list[0][1], cargo_corners_list[1][1])))
                 self.plot_queues['object_safe_2'].put_nowait(((cargo_corners_list[1][0], cargo_corners_list[2][0]), (cargo_corners_list[1][1], cargo_corners_list[2][1])))
                 self.plot_queues['object_safe_3'].put_nowait(((cargo_corners_list[2][0], cargo_corners_list[3][0]), (cargo_corners_list[2][1], cargo_corners_list[3][1])))
                 self.plot_queues['object_safe_4'].put_nowait(((cargo_corners_list[3][0], cargo_corners_list[0][0]), (cargo_corners_list[3][1], cargo_corners_list[0][1])))
-
 
         except:
             pass
