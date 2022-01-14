@@ -596,8 +596,16 @@ class MpcModule:
                     # Compute distance between polygon center point of current obs and cargo at time t=0
                     if t == 0:
                         ### compute center point of obs (here only for rectangle)
-                        center_x_obs = (vertices_obs[0][0] + vertices_obs[2][0])/2
-                        center_y_obs = (vertices_obs[0][1] + vertices_obs[2][1])/2
+                        # RECTANGLE
+                        # center_x_obs = (vertices_obs[0][0] + vertices_obs[2][0])/2
+                        # center_y_obs = (vertices_obs[0][1] + vertices_obs[2][1])/2
+                        # TRIANGLE
+                        median_x = -(vertices_obs[0][0] + vertices_obs[1][0])/2 + vertices_obs[2][0]
+                        median_x_scale = median_x/3
+                        center_x_obs = (vertices_obs[0][0] + vertices_obs[1][0])/2 + median_x_scale
+                        median_y = -(vertices_obs[0][1] + vertices_obs[1][1])/2 + vertices_obs[2][1]
+                        median_y_scale = median_y/3
+                        center_y_obs = (vertices_obs[0][1] + vertices_obs[1][1])/2 + median_y_scale
                         # Compute distance of center points and multiply that to cost
                         d.append(cs.sqrt((center_x_cargo - center_x_obs)**2 +(center_y_cargo - center_y_obs)**2))
 
@@ -621,7 +629,7 @@ class MpcModule:
                             h = cs.fmax(0.0, obs_eq)**2   # zero if obs_eq is smaller than zero, i.e. if ATR position fulfills constraint (CasADi: Maximum function is "differentiable")
                             inside *= h  # choose max h value as cost
                         d_obs = d[obs_idx]
-                        crash += inside*(1/d_obs) # crash cost per obstacle
+                        crash += inside*(1/d_obs)*1e-2 # crash cost per obstacle
                     print("First crash: ", crash)
                     
                     # Loop over all vertices of current obstacle
@@ -649,7 +657,7 @@ class MpcModule:
                             h = cs.fmax(0.0, obs_eq)**2   # zero if obs_eq is smaller than zero, i.e. if ATR position fulfills constraint (CasADi: Maximum function is "differentiable")
                             inside *= h # choose max h value as cost
                         d_obs = d[obs_idx]
-                        crash += inside*(1/d_obs)*2e-2 # crash cost per obstacle  
+                        crash += inside*(1/d_obs)*1e-2 # crash cost per obstacle  
                     print("Total crash: ", crash)
                     # Update current obs
                     obs_idx += 1

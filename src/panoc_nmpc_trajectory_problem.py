@@ -88,7 +88,8 @@ class PanocNMPCTrajectoryProblem:
             # Get vertices of shapely object
             vert = np.vstack(ob.exterior.xy).T[:-1] # Clip last vertex that is doubled due to shapely convention
             # Unpad obstacle to get original and get vertices of original
-            vert_unpad = obs_handler.pad_obstacles(np.expand_dims(vert, axis=0), decrease=True)[0]
+            # vert_unpad = obs_handler.pad_obstacles(np.expand_dims(vert, axis=0), decrease=True)[0]
+            vert_unpad = vert # TODO not correct but line above throws an error for obs that are not rectangles 
             # Convert the obstacle into line inequalities and add them to the list
             A, b = obstacle_as_inequality(np.mat(vert.ravel().reshape(-1, 2)))
             obs_array = np.array(np.concatenate((b, A), axis = 1))

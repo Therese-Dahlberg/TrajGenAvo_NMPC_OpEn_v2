@@ -1,5 +1,5 @@
 {
-    "nodes": [
+    "nodes": [        
         {
             "coord": [5,9], 
             "neighbour": [[]]

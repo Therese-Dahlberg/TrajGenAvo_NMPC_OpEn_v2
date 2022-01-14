@@ -145,7 +145,7 @@ def plot_polygons_w_atr(polygons, master_pos, slave_pos):
     plt.show()
 
 
-def main(build=False, destroy_plots=False):
+def main(build=True, destroy_plots=False):
     traj_gen = init(build=build, self_destruct=destroy_plots)
     try:
         traj_gen.run(plot=1)
