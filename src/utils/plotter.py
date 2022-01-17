@@ -1,3 +1,4 @@
+from copyreg import remove_extension
 import numpy as np
 import multiprocessing
 from queue import Empty
@@ -12,32 +13,44 @@ import matplotlib.pyplot as plt
 # import src.main
 
 def start_plotter(config, plot_config, aut_test_config=None, width=800, height=600):
-    plot_queues_map  = {'master_path':multiprocessing.Queue(maxsize=1), 
+    plot_queues_map  = {'master_path':multiprocessing.Queue(maxsize=1),
+
                 'master_start':multiprocessing.Queue(maxsize=1), 
                 'master_end':multiprocessing.Queue(maxsize=1), 
-               'slave_path':multiprocessing.Queue(maxsize=1), 
+                'slave_path':multiprocessing.Queue(maxsize=1), 
                 'slave_start':multiprocessing.Queue(maxsize=1), 
                 'slave_end':multiprocessing.Queue(maxsize=1), 
-               'obstacles_original':multiprocessing.Queue(maxsize=1), 
-               'obstacles_test':multiprocessing.Queue(maxsize=1), 
-               'obstacles_padded':multiprocessing.Queue(maxsize=1), 
-               'closest_obstacles':multiprocessing.Queue(maxsize=1), 
-               'traversed_path':multiprocessing.Queue(maxsize=1), 
-               'planned_path':multiprocessing.Queue(maxsize=1), 
-               'planned_trajectory_master':multiprocessing.Queue(maxsize=1), 
-               'planned_trajectory_slave':multiprocessing.Queue(maxsize=1), 
-               'nodes':multiprocessing.Queue(maxsize=1), 
-               'boundry':multiprocessing.Queue(maxsize=1), 
-            #    'look_ahead':multiprocessing.Queue(maxsize=1), 
-               'trajectory_master':multiprocessing.Queue(maxsize=1), 
-               'trajectory_slave':multiprocessing.Queue(maxsize=1), 
-               'line_vertices_master':multiprocessing.Queue(maxsize=1), 
-               'line_vertices_slave':multiprocessing.Queue(maxsize=1), 
-               'ref_point_master':multiprocessing.Queue(maxsize=1), 
-               'ref_point_slave':multiprocessing.Queue(maxsize=1), 
-               'search_sector':multiprocessing.Queue(maxsize=1), 
-               'object_collision': multiprocessing.Queue(maxsize=1),
-               'object_safe': multiprocessing.Queue(maxsize=1), # the carried object which needs to be plotted later on
+                'obstacles_original':multiprocessing.Queue(maxsize=1), 
+                'obstacle_bc':multiprocessing.Queue(maxsize=1),  #bounding circele around obstacle
+                # 'obstacles_padded':multiprocessing.Queue(maxsize=1), 
+                'closest_obstacles':multiprocessing.Queue(maxsize=1), 
+                'traversed_path':multiprocessing.Queue(maxsize=1), 
+                'planned_path':multiprocessing.Queue(maxsize=1), 
+                'planned_trajectory_master':multiprocessing.Queue(maxsize=1), 
+                'planned_trajectory_slave':multiprocessing.Queue(maxsize=1), 
+                'nodes':multiprocessing.Queue(maxsize=1), 
+                'boundry':multiprocessing.Queue(maxsize=1), 
+                # 'look_ahead':multiprocessing.Queue(maxsize=1), 
+                'trajectory_master':multiprocessing.Queue(maxsize=1), 
+                'trajectory_slave':multiprocessing.Queue(maxsize=1), 
+                'line_vertices_master':multiprocessing.Queue(maxsize=1), 
+                'line_vertices_slave':multiprocessing.Queue(maxsize=1), 
+                'ref_point_master':multiprocessing.Queue(maxsize=1), 
+                'ref_point_slave':multiprocessing.Queue(maxsize=1), 
+                'search_sector':multiprocessing.Queue(maxsize=1), 
+                'object_collision': multiprocessing.Queue(maxsize=1),
+                'object_safe': multiprocessing.Queue(maxsize=1), # the carried object which needs to be plotted later on
+                'cargo_bc': multiprocessing.Queue(maxsize=1),
+                'object_collision_1': multiprocessing.Queue(maxsize=1), # the carried object which needs to be plotted later on
+                'object_collision_2': multiprocessing.Queue(maxsize=1),
+                'object_collision_3': multiprocessing.Queue(maxsize=1),
+                'object_collision_4': multiprocessing.Queue(maxsize=1),
+                'object_collision_5': multiprocessing.Queue(maxsize=1),
+                'object_safe_1': multiprocessing.Queue(maxsize=1), # the carried object which needs to be plotted later on
+                'object_safe_2': multiprocessing.Queue(maxsize=1),
+                'object_safe_3': multiprocessing.Queue(maxsize=1),
+                'object_safe_4': multiprocessing.Queue(maxsize=1),
+                'object_safe_5': multiprocessing.Queue(maxsize=1),
             } 
     
     plot_queues_data  = {'master_lin_vel':multiprocessing.Queue(maxsize=1), 
@@ -174,23 +187,12 @@ class PlotterMap():
         self.legend_map = self.map_plot.addLegend(labelTextColor=(0, 0, 0))
         self.legend_map.setBrush((255, 255, 255, 200))
 
-        # plot_item = self.win_map.addPlot()
-        # p_ellipse = pg.EllipseROI([0, 0], [10, 10], pen='y')
-        # p_ellipse2 = pg.ROI([1, 1], [27, 28], pen='y')
-        # p_ellipse3 = pg.QtGui.QGraphicsEllipseItem(0, 0, 10, 10)  # x, y, width, height
-        # # self.win_map.addPlot(p_ellipse)
-        # # self.win_map.addItem(p_ellipse)
-        # # p_ellipse3.setData()
-        # p_ellipse3.setPen(pg.mkPen((0, 0, 0, 100)))
-        # p_ellipse3.setBrush(pg.mkBrush((50, 50, 200)))   
-        # plot_item.addItem(p_ellipse3)
-
         self.map_plots = {'master_path':self.map_plot.plot([], pen=pg.mkPen(plot_config['master_path_color'][:3], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['master_path_color'][:3], name=plot_config['master_label']+'-path'), 
                           'master_start':self.map_plot.plot([], symbolBrush=plot_config['master_path_color'][:3], symbolSize=17, symbol='star', symbolPen=plot_config['master_path_color'][:3], name=plot_config['master_label']+'-start'), 
                           'master_end':self.map_plot.plot([], symbolBrush=plot_config['master_path_color'][:3], symbolSize=17, symbol='+', symbolPen=plot_config['master_path_color'][:3], name=plot_config['master_label']+'-goal'), 
                           'obstacles_original':self.map_plot.plot([], pen=pg.mkPen(plot_config['obs_sta_org_color'], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['obs_sta_org_color'], name=plot_config['obs_org_legend']), 
-                          'obstacles_test':self.map_plot.plot([], pen=pg.mkPen(plot_config['obs_sta_org_color'], width=3, style=QtCore.Qt.DashLine), symbolBrush=(255, 255, 255), symbolSize=1, symbolPen=plot_config['obs_sta_org_color'], name=plot_config['obs_org_legend']), 
-                          'obstacles_padded':self.map_plot.plot([], pen=pg.mkPen(plot_config['obs_sta_pad_color'], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['obs_sta_pad_color'], name=plot_config['obs_sta_pad_legend']), 
+                          'obstacle_bc':self.map_plot.plot([], pen=pg.mkPen(plot_config['obs_sta_org_color'], width=3, style=QtCore.Qt.DashLine), symbolBrush=(255, 255, 255), symbolSize=1, symbolPen=plot_config['obs_sta_org_color'], name=plot_config['obs_org_legend']), 
+                        #   'obstacles_padded':self.map_plot.plot([], pen=pg.mkPen(plot_config['obs_sta_pad_color'], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['obs_sta_pad_color'], name=plot_config['obs_sta_pad_legend']), 
                           'closest_obstacles':self.map_plot.plot([], pen=pg.mkPen(plot_config['obs_sta_un_closest_color'], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['obs_sta_un_closest_color'], name=plot_config['obs_sta_un_closest_legend']), 
                           'traversed_path':self.map_plot.plot([], pen='b', symbolBrush=(255, 0, 0), symbolSize=5, symbolPen='g'), 
                           'planned_path':self.map_plot.plot([], pen=pg.mkPen(plot_config['planned_path_color'], style=QtCore.Qt.DashLine), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['planned_path_color'], name=plot_config['planned_path_label']), 
@@ -214,8 +216,20 @@ class PlotterMap():
             self.map_plots['ref_point_slave'] = self.map_plot.plot([], pen=None, symbolBrush=plot_config['slave_ref_point_color'], symbolSize=10, symbolPen=plot_config['slave_ref_point_color'], name=plot_config['slave_ref_point_legend'])
 
         self.map_plots['object_collision'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_collision_color'][:3], name='Cargo under the collision')
-        self.map_plots['object_safe'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3], name='safe Cargo')                
-
+        self.map_plots['object_safe'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3], name='safe Cargo')
+        self.map_plots['cargo_bc'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=2, style=QtCore.Qt.DashLine), symbolBrush=(255, 255, 255), symbolSize=1, symbolPen=plot_config['object_no_collision_color'][:3], name='Cargo')
+        self.map_plots['object_collision_1'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_collision_color'][:3], name='Cargo under the collision')
+        self.map_plots['object_collision_2'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7,symbolPen=plot_config['object_collision_color'][:3])
+        self.map_plots['object_collision_3'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7,symbolPen=plot_config['object_collision_color'][:3])
+        self.map_plots['object_collision_4'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7,symbolPen=plot_config['object_collision_color'][:3])
+        self.map_plots['object_collision_5'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7,symbolPen=plot_config['object_collision_color'][:3])
+        
+        self.map_plots['object_safe_1'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3], name='safe Cargo')
+        self.map_plots['object_safe_2'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3])
+        self.map_plots['object_safe_3'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3])
+        self.map_plots['object_safe_4'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3])
+        self.map_plots['object_safe_5'] = self.map_plot.plot([], pen=pg.mkPen(plot_config['object_no_collision_color'][:1], width=5), symbolBrush=(255, 255, 255), symbolSize=7, symbolPen=plot_config['object_no_collision_color'][:3])
+        
         # Set up data plots
         self.canvas_lin_vel = self.win_data.addPlot(title="Lin-Vel", row=0, col=0)
         self.canvas_lin_vel.setLabel('left', 'Vel', units='m/s')
@@ -409,7 +423,7 @@ class PlotterMap():
         self.win_cost.raise_()
 
     def update_map(self, key, data):
-        if key == 'obstacles_original' or key == 'obstacles_padded' or key == 'look_ahead' or key == 'closest_obstacles':
+        if key == 'obstacles_original' or key == 'look_ahead' or key == 'closest_obstacles' or key == 'obstacles_padded':
             connect = []
             x = []
             y = []
@@ -424,28 +438,23 @@ class PlotterMap():
                 connect += [1]*(x_.shape[0]) + [0]
             self.map_plots[key].setData(x=x, y=y, connect=np.array(connect))
         
-        elif key == 'obstacles_test':
-            # print("handle circles")
+        elif key == 'obstacle_bc' or key == 'cargo_bc':
             connect = []
             x = []
             y = []
+            r_extension = 0.7247
 
             for d in data:  #data is the list of circle parameters,  [array([x, y]) radius]
-                # print("d in data: ", d)
                 
                 xy_origin, r = tuple(np.array(d).T)
-                # print("o and r: ", xy_origin,r)
+
                 o_x = xy_origin[0]
                 o_y = xy_origin[1]
                 n = 200
                 list_points = [(math.cos(2*math.pi/n*x)*r + o_x,math.sin(2*math.pi/n*x)*r+o_y) for x in range(0,n+1)]
                 try:
                     x_, y_ = tuple(np.array(list_points).T)
-                #     o_x = xy_origin[0]
-                #     o_y = xy_origin[1]
-                #     n = 20
-                #     print("origin & radius : ", xy_origin, r)
-                #     list_points = [(math.cos(2*math.pi/n*x)*r + o_x,math.sin(2*math.pi/n*x)*r+o_y) for x in range(0,n+1)]
+
                 except:
                     print(f"{self.print_name}: some exception: data put on plot_queues has to be either [x, y] or [[[x0, y0], [x1, y1]], [[x0, y0], [x1, y1]] ]")
                     return

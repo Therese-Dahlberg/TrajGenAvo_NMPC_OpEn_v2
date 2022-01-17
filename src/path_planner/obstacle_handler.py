@@ -141,7 +141,7 @@ class ObstacleHandler:
         unexpected_obstacles_shapely = self.obs_as_shapely_polygon(unexpected_padded_obs)
         return static_original_obs, static_padded_obs, static_obstacles_shapely, unexpected_original_obs, unexpected_padded_obs, unexpected_obstacles_shapely
 
-    #Creates a circular boundary around all static obstacles. Returns a list with parameters for each circle. Does not work right now.
+    #Creates a circular boundary around all static obstacles. Returns a list with parameters for each circle
     def bounding_circles(self,obstacles):
         # static_original_obs, static_padded_obs, static_obstacles_shapely, unexpected_original_obs,_,_ = self.get_static_obstacles()
 
@@ -152,7 +152,7 @@ class ObstacleHandler:
         bounding_circles_list = []
         circle_parameters_list = []
 
-        #TODO: minimum enclosing circle for all obstacels, right now this only is applicable for one obstacle
+        #TODO: minimum enclosing circle for all obstacels, right now this only is applicable for one obstacle?????
         for o in obstacles:
             #get minimum enclosing circle parameters from miniball
             circle_coords, r_squared = miniball.get_bounding_ball(np.array(o))
@@ -498,34 +498,34 @@ class ObstacleHandler:
         #     # print("I'm here!")
         #     obs+=[ob for ob in npCircles]
         #     # print("obs is empty?", obs)
-        try: self.plot_queues['obstacles_test'].put_nowait(obs_circles)
+        try: self.plot_queues['obstacle_bc'].put_nowait(obs_circles)
         except Full: pass
 
 
-        # Plot all obstacles padded
-        obs = []
-        if np.all(static_padded_obs.shape):
-            obs += [ob for ob in  static_padded_obs]
-        if np.all(unexpected_padded_obs.shape):
-            obs += [ob for ob in  unexpected_padded_obs]
-        if np.all(dynamic_padded_obs.shape):
-            if not self.plot_config['enable_ellipses']:
-                # Plot the polygon representation of the dynamic obstacles
-                obs += [ob for ob in dynamic_padded_obs[:, 0, :, :]]
-                # Plot the future positions of the dynamic obstacles
-                if self.plot_config['plot_future_dyn_obs']:
-                    obs += [ob for ob in dynamic_padded_obs[:, self.config.n_hor -1, :, :]]
+        # # Plot all obstacles padded
+        # obs = []
+        # if np.all(static_padded_obs.shape):
+        #     obs += [ob for ob in  static_padded_obs]
+        # if np.all(unexpected_padded_obs.shape):
+        #     obs += [ob for ob in  unexpected_padded_obs]
+        # if np.all(dynamic_padded_obs.shape):
+        #     if not self.plot_config['enable_ellipses']:
+        #         # Plot the polygon representation of the dynamic obstacles
+        #         obs += [ob for ob in dynamic_padded_obs[:, 0, :, :]]
+        #         # Plot the future positions of the dynamic obstacles
+        #         if self.plot_config['plot_future_dyn_obs']:
+        #             obs += [ob for ob in dynamic_padded_obs[:, self.config.n_hor -1, :, :]]
             
 
-            if self.plot_config['enable_ellipses']:
-                # Plot the ellipse representation of the dynamic obstacles
-                obs += [self.polygon_to_coord_plotable(ob, mvee=False, polygon=True, panoc=panoc) for ob in dynamic_padded_obs[:, 0, :, :]]
-                # Plot the future positions of the dynamic obstacles
-                if self.plot_config['plot_future_dyn_obs']:
-                    obs += [self.polygon_to_coord_plotable(ob, mvee=False, polygon=True, panoc=panoc) for ob in dynamic_padded_obs[:, self.config.n_hor -1, :, :]]
+        #     if self.plot_config['enable_ellipses']:
+        #         # Plot the ellipse representation of the dynamic obstacles
+        #         obs += [self.polygon_to_coord_plotable(ob, mvee=False, polygon=True, panoc=panoc) for ob in dynamic_padded_obs[:, 0, :, :]]
+        #         # Plot the future positions of the dynamic obstacles
+        #         if self.plot_config['plot_future_dyn_obs']:
+        #             obs += [self.polygon_to_coord_plotable(ob, mvee=False, polygon=True, panoc=panoc) for ob in dynamic_padded_obs[:, self.config.n_hor -1, :, :]]
 
-        try: self.plot_queues['obstacles_padded'].put_nowait(obs)
-        except Full: pass
+        # try: self.plot_queues['obstacles_padded'].put_nowait(obs)
+        # except Full: pass
 
         # Plot boundry
         data = np.vstack((boundry_padded, boundry_padded[0])).T

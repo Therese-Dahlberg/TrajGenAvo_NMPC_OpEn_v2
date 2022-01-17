@@ -6,6 +6,7 @@ from queue import Full
 
 import numpy as np
 import json
+import math
 
 # Own imports
 from ATRS import ATRS
@@ -22,6 +23,7 @@ from utils.config import Configurator, SolverParams, Weights
 
 from shapely.geometry import box as Box
 from shapely.geometry import Polygon
+import shapely.geometry as sg
 
 file_path = Path(__file__)
 obs_original = os.path.join(str(file_path.parent.parent), 'data', 'obstacles.json')
@@ -315,12 +317,12 @@ class TrajectoryGenerator:
         # obstacle_corners could for example be a list containing the coordinates of all PADDED obstacles:
         # [[o1_x,o1_y],...,[oM_x,oM_y]], for M obstacles.
 
-        #TODO: change this to the data from the json file
+        #TODO: change this to the data from the json file, only useful if we want to change the colour of the plot when colliding
         obstacle = Polygon([(5.0, 4.0), (5.0, 5.0), (6.0, 5.0), (6.0, 4.0)])
 
         masterPosition = current_list[0][0]
         slavePosition = current_list[0][1]
-        scalar_for_corners = 0.5
+        scalar_for_corners = 0.75
 
         x_master = float(masterPosition[0])
         y_master = float(masterPosition[1])
@@ -349,7 +351,6 @@ class TrajectoryGenerator:
         static_original_obs, static_padded_obs, _, unexpected_original_obs, unexpected_padded_obs,_ = self.obs_handler.get_static_obstacles()
         dynamic_original_obs, dynamic_padded_obs, _ = self.obs_handler.get_dynamic_obstacles()
         boundry = self.obs_handler.get_boundry()
-        # circle_boundaries,circle_parameter_list = self.obs_handler.bounding_circles()
 
         #This plots the obstacles
         self.obs_handler.plot(boundry, static_original_obs,static_padded_obs, unexpected_original_obs, unexpected_padded_obs, dynamic_original_obs, dynamic_padded_obs, self.panoc) 
@@ -385,21 +386,57 @@ class TrajectoryGenerator:
         except Full:
             pass
         
+
+        try: #Plots the bc for cargo
+
+            #Coordinates for the master and slave
+            x_master = past_traj_master[-1][0]
+            y_master = past_traj_master[-1][1]
+            x_slave = past_traj_slave[-1][0]
+            y_slave = past_traj_slave[-1][1]
+
+            #Origin of the cargo circle
+            x_origin_cargo = (x_master + x_slave)/2
+            y_origin_cargo = (y_master + y_slave)/2
+
+            #Radius of the cargo circle
+            r_ext = 0.4014
+            r_cargo = math.sqrt((x_origin_cargo-x_master)**2 + (y_origin_cargo-y_master)**2) + r_ext
+
+            circle_parameters = []
+            circle_parameters.append([(x_origin_cargo,y_origin_cargo),r_cargo])
+            np_circle_parameters = np.array(circle_parameters, dtype=object) #converting to numpy to function with other parts of the code
+
+            self.plot_queues['cargo_bc'].put_nowait(np_circle_parameters)
+        except:
+            pass
+
+
         try: #plot the carried object here, set up the plot positions
             currentList = [[past_traj_master[-1], past_traj_slave[-1]]]
 
-            output = self.onlineCollisionDetection(currentList)
+            masterPosition = currentList[0][0]
+            slavePosition = currentList[0][1]
+            scalar_for_corners = 0.75
 
-            if output == 1:
-                print('Collision!!!!')
+            x_master = float(masterPosition[0])
+            y_master = float(masterPosition[1])
+            x_slave = float(slavePosition[0])
+            y_slave = float(slavePosition[1])
 
-                #put_nowait adds an element in the plot_queue. A plot queue is a FIFO queue
-                self.plot_queues['object_collision'].put_nowait(((past_traj_master[-1][0], past_traj_slave[-1][0]), (past_traj_master[-1][1], past_traj_slave[-1][1])))
-                # if state_changed:
-                # self.plot_queues.get_nowait()
-            elif output == 0:
-                self.plot_queues['object_safe'].put_nowait(((past_traj_master[-1][0], past_traj_slave[-1][0]), (past_traj_master[-1][1], past_traj_slave[-1][1])))
-                # self.plot_queues['object_safe'].put_nowait(past_traj_master[-1][0], past_traj_master[-1][1])
+            master_corner_1 = np.array([x_master, y_master]) + scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
+            master_corner_2 = np.array([x_master, y_master]) - scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
+            slave_corner_1 = np.array([x_slave, y_slave]) + scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
+            slave_corner_2 = np.array([x_slave, y_slave]) - scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
+            cargo_corners_list = [master_corner_1, master_corner_2, slave_corner_2, slave_corner_1]
+
+
+            #Plot the cargo:
+            self.plot_queues['object_safe_1'].put_nowait(((cargo_corners_list[0][0], cargo_corners_list[1][0]), (cargo_corners_list[0][1], cargo_corners_list[1][1])))
+            self.plot_queues['object_safe_2'].put_nowait(((cargo_corners_list[1][0], cargo_corners_list[2][0]), (cargo_corners_list[1][1], cargo_corners_list[2][1])))
+            self.plot_queues['object_safe_3'].put_nowait(((cargo_corners_list[2][0], cargo_corners_list[3][0]), (cargo_corners_list[2][1], cargo_corners_list[3][1])))
+            self.plot_queues['object_safe_4'].put_nowait(((cargo_corners_list[3][0], cargo_corners_list[0][0]), (cargo_corners_list[3][1], cargo_corners_list[0][1])))
+
         except:
             pass
 

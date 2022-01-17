@@ -517,35 +517,15 @@ class MpcModule:
         #Obstacles should be a list containing all vertices of all obstacles
         #Example: [  [ [o1_x1,o1_y1], ..., [o1_xN,o1_yN] ], ..., [ [oM_x1,oM_y1], ..., [oM_xK,oM_yK] ]  ]
         
-        
         # If cost is just computed or also logged 
         if not individual_costs:    
             crash_in_trajectory = 0 
         else:
             crash_in_trajectory = [] 
 
-        
-        # print("what type is obstacles: ", type(obstacles))
-        # print("What is inside obstacles: ", obstacles)
-
-        # print("what type is q: ", type(q))
-        # print("What is inside q: ", q)
-        
-        # # Origin of the obstacle cirlce, should be moved to config/json file.
-        # x_origin_obs = 5.5
-        # y_origin_obs = 4.5
-
-        # # Radius of the obstacle circle.
-        # r_obs = 1.5
-
-
-        #TODO: import the vertices of the obstacles from json file
-
-        #TODO: make list to storeprint("static= []
         bounding_circles = []
         circle_parameters_list = []
 
-        #TODO: minimum enclosing circle for all obstacels, right now this only is applicable for one obstacle
         for o in obstacles:
             
             #get minimum enclosing circle parameters from miniball
@@ -558,37 +538,20 @@ class MpcModule:
             circle = sg.Point(circle_coords[0],circle_coords[1]).buffer(radius)
             bounding_circles.append(circle) #This should be plotted in the plotter function
 
-        #TODO: coordinates for the origin of the bounding circle
-
-        #TODO: radius of the bounding circle
-
-        #TODO: bounding circle of obstacle from the vertices as shapely object?
-
-        #TODO: model the cargo, start with easy shape.
-        
-        #TODO: The distance between the ATR:s should be the same as the longest dimension of the cargo, for simple modelling?
-
-        
         # Loop over time steps along horizon, still useful
         for t in range(0, self.solver_param.base.n_hor):
             # Reset/init for each time step
-            area = 0
             x_master = x_all_master[t]
             y_master = y_all_master[t]
             x_slave = x_all_slave[t]
             y_slave = y_all_slave[t]
 
-            # Origin of the cargo circle!
+            # Origin and radius of the cargo bounding circle!
+            # TODO change this to be calculated with SEC as well!
             x_origin_cargo = (x_master + x_slave)/2
             y_origin_cargo = (y_master + y_slave)/2
-
-            # TODO: calculate the radius of the cargo circle, change to casadi instead of math. 
-            # r_cargo = math.sqrt((x_origin_cargo-x_master)**2 + (y_origin_cargo-y_master)**2)
-            r_cargo = cs.sqrt((x_origin_cargo-x_master)**2 + (y_origin_cargo-y_master)**2)
-
-
-            # TODO: define the distance between the two origins, should be able to change distance between ATRs depending on the cargo.
-            #TODO: check all obstacles in the list
+            r_extension = 0.4014
+            r_cargo = cs.sqrt((x_origin_cargo-x_master)**2 + (y_origin_cargo-y_master)**2) + r_extension
 
             crash = 0
             for bc in range(len(bounding_circles)):
@@ -596,39 +559,14 @@ class MpcModule:
                 obs_origin = circle_parameters_list[bc][0]
                 obs_radius = circle_parameters_list[bc][1]
 
-                #Calculate the distance between the origin of the cargo and obstacle, change to casadi instead of math
-                # d_origins = math.sqrt((x_origin_cargo - obs_origin[0])**2 + (y_origin_cargo - obs_origin[1])**2)
                 d_origins = cs.sqrt((x_origin_cargo - obs_origin[0])**2 + (y_origin_cargo - obs_origin[1])**2)
 
                 crash = crash + cs.fmax(0.0, r_cargo + obs_radius - d_origins)**2.0   # zero if cargo fulfills constraint, change area to the cirlce condition
-                # if crash > 0.0:
-                #     print("crash added", crash)
 
-            # TODO: Loop over all static obstacles (Save for later so that we can model obstacles as more than one cirlce)
-            # for bounding_box_obj in bb_list:
-            #     # Simple check f
-            #     if (obj_xmin < cargo_xmax and obj_xmax > cargo_xmin and
-            #         obj_ymin < cargo_ymax and obj_ymax > cargo_ymin):
-            #         # Bounding boxes overlap
-            #         # Compute collision area with shapely
-            #         # TODO: get shapely object of static obstacle with its index in bounding box list
-            #         obj = obj_list[index]
-            #         area += cargo.intersection(obj).area/min(cargo.area,obj.area)   # intersecting area compared to the size of the cargo or obstacle for good estimation if intrusion is bad or negatable
-            
-            # crash = cs.fmax(0.0, r_cargo+r_obs-d_origins)**2.0   # zero if cargo fulfills constraint, change area to the cirlce condition
-            # # print("crash", crash)
-            # # print("type", type(crash))
-
-            # if crash > 0.0:
-            #     print("crash added")
-
-            # print('q', q)
             # Update cost with number of collisions for all obstacles for current time step
             if not individual_costs:
-                # print("not individual case: ", crash*q)
                 crash_in_trajectory += crash*q
             else:
-                # print("individual case: ", crash*q)
                 crash_in_trajectory.append(crash*q)
 
         return crash_in_trajectory

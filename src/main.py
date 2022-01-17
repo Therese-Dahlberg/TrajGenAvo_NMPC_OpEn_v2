@@ -36,17 +36,11 @@ def init(build=True, self_destruct=False):
         #ORIGINAL NODES
         master_goal = [(5, 2, 1.57), (5, 9, 1.57), (4, 10, 1.57)] # for different modes
         slave_goal = [(5, 1, 1.57), (5, 8, 1.57), (4, 9, 1.57)]
-
-        #NEW NODES
-        # master_goal = [(5, 2, 1.57), (8, 6, 1.57), (10, 8, 1.57)] # for different modes
-        # slave_goal = [(5, 1, 1.57), (7, 6, 1.57), (9, 8, 1.57)]
     
         # Global path
         map_fp = os.path.join(str(file_path.parent.parent), 'data', 'map.json')
-        # print("map fp", map_fp)
         gpp = GlobalPathPlanner(map_fp)
         global_path = gpp.search_astar(master_goal[0][:2], master_goal[1][:2]) # Send the start and end position for the master to A* alg.
-        # print('global path ', global_path)
 
         # Create the trajectory generator and set global path
         start_pose = [start_master, start_slave]
@@ -55,12 +49,9 @@ def init(build=True, self_destruct=False):
         return traj_gen
 
 
-# Checks if there is a collision with the obstacles (only for static obstacles for now)
-# TODO: Implement a function to check wether or not a trajectory has collided with any obstacle.
+# Checks if there is a collision with the obstacles (only for 1 static obstacles for now) OFFLINE
 def collisionDetection(trajList):
     # trajList should be a list of generated trajectores: [[(x0_m,y0_m,theta0_m),...,(xN_m,yN_m,thetaN_m)],[(x0_s,y0_s,theta0_s),...,(xN_s,yN_s,thetaN_s)]], for N number of points.
-    # obstacle_corners could for example be a list containing the coordinates of all PADDED obstacles: [[o1_x,o1_y],...,[oM_x,oM_y]], for M obstacles.
-    # TODO: Fix the padded obstacles coordinates!
 
     padded_obstacle = Polygon([(4.5,3.5),(4.5,5.5),(6.5,5.5),(6.5,3.5)])
     nr_of_points = len(trajList[0])
@@ -115,7 +106,6 @@ def main(build=True, destroy_plots=False):
     finally:
         print("Should kill all running processes")
     generated_trajectory = traj_gen.getGeneratedTrajectory()
-    # out = collisionDetection(generated_trajectory)
         
 
 if __name__ == '__main__':
