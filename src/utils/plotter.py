@@ -4,12 +4,6 @@ from queue import Empty
 
 from PyQt5 import QtCore, QtWidgets
 import pyqtgraph as pg
-from shapely.geometry import box as Box
-from shapely.geometry import Polygon
-import matplotlib.pyplot as plt
-# from src.main import collisionDetection
-# import src.main
-# from trajectory_generator import TrajectoryGenerator
 
 def start_plotter(config, plot_config, aut_test_config=None, width=800, height=600):
     plot_queues_map  = {'master_path':multiprocessing.Queue(maxsize=1),
@@ -41,7 +35,7 @@ def start_plotter(config, plot_config, aut_test_config=None, width=800, height=6
                         'object_collision_3': multiprocessing.Queue(maxsize=1),
                         'object_collision_4': multiprocessing.Queue(maxsize=1),
                         'object_collision_5': multiprocessing.Queue(maxsize=1),
-                        'object_safe_1': multiprocessing.Queue(maxsize=1), # the carried object which needs to be plotted later on
+                        'object_safe_1': multiprocessing.Queue(maxsize=1),
                         'object_safe_2': multiprocessing.Queue(maxsize=1),
                         'object_safe_3': multiprocessing.Queue(maxsize=1),
                         'object_safe_4': multiprocessing.Queue(maxsize=1),
@@ -89,6 +83,8 @@ def start_plotter(config, plot_config, aut_test_config=None, width=800, height=6
                'cost_slave_ref_points':multiprocessing.Queue(maxsize=1),
                'cost_slave_vel_ref':multiprocessing.Queue(maxsize=1),
 
+               'cost_cargo_static_obs':multiprocessing.Queue(maxsize=1),
+
                'cost_constraint':multiprocessing.Queue(maxsize=1),
                
                'cost_future_master_lin_vel':multiprocessing.Queue(maxsize=1), 
@@ -113,6 +109,8 @@ def start_plotter(config, plot_config, aut_test_config=None, width=800, height=6
                'cost_future_slave_dynamic_obs':multiprocessing.Queue(maxsize=1),
                'cost_future_slave_ref_points':multiprocessing.Queue(maxsize=1),
                'cost_future_slave_vel_ref':multiprocessing.Queue(maxsize=1),
+               
+               'cost_future_cargo_static_obs':multiprocessing.Queue(maxsize=1),
 
                'cost_future_constraint':multiprocessing.Queue(maxsize=1),
 

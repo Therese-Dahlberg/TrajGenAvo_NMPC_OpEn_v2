@@ -21,8 +21,6 @@ constraint:         # Distance constraint
     d: 1                        # The distance the atrs should keep in m
     distance_error_lb: -0.05    # lower bound error margin in m, actual ok distance: d + distance_error_lb <d_ok < d + distance_error_ub
     distance_error_ub: 0.05     # upper bound error margin
-#    distance_lb: 0.95           # Lower bound distance between ATRs, ORIGINAL CODE
-#    distance_ub: 1.05           # Upper bound distance between ATRs, ORIGINAL CODE
     distance_lb: 0.95          # Lower bound distance between ATRs
     distance_ub: 1.05           # Upper bound distance between ATRs
     formation_angle: 0
@@ -39,7 +37,7 @@ dist_to_start_turn: 2
 ang_detect_dyn_obs: 1.57 # The angle around the master at which to detect dynamic obstacles. It's symmetric so pi would yield a full circle
 dist_detect_dyn_obs: 3 # The radius of the circle sector in which dynamic obstacles are detected.
 enable_slave: True # If there should should be a slave. If set to False there will only be a master robot.
-aggressive_factor : 0.5    # Between 0 & 1, between old people driving & rally driver. 
+aggressive_factor : 0.1    # Between 0 & 1, between old people driving & rally driver. 
 
 # Helper variables (Generally does not have to be changed)
 nx: 6      # Number of states for the robot x_master, y_master, theta_master, x_slave, y_slave, theta_slave

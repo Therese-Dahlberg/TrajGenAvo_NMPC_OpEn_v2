@@ -22,15 +22,6 @@ def test_poly_poly(a, b, response):
     a_pos = a.pos
     b_pos = b.pos
 
-    # NO NEED FOR RETURN BOOLEAN, response.overlap has all information needed
-    # Check that for all normals in a and b there is no seperating axis found
-    # boolean = 1     # 1: collision, 0: no collision 
-
-    # for n in a.normals:
-    #     sep_axis_found = is_separating_axis(a_pos, b_pos, a_points, b_points, n, response):
-    #     # sep_axis_found = 1, when no collision -> map to 0 to give back correct signal
-    #     boolean *= (sep_axis_found - 1)**sep_axis_found     # map 1 to 0 and vice versa
-
     for n in a.normals:
         is_separating_axis(a_pos, b_pos, a_points, b_points, n, response)
 
@@ -39,11 +30,7 @@ def test_poly_poly(a, b, response):
 
     response.a = a
     response.b = b
-    # response.overlap_v = response.overlap_n * response.overlap
 
 def collide(a, b, response=None):
-    # TODO: implement bounding box checking -> even useful?
-    # if not test_aabb(a.aabb, b.aabb):
-    #     return False
     test_poly_poly(a, b, response)
     

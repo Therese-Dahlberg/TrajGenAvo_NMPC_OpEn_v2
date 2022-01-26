@@ -8,7 +8,7 @@ import numpy as np
 
 # Own imports
 from ATRS import ATRS
-from mpc.mpc_generator import MpcModule, get_length
+from mpc.mpc_generator import MpcModule, get_length, obstacles
 
 from path_planner.path_planner import PathPlanner
 from path_planner.obstacle_handler import ObstacleHandler
@@ -18,39 +18,10 @@ from panoc_nmpc_trajectory_problem import PanocNMPCTrajectoryProblem
 
 from utils.plotter import start_plotter
 from utils.config import Configurator, SolverParams, Weights
-from shapely.geometry import box as Box
 from shapely.geometry import Polygon
 
-import math
-import miniball
 import json
 from pathlib import Path
-# TODO: combine with stuff in mpc generator
-# # Get path to this file
-# file_path = Path(__file__)
-# # Load static obstacle polgyon and bounding boxes objects in shapely.geometry format
-# shapely_pickle = os.path.join(str(file_path.parent.parent.parent), 'data', 'shapely_obstacles_w_bounding_boxes.p')
-# with open(shapely_pickle, mode='rb') as f:
-#     static_dict = pickle.load(f)
-from main import init_obs
-static_dict = init_obs()
-
-# Pre compute for circles approach in collision detection of cargo
-file_path = Path(__file__)
-#Get the path to the json file
-obs_original = os.path.join(str(file_path.parent.parent), 'data', 'obstacles.json')
-with open(obs_original) as f:
-    distros_dict = json.load(f)
-static_obs = []
-unexpected_obs = []
-# for elem in distros_dict['static']:
-#     static_obs.append(elem)
-#     # print("static ",static_obs)
-for elem in distros_dict['unexpected']:
-    unexpected_obs.append(elem['vertices'])
-    # print("unexpected ",unexpected_obs)
-
-
 
 class TrajectoryGenerator:
     """Class that generates control inputs. Uses solver_paramuration file in solver_params folder
@@ -179,9 +150,9 @@ class TrajectoryGenerator:
 
             # Local path planner, plans around unexpected obstacles
             _, static_padded_obs, _, _, unexpected_padded_obs, unexpected_obstacles_shapely = self.obs_handler.get_static_obstacles()
-            boundary = self.obs_handler.get_boundary()
+            boundary_padded = self.obs_handler.get_boundary()
 
-            self.path_planner.local_path_plan(x[:3], unexpected_padded_obs, unexpected_obstacles_shapely, static_padded_obs, boundary)
+            self.path_planner.local_path_plan(x[:3], unexpected_padded_obs, unexpected_obstacles_shapely, static_padded_obs, boundary_padded)
 
             # If the slave is disabled we shouldn't try to trajectory plan for it
             if not self.solver_param.base.enable_slave:
@@ -200,7 +171,7 @@ class TrajectoryGenerator:
             constraints, closest_static_unexpected_obs = self.panoc.convert_static_obs_to_eqs_and_verts(closest_obs_static, self.obs_handler) # get half-spaces and vertices out of original static obs
             dyn_constraints, closest_dynamic_obs_poly, closest_dynamic_obs_ellipse = list(self.panoc.convert_dynamic_obs_to_eqs(closest_obs_dynamic))
             active_dyn_obs = self.panoc.get_active_dyn_obs(dyn_constraints)
-            bounds_eqs = self.panoc.convert_bounds_to_eqs(boundary)
+            bounds_eqs_and_verts = self.panoc.convert_bounds_to_eqs_and_verts(boundary_padded, self.obs_handler)
 
             # Generate reference values
             x_finish_master, line_vertices_master, goal_in_reach = self.panoc.generate_refs(x_cur, self.path_planner.path)
@@ -225,14 +196,14 @@ class TrajectoryGenerator:
             '''
             # Calculate trajectory when not in formation
             if self.state == States.COUPLING or self.state == States.DECOUPLING:
-                ref_cost, parameters, solution = self.panoc.gen_pos_traj(x_cur, self.master_end + self.slave_end, constraints, dyn_constraints, active_dyn_obs,  self.solver_param.base.vehicle_margin, 1e100, bounds_eqs, self.u_previous, self.initial_guess_pos, prev_acc)
+                ref_cost, parameters, solution = self.panoc.gen_pos_traj(x_cur, self.master_end + self.slave_end, constraints, dyn_constraints, active_dyn_obs,  self.solver_param.base.vehicle_margin, 1e100, bounds_eqs_and_verts, self.u_previous, self.initial_guess_pos, prev_acc)
                 self.initial_guess_pos = solution
             # Calculate trajectory when in formation
             elif self.state == States.FORMATION: 
                 # If goal is not in reach, follow the lines
                 if not goal_in_reach:
                     # Generate one trajectory for master
-                    ref_cost, parameters, solution = self.panoc.gen_line_following_traj(x_cur, dyn_constraints, line_vertices_master, line_vertices_slave, formation_angle_ref, constraints, active_dyn_obs, self.solver_param.base.constraint['distance_lb'], self.solver_param.base.constraint['distance_ub'], self.solver_param.base.aggressive_factor, bounds_eqs, self.u_previous, self.initial_guess_master, prev_acc)
+                    ref_cost, parameters, solution = self.panoc.gen_line_following_traj(x_cur, dyn_constraints, line_vertices_master, line_vertices_slave, formation_angle_ref, constraints, active_dyn_obs, self.solver_param.base.constraint['distance_lb'], self.solver_param.base.constraint['distance_ub'], self.solver_param.base.aggressive_factor, bounds_eqs_and_verts, self.u_previous, self.initial_guess_master, prev_acc)
                     self.initial_guess_master = solution
                     
                     if self.solver_param.base.enable_slave:
@@ -240,15 +211,15 @@ class TrajectoryGenerator:
                         trajectory = self.panoc.calculate_trajectory(solution[:2*2*self.solver_param.base.trajectory_length], x_cur[:3], x_cur[3:], self.plot_config)
                         ref_trajectory = self.panoc.offset_trajectory(trajectory, formation_angle_ref)
                         
-                        ref_cost, parameters, solution = self.panoc.gen_traj_following_traj(ref_trajectory, solution, x_cur, formation_angle_ref, x_finish_master + x_finish_slave, constraints, dyn_constraints, active_dyn_obs, self.solver_param.base.constraint['distance_lb'], self.solver_param.base.constraint['distance_ub'], self.solver_param.base.aggressive_factor, bounds_eqs, self.u_previous, self.initial_guess_dual, prev_acc)
+                        ref_cost, parameters, solution = self.panoc.gen_traj_following_traj(ref_trajectory, solution, x_cur, formation_angle_ref, x_finish_master + x_finish_slave, constraints, dyn_constraints, active_dyn_obs, self.solver_param.base.constraint['distance_lb'], self.solver_param.base.constraint['distance_ub'], self.solver_param.base.aggressive_factor, bounds_eqs_and_verts, self.u_previous, self.initial_guess_dual, prev_acc)
                         self.initial_guess_dual = solution
                 # If goal is in reach, go to the goal
                 elif goal_in_reach:
                     if self.solver_param.base.enable_slave:
-                        ref_cost, parameters, solution = self.panoc.gen_pos_traj(x_cur, self.master_end + self.slave_end, constraints, dyn_constraints, active_dyn_obs, self.solver_param.base.constraint['distance_lb'], self.solver_param.base.constraint['distance_ub'], bounds_eqs, self.u_previous, self.initial_guess_pos, prev_acc)
+                        ref_cost, parameters, solution = self.panoc.gen_pos_traj(x_cur, self.master_end + self.slave_end, constraints, dyn_constraints, active_dyn_obs, self.solver_param.base.constraint['distance_lb'], self.solver_param.base.constraint['distance_ub'], bounds_eqs_and_verts, self.u_previous, self.initial_guess_pos, prev_acc)
                         self.initial_guess_pos = solution
                     else:
-                        ref_cost, parameters, solution = self.panoc.gen_pos_traj(x_cur, self.master_end + self.slave_end, constraints, dyn_constraints, active_dyn_obs, self.solver_param.base.vehicle_margin, 1e100, bounds_eqs, self.u_previous, self.initial_guess_pos, prev_acc)
+                        ref_cost, parameters, solution = self.panoc.gen_pos_traj(x_cur, self.master_end + self.slave_end, constraints, dyn_constraints, active_dyn_obs, self.solver_param.base.vehicle_margin, 1e100, bounds_eqs_and_verts, self.u_previous, self.initial_guess_pos, prev_acc)
                         self.initial_guess_pos = solution
             else:
                 raise ValueError(f"Invalid state to be in: {self.state}!")
@@ -320,34 +291,33 @@ class TrajectoryGenerator:
     def getGeneratedTrajectory(self):
         return self.gen_traj
 
-    def onlineCllisionDetection(self, current_list):
+    def onlineCollisionDetection(self, current_list):
         # currentList should be a list of the current position of the cargo
         # [[(x0_m,y0_m,theta0_m),...,(xN_m,yN_m,thetaN_m)],[(x0_s,y0_s,theta0_s),...,(xN_s,yN_s,thetaN_s)]], for N number of points.
         # obstacle_corners could for example be a list containing the coordinates of all PADDED obstacles:
         # [[o1_x,o1_y],...,[oM_x,oM_y]], for M obstacles.
+        for obs in obstacles:
+            obstacle_as_shapely = Polygon(obs)
 
-        obstacle = Polygon([(5.0, 4.0), (5.0, 5.0), (6.0, 5.0), (6.0, 4.0)])
+            masterPosition = current_list[0][0]
+            slavePosition = current_list[0][1]
+            scalar_for_corners = 1
 
-        masterPosition = current_list[0][0]
-        slavePosition = current_list[0][1]
-        scalar_for_corners = 1
+            x_master = float(masterPosition[0])
+            y_master = float(masterPosition[1])
+            x_slave = float(slavePosition[0])
+            y_slave = float(slavePosition[1])
 
-        x_master = float(masterPosition[0])
-        y_master = float(masterPosition[1])
-        x_slave = float(slavePosition[0])
-        y_slave = float(slavePosition[1])
+            master_corner_1 = np.array([x_master, y_master]) + scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
+            master_corner_2 = np.array([x_master, y_master]) - scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
+            slave_corner_1 = np.array([x_slave, y_slave]) + scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
+            slave_corner_2 = np.array([x_slave, y_slave]) - scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
 
-        master_corner_1 = np.array([x_master, y_master]) + scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
-        master_corner_2 = np.array([x_master, y_master]) - scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
-        slave_corner_1 = np.array([x_slave, y_slave]) + scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
-        slave_corner_2 = np.array([x_slave, y_slave]) - scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
+            cargo = Polygon([master_corner_1, master_corner_2, slave_corner_2, slave_corner_1])
 
-        cargo = Polygon([master_corner_1, master_corner_2, slave_corner_2, slave_corner_1])
-
-        if cargo.intersects(obstacle):
-            return 1
-        else:
-            return 0
+            if cargo.intersects(obstacle_as_shapely):
+                return 1
+        return 0
 
     def plot(self, trajectory, u_master_prev, u_slave_prev, past_trajectory, u):
         
@@ -357,8 +327,8 @@ class TrajectoryGenerator:
         # Get the obstacles and plot that stuff
         static_original_obs, static_padded_obs, _, unexpected_original_obs, unexpected_padded_obs,_ = self.obs_handler.get_static_obstacles()
         dynamic_original_obs, dynamic_padded_obs, _ = self.obs_handler.get_dynamic_obstacles()
-        boundary = self.obs_handler.get_boundary()
-        self.obs_handler.plot(boundary, static_original_obs,static_padded_obs, unexpected_original_obs, unexpected_padded_obs, dynamic_original_obs, dynamic_padded_obs, self.panoc) 
+        boundary_padded = self.obs_handler.get_boundary()
+        self.obs_handler.plot(boundary_padded, static_original_obs,static_padded_obs, unexpected_original_obs, unexpected_padded_obs, dynamic_original_obs, dynamic_padded_obs, self.panoc) 
         
         # Plot the closest static and unexpected obstacles
         start_time = perf_counter_ns()
@@ -407,12 +377,9 @@ class TrajectoryGenerator:
             slave_corner_1 = np.array([x_slave, y_slave]) + scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
             slave_corner_2 = np.array([x_slave, y_slave]) - scalar_for_corners * np.array([y_slave - y_master, x_master - x_slave]) / np.linalg.norm([y_master - y_slave, x_master - x_slave])
             cargo_corners_list = [master_corner_1, master_corner_2, slave_corner_2, slave_corner_1]
-            output = self.onlineCllisionDetection(currentList)
-            # print(master_corner_2-master_corner_1)
-            # print(slave_corner_1 - master_corner_1)
+            output = self.onlineCollisionDetection(currentList)
             if output == 1:
-                print('Collision!!!!')
-
+                # print('Collision!!')
                 # plot the not needed box far away
                 self.plot_queues['object_safe_1'].put_nowait(((cargo_corners_list[0][0]+100, cargo_corners_list[1][0]+100), (cargo_corners_list[0][1]+100, cargo_corners_list[1][1]+100)))
                 self.plot_queues['object_safe_2'].put_nowait(((cargo_corners_list[1][0]+100, cargo_corners_list[2][0]+100), (cargo_corners_list[1][1]+100, cargo_corners_list[2][1]+100)))
@@ -563,19 +530,18 @@ class TrajectoryGenerator:
         self.costs_future['cost_future_slave_dynamic_obs'] = self.mpc_generator.cost_inside_dyn_ellipse2(all_x_slave, all_y_slave, self.mpc_generator.q_dyn_obs_c, individual_costs=True)
 
         cost_static_master = float(self.mpc_generator.cost_inside_static_object(all_x_master, all_y_master, self.mpc_generator.q_obs_c))
-        cost_static_slave = float(self.mpc_generator.cost_inside_static_object(all_x_slave, all_y_slave, self.mpc_generator.q_obs_c))
-        # cost_static_cargo = float(self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, [static_obs[0], unexpected_obs[0]], self.mpc_generator.q_obs_c, vert2_method=True))
-        cost_static_cargo = float(self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, [unexpected_obs[0]], self.mpc_generator.q_obs_c, vert2_method=True))
+        cost_static_slave  = float(self.mpc_generator.cost_inside_static_object(all_x_slave, all_y_slave, self.mpc_generator.q_obs_c))
+        cost_static_cargo = float(self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, obstacles, self.mpc_generator.q_obs_c, vert_method=True))
         cost_bounds_master = float(self.mpc_generator.cost_outside_bounds(all_x_master, all_y_master, self.mpc_generator.q_obs_c))
-        cost_bounds_slave = float(self.mpc_generator.cost_outside_bounds(all_x_slave, all_y_slave, self.mpc_generator.q_obs_c))
-        # cost_bounds_cargo = float(self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, self.mpc_generator.q_obs_c))
+        cost_bounds_slave  = float(self.mpc_generator.cost_outside_bounds(all_x_slave, all_y_slave, self.mpc_generator.q_obs_c))
+        cost_bounds_cargo = float(self.mpc_generator.cost_cargo_outside_bounds(all_x_master, all_y_master, all_x_slave, all_y_slave, self.mpc_generator.q_obs_c))
         self.costs['cost_master_static_obs'].append(float(cost_static_master + cost_bounds_master)) #TODO: Split boudns cost into seperate plot function
         self.costs_future['cost_future_master_static_obs'] = self.mpc_generator.cost_inside_static_object(all_x_master, all_y_master, self.mpc_generator.q_obs_c, individual_costs=True)
         self.costs['cost_slave_static_obs'].append(float(cost_static_slave + cost_bounds_slave)) #TODO: Split boudns cost into seperate plot function
         self.costs_future['cost_future_slave_static_obs'] = self.mpc_generator.cost_inside_static_object(all_x_slave, all_y_slave, self.mpc_generator.q_obs_c, individual_costs=True)
-        # TODO: create cargo bounds func (see above and below)
-        # self.costs['cost_cargo_static_obs'].append(float(cost_static_cargo))# + cost_bounds_cargo))
-        # self.costs_future['cost_future_cargo_static_obs'] = self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, self.mpc_generator.q_obs_c, individual_costs=True, lib_method=True)
+        # TODO: Plot cargo cost
+        # self.costs['cost_cargo_static_obs'].append(float(cost_static_cargo + cost_bounds_cargo))
+        # self.costs_future['cost_future_cargo_static_obs'] = self.mpc_generator.cost_cargo_inside_static_object(all_x_master, all_y_master, all_x_slave, all_y_slave, obstacles, self.mpc_generator.q_obs_c, individual_costs=True, vert_method=True)
         #######  
         # Master control signal costs
         master_u = trajectory[:, [6, 7]].reshape(-1, 1)

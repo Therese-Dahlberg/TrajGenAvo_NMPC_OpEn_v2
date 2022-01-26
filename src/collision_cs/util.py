@@ -216,21 +216,10 @@ def is_separating_axis(a_pos, b_pos, a_points, b_points, axis, response=None):
     # Take absolut value
     abs_overlap = cs.sqrt(overlap**2)
     # if abs_overlap < response.overlap:
-    # TODO: why no checking in the other direction???
     b_abs = cs2bool(response.overlap - abs_overlap)
 
     # Update overlap
     response.overlap += b_abs*(abs_overlap-response.overlap)  # increase if necessary
-
-    # DONT NEED NORMAL VECTOR
-    # response.overlap_n.set(axis)
-    # if overlap < 0:
-    #     response.overlap_n = response.overlap_n.reverse()
-
-    # DONT NEED RETURN
-    # return no_collision    # 1 if no collision, 0 if collision possible (no seperating axis found)
-    ####
-
 
 def voronoi_region(line, point):
     dp = point.dot(line)

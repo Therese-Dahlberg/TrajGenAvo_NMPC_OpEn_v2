@@ -119,8 +119,8 @@ class ObstacleHandler:
             obs_json = json.load(f)
         
         static_obs = []
-        # for elem in obs_json['static']:
-        #     static_obs.append(elem)
+        for elem in obs_json['static']:
+            static_obs.append(elem)
         static_original_obs = np.array(static_obs.copy(), dtype=object)
         static_padded_obs = self.pad_obstacles(static_original_obs)
         static_obstacles_shapely = self.obs_as_shapely_polygon(static_padded_obs)

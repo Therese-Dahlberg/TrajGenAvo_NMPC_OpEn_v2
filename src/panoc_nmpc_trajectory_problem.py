@@ -8,7 +8,6 @@ import scipy
 import scipy.spatial
 import numpy as np
 
-import shapely
 from sympy import symbols, solve, lambdify
 
 # Own imports
@@ -88,8 +87,8 @@ class PanocNMPCTrajectoryProblem:
             # Get vertices of shapely object
             vert = np.vstack(ob.exterior.xy).T[:-1] # Clip last vertex that is doubled due to shapely convention
             # Unpad obstacle to get original and get vertices of original
-            # vert_unpad = obs_handler.pad_obstacles(np.expand_dims(vert, axis=0), decrease=True)[0]
-            vert_unpad = vert # TODO not correct but line above throws an error for obs that are not rectangles 
+            vert_unpad = obs_handler.pad_obstacles(np.expand_dims(vert, axis=0), decrease=True)[0]
+            # vert_unpad = vert # TODO not correct but line above throws an error for obs that are easily "unpaddable", e.g. have sharp corners
             # Convert the obstacle into line inequalities and add them to the list
             A, b = obstacle_as_inequality(np.mat(vert.ravel().reshape(-1, 2)))
             obs_array = np.array(np.concatenate((b, A), axis = 1))
@@ -155,18 +154,28 @@ class PanocNMPCTrajectoryProblem:
             obs.append(np.concatenate((np.reshape(A, -1), c)))
         return obs
 
-    def convert_bounds_to_eqs(self, boundary_padded):
-        bounds = boundary_padded
-        A, B = obstacle_as_inequality(np.mat(bounds))
-        bounds_array = np.array(np.concatenate((B, A), axis = 1)).reshape(-1)
-        #convert to list
-        bounds_array = list(bounds_array)
-        n_params = len(bounds_array)
-        req_param = self.solver_param.base.n_bounds_vertices*self.solver_param.base.n_param_line
-        if n_params < req_param:
-            extra_params = np.zeros(req_param-n_params)
-            bounds_array = bounds_array + list(extra_params)
-        return bounds_array
+    def convert_bounds_to_eqs_and_verts(self, boundary_padded, obs_handler):
+        # Number of parameters needed to describe boundary
+        n_param = self.solver_param.base.n_param_line*2 + self.solver_param.base.n_param_vertex
+
+        bounds_vert = boundary_padded
+        # Unpad obstacle to get original and get vertices of original
+        vert_unpad = obs_handler.pad_obstacles(np.expand_dims(bounds_vert, axis=0))[0]
+        A, B = obstacle_as_inequality(np.mat(bounds_vert))
+        bounds_eqs_array = np.array(np.concatenate((B, A), axis = 1))
+        # H-representation for original as well
+        A_unpad, b_unpad = obstacle_as_inequality(np.mat(vert_unpad))
+        bounds_eqs_array_unpad = np.array(np.concatenate((b_unpad, A_unpad), axis = 1))
+        # Combine and reshape
+        eqs_and_verts = np.concatenate((bounds_eqs_array,bounds_eqs_array_unpad,vert_unpad), axis = 1).reshape(-1)
+        n_vert = len(bounds_vert)
+        while n_vert < self.solver_param.base.n_bounds_vertices:
+            extra_params = eqs_and_verts[-n_param:] # if there are less vertices than possible, copy last vertex as a space holder
+            n_vert += 1
+            eqs_and_verts = np.hstack((eqs_and_verts, extra_params))
+        # Make sure the correct number of params are sent
+        assert (self.solver_param.base.n_bounds_vertices * n_param == sum(eqs_and_verts.shape)), "An invalid amount of static obstacles parameters were sent."
+        return eqs_and_verts
 
     def convert_static_obs_to_eqs_and_verts(self, closest_obs, obs_handler):
         """[summary]
@@ -189,7 +198,6 @@ class PanocNMPCTrajectoryProblem:
             n_obs = len(obs) 
             if n_obs < self.solver_param.base.n_obs_of_each_vertices: #TODO: Add special case for triangles
                 obs_array = 1e9*np.ones((self.solver_param.base.n_obs_of_each_vertices-n_obs)*n_param*key) # Set nearly inf for equation params of every additional obs for each order (so high to be not common / not typical for normal points to lie there since this would lead to a bad behavior)
-                # obs_array = np.zeros((self.solver_param.base.n_obs_of_each_vertices-n_obs)*n_param*key)
                 key_obs_equations_and_vertices = np.hstack((key_obs_equations_and_vertices, obs_array))
             obs_equations_and_vertices.append(key_obs_equations_and_vertices)
         
@@ -311,7 +319,7 @@ class PanocNMPCTrajectoryProblem:
                 ]
         
         
-        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [0] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + refs +  list(constraints) + list(dyn_constraints) + active_dyn_obs + bounds_eqs
+        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [0] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + refs +  list(constraints) + list(dyn_constraints) + active_dyn_obs + list(bounds_eqs)
         parameters = [float(param) for param in parameters]
 
         
@@ -384,7 +392,7 @@ class PanocNMPCTrajectoryProblem:
             weight_list.append( mixed_weight)
 
         u_previous = u_prev[:2] + [0,0]
-        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [formation_angle_ref] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + refs +  list(constraints) + list(dyn_constraints) + active_dyn_obs + bounds_eqs
+        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [formation_angle_ref] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + refs +  list(constraints) + list(dyn_constraints) + active_dyn_obs + list(bounds_eqs)
 
         parameters = [float(param) for param in parameters]
 
@@ -481,7 +489,7 @@ class PanocNMPCTrajectoryProblem:
             mixed_weight = weight_list_soft[i]*(1-aggressive_factor) + weight_list_aggressive[i] * aggressive_factor
             weight_list.append( mixed_weight)
 
-        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [formation_angle_ref] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + trajectory_ref +  list(constraints) + list(dyn_constraints) + active_dyn_obs  + bounds_eqs
+        parameters = x_cur + x_finish + u_previous + acc_init + [self.solver_param.base.constraint['d']] + [distance_lb] + [distance_ub] + [formation_angle_ref] + [self.solver_param.base.constraint['formation_angle_error_margin']] + weight_list + u_ref + trajectory_ref +  list(constraints) + list(dyn_constraints) + active_dyn_obs  + list(bounds_eqs)
         parameters = [float(param) for param in parameters]
 
         
@@ -554,7 +562,7 @@ class PanocNMPCTrajectoryProblem:
                     line_vertices.append(ref_points[node_to_check_idx-1])
                     break
 
-        # Add last vertix
+        # Add last vertex
         line_vertices.append(ref_points[-1])
 
         # Calculate closest lines
@@ -562,7 +570,7 @@ class PanocNMPCTrajectoryProblem:
         dist_to_lines = np.array([self.mpc_generator.dist_to_line(x_cur[:2], *line).__float__() for line in lines])**0.5
         closest_line_idx = np.argmin(dist_to_lines)
 
-        # Find the first vertix on the current line
+        # Find the first vertex on the current line
         line_vertices = [lines[closest_line_idx][0]]
         dist_lines_ahead = np.cumsum(dist_to_lines[closest_line_idx:]) - self.solver_param.base.dist_to_start_turn*100 
         for i in range(len(lines[closest_line_idx:])): 

@@ -28,7 +28,6 @@ q_acc_c: 0      # (delete) Cost for acceleration, soft constraint
 q_lin_jerk: 0.0 # (delete) Cost for linear jerk
 q_ang_jerk: 0.0 # (delete) Cost for angular jerk
 q_reverse: 0    # (delete) Cost for reverse
-# q_cargo: 1000    # Collision of cargo
 
 
 
